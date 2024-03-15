@@ -2,6 +2,7 @@
     font-family: 'Brush Script MT', cursive;
     justify-self: center;
     margin-right: auto;
+    margin-left: auto;
 }
   
 .main-header{
@@ -13,6 +14,7 @@
     width: 100%;
     text-align: center;
     top: 0;
+    z-index: 1;
 }
 
 .svg-button {
@@ -22,6 +24,7 @@
     background-image: url('../svg/sidebarbutton.svg');
     background-size:contain;
     background-repeat: no-repeat;
+    background-position: center;
     height: 2.5em;
     border: none;
     border-radius: 5px;
@@ -29,6 +32,9 @@
     z-index: 2;
     margin-right: auto;
     margin-left: 20px;
+    transition: transform 0.3s ease;
+    --rotation: 0deg;
+    transform: rotate(var(--rotation, 0deg));
 }
 
 /* Optional hover effect */
@@ -38,5 +44,29 @@
 
 /* Optional focus effect */
 .svg-button:focus {
+    outline: none; /* Remove focus outline */
+}
+
+.user-icon{
+    background-image: url('../svg/user.svg');
+    background-size:contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    align-self: center;
+    justify-self: center;
+    margin-left: auto;
+    margin-right: 20px;
+    height: 3em;
+    width: 3em;
+    border: none;
+    background-color: aqua;
+}
+
+.user-icon:hover {
+    opacity: 0.8;
+}
+
+/* Optional focus effect */
+.user-icon:focus {
     outline: none; /* Remove focus outline */
 }

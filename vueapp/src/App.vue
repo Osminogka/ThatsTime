@@ -2,10 +2,25 @@
 import('./assets/css/header.css');
 import('./assets/css/navigation.css');
 import('./assets/css/nav-buttons.css');
+import('./assets/css/user.css');
 
 import { ref } from 'vue';
 
+function rotateTag() {
+  showSideBar.value = !showSideBar.value;
+  var new_value = "";
+  if(showSideBar.value)
+    new_value = "rotate(90deg)";
+  else
+    new_value = "rotate(0deg)";
+  
+  document.getElementById('nav-button').style.transform = new_value;
+}
 const showSideBar = ref(false);
+const showUserNav = ref(false);
+
+const username = 'Osminogka';
+
 const friendList = ref([
   { name: 'Friend1' },
   { name: 'Friend2' },
@@ -64,11 +79,20 @@ const groupInvites = ref([
   <header>
     <div class="main-header">
       <div class="main-header">
-        <button class="svg-button" @click="showSideBar = !showSideBar">
+        <button id="nav-button" class="svg-button" @click="rotateTag">
         </button>
         <h1 class="header-text">That's Time!</h1>
+        <span>{{ username }}</span>
+        <button @click="showUserNav = !showUserNav" class="user-icon"></button>
       </div>
     </div>
+    <Transition name="usernav">
+      <div v-if="showUserNav" class="user-nav">
+        <button class="button-nav-user button-nav-profile"></button>
+        <button class="button-nav-user button-nav-settings"></button>
+        <button class="button-nav-user button-nav-logout"></button>
+      </div>
+    </Transition>
     <Transition name="sidebar">
       <div v-if="showSideBar" class="sidenav">
         <p class="nav-header">Your Friends</p>

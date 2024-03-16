@@ -8,7 +8,7 @@
     overflow-x: hidden;
     transition: 0.5s;
     padding-right: 10px;
-    background-color: #6ae7eb;
+    background-color: #03f7ff;
 }
 
 .button-nav-user{
@@ -17,30 +17,22 @@
     border: none;
     width: 3em;
     height: 3em;
+    background-color: #03f7ff;
+    background-position: center;
+    background-size:contain;
+    background-repeat: no-repeat;
 }
 
 .button-nav-profile{
-    background-image: url('../svg/profile.svg');
-    background-position: center;
-    background-size:contain;
-    background-repeat: no-repeat;
-    background-color: #6ae7eb;
+    background-image: url('../svg/UserInfoNav/profile.svg');
 }
 
 .button-nav-settings{
-    background-image: url('../svg/settings.svg');
-    background-position: center;
-    background-size:contain;
-    background-repeat: no-repeat;
-    background-color: #6ae7eb;
+    background-image: url('../svg/UserInfoNav/settings.svg');
 }
 
 .button-nav-logout{
-    background-image: url('../svg/logout.svg');
-    background-position: center;
-    background-size:contain;
-    background-repeat: no-repeat;
-    background-color: #6ae7eb;
+    background-image: url('../svg/UserInfoNav/logout.svg');
 }
 
 .usernav-enter-active, .usernav-leave-active {
@@ -53,6 +45,23 @@
 
 .usernav-enter-from,
 .usernav-leave-to {
-    transform: translateY(-20px);
+    transform: translateY(-100px);
     opacity: 0;
+}
+
+#user-icon-button.animate{
+    opacity: 1;
+    animation: user-icon-animation 0.3s ease;
+}
+
+@keyframes user-icon-animation {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.25);
+    }
+    100% {
+      transform: scale(1);
+    }
 }

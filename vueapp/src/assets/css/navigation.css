@@ -8,50 +8,71 @@
 
 .sidebar-enter-from,
 .sidebar-leave-to {
-    transform: translateX(-20px);
+    transform: translateX(-100px);
+    opacity: 0;
+}
+
+
+
+.navlists-enter-active, .navlists-leave-active {
+    transition: all 0.3s ease-out;
+}
+
+.navlists-leave-active {
+    transition: all 0.3 ease-out;
+}
+
+.navlists-enter-from,
+.navlists-leave-to {
+    transform: translateX(-100px);
     opacity: 0;
 }
 
 .nav-header{
-    color: rgb(255, 192, 76);
-    font-size: 1.2em;
-    font-weight: bold;
-    text-shadow: 2px 2px 4px rgb(0, 0, 0);
-    display: flex; /* Add this line */
-    justify-content: center; /* Add this line */
+    display: flex;
+    flex-direction: row;
     align-items: center;
 }
 
 .sidebar-entity-box{
-    border-style: solid;
-    border-radius: 5px;
-    border-color: rgb(62, 111, 118);
-    background-color: rgb(139, 238, 228);
+    display: flex;
+    flex-direction: row;
+    border-bottom: black 1px solid;
     padding: 5px;
     margin: 2px;
+    justify-content: center;
+    align-items: center;
 }
 
 .sidenav {
-    height: 100%;
+    min-width: 15em;
+    width: auto;
     position: fixed;
     z-index: 1;
     left: 0;
-    background-color: #6ae7eb;
-    overflow-x: hidden;
+    background-color: #03f7ff;
+    overflow-x: auto;
+    overflow-y:scroll;
     transition: 0.5s;
     padding-right: 10px;
+    box-sizing: border-box;
 }
 
 .main-nav-div{
     margin: 10px;
-    border-color: rgb(62, 111, 118);
+    border-color: black;
     border-style: solid;
     border-radius: 5px;
-    background-color: rgb(139, 238, 228);
+    background-color: white;
     padding-left: 10px;
     font-size: 1.2em;
     padding-right: 10px;
     max-height: 250px;
     overflow-y: auto;
     margin-right: 50px;
+}
+
+.single-line{
+    font-size: 1.2em;
+    white-space: nowrap;
 }

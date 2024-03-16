@@ -1,0 +1,61 @@
+.container{
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+table{
+    border-collapse: collapse;
+    width: 40em;
+    height: 25em;
+    border-style: solid;
+    border-radius: 10px;
+    margin: 1em;
+}
+
+thead{
+    background: linear-gradient(to right, aquamarine, aqua);
+    border-bottom: solid;
+}
+
+.td-common-day{
+    border-style: solid;
+    text-align: center;
+    background-color: #AFFFF5;
+}
+
+.td-today{
+    font-weight: 900;
+    border-style: solid;
+    text-align: center;
+    background-color: rgb(0, 252, 168);
+}
+
+.td-null-day{
+    border: none;
+    background-color: #AFFFF5;
+}
+
+.button-cell{
+    width: 100%;
+    height: 100%;
+    border: none;
+    background-color: #AFFFF5;
+    padding: 10px;
+}
+
+.button-cell-current-day{
+    background-color: rgb(0, 252, 168);
+}
+
+.button-cell:hover{
+    background-color: #44FDE4;
+    cursor: pointer;
+}
+
+@media (max-width: 900px){
+    table{
+        width: auto;
+        height: 5em;
+    }
+}

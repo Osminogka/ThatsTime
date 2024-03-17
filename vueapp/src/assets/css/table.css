@@ -4,6 +4,20 @@
     flex-wrap: wrap;
 }
 
+.table-container{
+    display: flex;
+    flex-direction: column;
+}
+
+.arrow-container{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+
 table{
     border-collapse: collapse;
     width: 40em;
@@ -50,8 +64,29 @@ thead{
 }
 
 .button-cell:hover{
-    background-color: #44FDE4;
+    background-color: #01EED6;
     cursor: pointer;
+}
+
+.button-cell-selected{
+    background-color: #01EED6;
+}
+
+.button-cell.animate, .arrow.animate{
+    opacity: 1;
+    animation: bounce-in 0.3s ease;
+}
+
+@keyframes bounce-in {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.25);
+    }
+    100% {
+      transform: scale(1);
+    }
 }
 
 @media (max-width: 900px){
@@ -63,4 +98,21 @@ thead{
     .button-cell{
         height: 100%;
     }
+}
+
+.arrow{
+    width: 2em;
+    height: 2em;
+    background-color: white;
+    cursor: pointer;
+}
+
+.left-arrow{
+    background-image: url('../svg/MainTable/leftArrow.svg');
+    justify-self: flex-end;
+}
+
+.right-arrow{
+    background-image: url('../svg/MainTable/rightArrow.svg');
+    justify-self: flex-start;
 }

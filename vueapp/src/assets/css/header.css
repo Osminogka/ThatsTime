@@ -3,6 +3,7 @@
     justify-self: center;
     margin-right: auto;
     margin-left: auto;
+    text-shadow: 3px 4px 0px rgba(0,0,0,0.3);
 }
   
 .main-header{

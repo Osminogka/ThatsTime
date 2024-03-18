@@ -29,6 +29,7 @@
 }
 
 .nav-header{
+    margin-left: 10px;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -47,7 +48,7 @@
 .sidenav {
     min-width: 15em;
     width: auto;
-    position: fixed;
+    position: absolute;
     z-index: 1;
     left: 0;
     background-color: #03f7ff;

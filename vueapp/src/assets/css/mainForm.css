@@ -42,6 +42,10 @@ input, textarea {
     font-weight: bold;
 }
 
+input:hover, textarea:hover {
+    background-color: #01EED6;
+}
+
 textarea{
     border-width: 0.2em;
 }
@@ -69,6 +73,7 @@ textarea{
     background: #55FFEF;
     position: relative;
 }
+
 ul {
     width: 100%;
     max-height: 15em;
@@ -93,7 +98,7 @@ li{
     }
 }
 
-.arrow {
+.arrow-select {
     position: absolute;
     right: 10px;
     top: 40%;
@@ -148,4 +153,54 @@ li{
     100% {
       transform: scale(1);
     }
+}
+
+.submit-button{
+    margin-top: 1em;
+    background-color: #55FFEF;
+    border-style: solid;
+    border-color: black;
+    border-radius: 0.5em;
+    border-width: 0.15em;
+    padding: 0.5em;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.submit-button:hover{
+    background-color: #01EED6;
+}
+
+.error-message{
+    color: black;
+    background-image: url('../svg/MainForm/error.svg');
+    background-repeat: no-repeat;
+    background-position: left;
+    background-color: #AFFFF5;
+    padding-left: 1.5em;
+}
+
+.error-input{
+    border-color: red;
+}
+
+.custom-label{
+    font-weight: bold;
+}
+
+.creation-status{
+    border-style: solid;
+    border-width: 0.2em;
+    border-radius: 0.5em;
+    padding: 5px;
+}
+
+.creation-failed{
+    border-color: red;
+    background-color: rgb(200, 10, 10);
+}
+
+.creation-successful{
+    border-color: green;
+    background-color: rgb(9, 197, 9);
 }

@@ -4,12 +4,29 @@ import('../assets/css/navigation.css');
 import('../assets/css/nav-buttons.css');
 import('../assets/css/user.css');
 import { reactive, ref, onMounted } from 'vue';
-import { friendList, friendRequests, groupInvites, groupList} from '../Core/userInfo'
+import { vOnClickOutside } from '@vueuse/components'
+import { friendList, friendRequests, groupInvites, groupList} from '../core/userInfo'
+import {todayDate, monthNames} from '../core/month'
 
-let animateButton;
+function hideSideBar() {
+  if(showInterface.showSideBar && event.target.id != 'showSideBar')
+  {
+    showInterface.showSideBar = false;
+    rotateTag('showSideBar', true);
+  }
+}
+
+function hideUserNav() {
+  if(showUserNav.value && event.target.id != 'user-icon-button')
+  {
+    showUserNav.value = false;
+  }
+}
 
 onMounted(() => {
-  animateButton = document.getElementById('user-icon-button');
+  window.addEventListener('scroll', hideSideBar);
+  window.addEventListener('scroll', hideUserNav);
+  let animateButton = document.getElementById('user-icon-button');
 
   animateButton.addEventListener('click', () => {
     animateButton.classList.add('animate');
@@ -18,18 +35,21 @@ onMounted(() => {
     setTimeout(() => {
       animateButton.classList.remove('animate');
     }, 300);
-  });
+});
 
   const mainHeader = document.getElementById('main-header');
   const sidebar = document.getElementById('sidebar');
+  const usernav = document.getElementById('usernavmenu');
   let parentElement = mainHeader.parentElement;
-  let heightPercentage = (mainHeader.offsetHeight / parentElement.offsetHeight) * 100 - 20;
+  let heightPercentage = (mainHeader.offsetHeight / parentElement.offsetHeight) * 100;
   sidebar.style.height = 'calc(100% - ' + heightPercentage + 'px)';
+  sidebar.style.top = heightPercentage + 20 + 'px';
+  usernav.style.top = heightPercentage + 20 + 'px';
 });
 
-function rotateTag(showProp) {
+function rotateTag(showProp, isExplicit = false) {
   let tempProp = showInterface[showProp];
-  tempProp = !tempProp;
+  if(!isExplicit) tempProp = !tempProp;
   showInterface[showProp] = tempProp;
   var new_value = "";
   if(tempProp)
@@ -62,11 +82,12 @@ const showUserNav = ref(false);
         <button id="showSideBar" class="show-nav-button" @click="rotateTag('showSideBar')">
         </button>
         <h1 class="header-text">That's Time!</h1>
-        <button id="user-icon-button" @click="showUserNav = !showUserNav" class="user-icon"></button>
+        <button id="user-icon-button" @click="showUserNav = !showUserNav" class="user-icon" v-on-click-outside="hideUserNav"></button>
       </div>
     </div>
+    <h1 class="h1-date">{{ todayDate.getDate() }} {{  monthNames[todayDate.getMonth()] }} {{ todayDate.getFullYear() }}</h1>
     <Transition name="usernav">
-      <div v-if="showUserNav" class="user-nav">
+      <div id="usernavmenu" v-show="showUserNav" class="user-nav">
         <button class="button-nav-user button-nav-profile"></button>
         <button class="button-nav-user button-nav-settings"></button>
         <button class="button-nav-user button-nav-logout"></button>
@@ -74,7 +95,7 @@ const showUserNav = ref(false);
     </Transition>
 
     <Transition name="sidebar">
-      <div id="sidebar" v-show="showInterface.showSideBar" class="sidenav">
+      <div id="sidebar" v-show="showInterface.showSideBar" class="sidenav" v-on-click-outside="hideSideBar">
         <div class="nav-header">
           <p class="single-line">Friends</p>
           <hr class="nav-hr"/>

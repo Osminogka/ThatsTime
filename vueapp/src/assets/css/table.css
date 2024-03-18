@@ -25,6 +25,7 @@ table{
     border-style: solid;
     border-radius: 10px;
     margin: 1em;
+    margin-top: 0.2em;
 }
 
 thead{
@@ -115,4 +116,14 @@ thead{
 .right-arrow{
     background-image: url('../svg/MainTable/rightArrow.svg');
     justify-self: flex-start;
+}
+
+.month-header{
+    font-size: 2em;
+    color: black;
+    padding: 10px;
+    font-family: 'Tahoma';
+    font-size: 1.3em;
+    text-align: center;
+    font-weight: bold
 }

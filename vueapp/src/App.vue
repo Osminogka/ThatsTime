@@ -1,6 +1,6 @@
 <script setup>
+import('./assets/css/router.css');
 import MainHeader from './components/MainHeader.vue';
-import MainTable from './components/MainTable.vue';
 
 </script>
 
@@ -9,6 +9,10 @@ import MainTable from './components/MainTable.vue';
     <main-header />
   </header>
   <main>
-    <main-table />
+    <div class="link-container">
+      <router-link to="/" class="custom-link" >Main Page</router-link>
+      <router-link to="/records" class="custom-link">Records</router-link>
+    </div>
+    <router-view></router-view>
   </main>
 </template>

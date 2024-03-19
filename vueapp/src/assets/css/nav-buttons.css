@@ -1,7 +1,6 @@
 .button-accept{
     background-image: url('../svg/Sidebar/accept.svg');
-    background-color: green;
-    border-radius: 3px;
+    background-color: white;
     height: 2em;
     width: 2em;
     padding: 5px;
@@ -26,8 +25,7 @@
 
 .button-decline{
     background-image: url('../svg/Sidebar/decline.svg');
-    background-color: red;
-    border-radius: 3px;
+    background-color: white;
     height: 2em;
     width: 2em;
     padding: 5px;

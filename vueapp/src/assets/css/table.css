@@ -127,3 +127,7 @@ thead{
     text-align: center;
     font-weight: bold
 }
+
+.check-label{
+    display: inline;
+}

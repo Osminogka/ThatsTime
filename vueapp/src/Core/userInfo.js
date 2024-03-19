@@ -1,5 +1,9 @@
 import { ref } from 'vue';
 
+export const user = ref({
+    name: 'Osminogka'
+});
+
 export const friendList = ref([
     { name: 'Friend1' },
     { name: 'Friend2' },
@@ -11,7 +15,7 @@ export const friendList = ref([
     { name: 'Friend8' },
     { name: 'Friend9' },
     { name: 'Friend10' }
-  ]);
+]);
   
 export const groupList = ref([
     { name: 'Group1' },
@@ -34,7 +38,7 @@ export const groupList = ref([
     { name: 'Group18' },
     { name: 'Group19' },
     { name: 'Group20' }
-  ]);
+]);
   
 export const friendRequests = ref([
     { name: 'Friend Request 1' },
@@ -42,7 +46,7 @@ export const friendRequests = ref([
     { name: 'Friend Request 3' },
     { name: 'Friend Request 4' },
     { name: 'Friend Request 5' }
-  ]);
+]);
   
 export const groupInvites = ref([
     { name: 'Group Invite 1' },
@@ -50,4 +54,4 @@ export const groupInvites = ref([
     { name: 'Group Invite 3' },
     { name: 'Group Invite 4' },
     { name: 'Group Invite 5' }
-  ]);
+]);

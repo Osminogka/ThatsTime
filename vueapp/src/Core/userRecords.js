@@ -1,6 +1,19 @@
-import { friendList, groupList } from "./userInfo";
+import { reactive } from "vue";
+import { friendList, groupList, user } from "./userInfo";
 
-var records = [];
+var records = reactive([{
+    selectedYear: 2023,
+    selectedMonth: 3,
+    selectedDay: 10,
+    selectedObject: "John",
+    Creator: "Osminogka",
+    yourSelf: false,
+    showGroupList: false,
+    hour: 12,
+    minute: 30,
+    recordName: "Meeting",
+    recordContent: "Discuss the project plan"
+}]);
 
 export const getRecords = () => {
     return records;
@@ -9,6 +22,8 @@ export const getRecords = () => {
 export const postRecord = (record) => {
     let erroList = isRecordValid(record);
     if(erroList.length === 0) {
+        record.Creator = user.value.name;
+        record.selectedMonth += 1;
         records.push(record);
         return [];
     } else {
@@ -31,7 +46,8 @@ function isRecordValid (record) {
         errorList.push('selectedMonth');
     }
     // Check if selectedObject is a valid object
-    if (record.showGroupList ? !groupList.value.some(obj => obj.name === record.selectedObject) : !friendList.value.some(obj => obj.name === record.selectedObject)) {
+    if (record.yourSelf? !(record.selectedObject == user.value.name) 
+        : record.showGroupList ? !groupList.value.some(obj => obj.name === record.selectedObject) : !friendList.value.some(obj => obj.name === record.selectedObject)) {
         errorList.push('selectedObject');
     }
     // Check if hour is a valid hour

@@ -2,11 +2,12 @@
 import('../assets/css/table.css')
 import('../assets/css/mainForm.css')
 import('../assets/css/user.css')
-import { friendList, groupList} from '../core/userInfo'
+import('../assets/css/customSelect.css')
+import { friendList, groupList, user} from '../core/userInfo'
 import {todayDate, monthNames} from '../core/month'
 import { postRecord } from '@/core/userRecords';
 
-import {ref, computed, onMounted, reactive } from 'vue';
+import {ref, computed, reactive, toRaw } from 'vue';
 
 const recordCreationStatus = reactive({
     status: true,
@@ -15,7 +16,9 @@ const recordCreationStatus = reactive({
 })
 
 async function submitForm() {
-    let result = postRecord(recordCreationForm);
+    let result = postRecord({...toRaw(recordCreationForm)});
+    for(let key in errorList) 
+        errorList[key].error = false;
     if(result.length > 0){
         for(let key of result) 
             errorList[key].error = true;
@@ -40,7 +43,8 @@ function clearInputs(wasSuccessful) {
         let errorProp = errorList[key];
         if(wasSuccessful){
             errorProp.error = false;
-            recordCreationForm[key] = errorProp.default;
+            if(key !== 'selectedObject')
+                recordCreationForm[key] = errorProp.default;
         }
         if(errorProp.error && !wasSuccessful)
             recordCreationForm[key] = errorProp.default;
@@ -59,6 +63,7 @@ const recordCreationForm = reactive({
     selectedDay: 1,
     selectedMonth: todayDate.getMonth(),
     showGroupList: false,
+    yourSelf: false,
     selectedObject: friendList.value[0].name,
     importance: 0,
     enterTime: false,
@@ -89,7 +94,6 @@ const errorList = reactive({
     selectedObject: {
         error: false,
         message: 'Invalid person selected',
-        default: friendList.value[0].name
     },
     hour: {
         error: false,
@@ -103,7 +107,7 @@ const errorList = reactive({
     },
     recordName: {
         error: false,
-        message: recordCreationForm.recordName <= 0 ? 'Record name is too long' : 'Record name is too short',
+        message: recordCreationForm.recordName.length <= 0 ? 'Record name is too short' : 'Record name is too long',
         default: ''
     },
     recordContent: {
@@ -131,6 +135,19 @@ function toggleObjectList() {
 }
 function selectObjectList(option) {
     recordCreationForm.selectedObject = option;
+}
+
+function selectObjectType(option) {
+    if(option === 'Group'){
+        recordCreationForm.showGroupList = !recordCreationForm.showGroupList;
+        recordCreationForm.yourSelf = false;
+        recordCreationForm.selectedObject = recordCreationForm.showGroupList? groupList.value[0].name : friendList.value[0].name;
+    }
+    else{
+        recordCreationForm.yourSelf = !recordCreationForm.yourSelf;
+        recordCreationForm.showGroupList = false;
+        recordCreationForm.selectedObject = recordCreationForm.yourSelf? user.value.name : friendList.value[0].name;
+    }
 }
 
 function toggleImportance() {
@@ -168,14 +185,6 @@ let animateArrow = (monthChange) => {
         button.classList.remove('animate');
     }, 300);
 }
-
-
-onMounted(() => {
-    let forGroupSelector = document.getElementById('input-checkbox');
-    forGroupSelector.addEventListener('change', () => {
-        recordCreationForm.showGroupList? recordCreationForm.selectedObject = groupList.value[0].name : recordCreationForm.selectedObject = friendList.value[0].name;
-    });
-});
 
 const weeks = computed(() => {
     let weeks = [];
@@ -242,28 +251,35 @@ const weeks = computed(() => {
         </div>
         <form class="form-for-record">
             <p class="p-selected-day">Selected day: {{ recordCreationForm.selectedDay }}</p>
-            <div>
-                <input id="input-checkbox" v-model="recordCreationForm.showGroupList" type="checkbox" /> For Group
+            <div class="checkbox-container">
+                <div id="input-checkbox" :class="{'input-checkbox-checked': recordCreationForm.showGroupList}" class="input-checkbox" 
+                    @click="selectObjectType('Group')"></div>
+                <label class="label-checkbox">For Group</label>
+                <div id="input-checkbox-yourself" :class="{ 'input-checkbox-checked': recordCreationForm.yourSelf }" class="input-checkbox" 
+                    @click="selectObjectType('Yourself')" style="margin-left: 1em;"></div>
+                <label class="label-checkbox">Yourself</label>
             </div>
             <p class="error-message" v-if="errorList.selectedObject.error">{{ errorList.selectedObject.message }}</p>
-            <div class="aselect" :data-value="recordCreationForm.selectedObject" :data-list="recordCreationForm.showGroupList? groupList : friendList">
-                <div :class="{'error-input': errorList.selectedObject.error }" class="selector" @click="toggleObjectList()">
-                    <div class="label">
-                        <span>{{ recordCreationForm.selectedObject }}</span>
-                    </div>
-                    <div class="arrow-select" :class="{ expanded : recordCreationForm.showObjectList }"></div>
-                    <Transition name="fadey">
-                        <div v-if="recordCreationForm.showObjectList">
-                            <ul>
-                                <li :class="{ current : item === value }" v-for="(item, index) in recordCreationForm.showGroupList? groupList : friendList" 
-                                @click="selectObjectList(item.name)" :key="index">
-                                    {{ item.name }}
-                                </li>
-                            </ul>
+            <Transition name="showTimeEnter">
+                <div v-if="!recordCreationForm.yourSelf" class="aselect" :data-value="recordCreationForm.selectedObject" :data-list="recordCreationForm.showGroupList? groupList : friendList">
+                    <div :class="{'error-input': errorList.selectedObject.error }" class="selector" @click="toggleObjectList()">
+                        <div class="label">
+                            <span>{{ recordCreationForm.selectedObject }}</span>
                         </div>
-                    </Transition>
+                        <div class="arrow-select" :class="{ expanded : recordCreationForm.showObjectList }"></div>
+                        <Transition name="fadey">
+                            <div v-if="recordCreationForm.showObjectList">
+                                <ul>
+                                    <li :class="{ current : item === value }" v-for="(item, index) in recordCreationForm.showGroupList? groupList : friendList" 
+                                    @click="selectObjectList(item.name)" :key="index">
+                                        {{ item.name }}
+                                    </li>
+                                </ul>
+                            </div>
+                        </Transition>
+                    </div>
                 </div>
-            </div>
+            </Transition>
             <label class="custom-label">Select importance</label>
             <div class="aselect" :data-value="recordCreationForm.importance" :data-list="importanceList.name">
                 <div class="selector" @click="toggleImportance()">
@@ -283,17 +299,18 @@ const weeks = computed(() => {
                     </Transition>
                 </div>
             </div>
-            <div>
-                <input id="input-checkbox" type="checkbox" v-model="recordCreationForm.enterTime" /> Enter time
+            <div class="checkbox-container checkbox-container-time">
+                <div id="input-checkbox" :class="{'input-checkbox-checked': recordCreationForm.enterTime}" class="input-checkbox" @click="recordCreationForm.enterTime = !recordCreationForm.enterTime"></div>
+                <label class="label-checkbox">Enter Time</label>
             </div>
             <Transition name="showTimeEnter">
                 <div v-if="recordCreationForm.enterTime">
-                    <label>Hour</label>
+                    <label class="custom-label">Hour</label>
                     <p class="error-message" v-if="errorList.hour.error">{{ errorList.hour.message }}</p>
-                    <input :class="{'error-input':errorList.recordName.error}" v-model="recordCreationForm.hour" type="number" step="1" min="0" max="23" />
-                    <label>Minute</label>
+                    <input :class="{'error-input':errorList.hour.error}" v-model="recordCreationForm.hour" type="number" step="1" min="0" max="23" />
+                    <label class="custom-label">Minute</label>
                     <p class="error-message" v-if="errorList.minute.error">{{ errorList.minute.message }}</p>
-                    <input :class="{'error-input':errorList.recordName.error}" v-model="recordCreationForm.minute" type="number" step="1" min="0" max="59" />
+                    <input :class="{'error-input':errorList.minute.error}" v-model="recordCreationForm.minute" type="number" step="1" min="0" max="59" />
                 </div>
             </Transition>
             <div>

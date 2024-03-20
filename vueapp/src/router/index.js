@@ -6,7 +6,26 @@ const routes = [
         name: "Login",
         component: () => import("../components/LoginPage.vue"),
         meta:{
-            title: "Login"
+            title: "Login",
+            requireAuth: false
+        }
+    },
+    {
+        path: "/profile",
+        name: "Profile",
+        component: () => import("../components/ProfilePage.vue"),
+        meta: {
+            title: "Profile",
+            requireAuth: true
+        }
+    },
+    {
+        path: "/addfriend",
+        name: "AddFriend",
+        component: () => import("../components/AddFriend.vue"),
+        meta:{
+            title: "Add Friend",
+            requireAuth: true
         }
     },
     {

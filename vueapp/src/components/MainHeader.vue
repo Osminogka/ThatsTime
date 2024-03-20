@@ -5,8 +5,7 @@ import('../assets/css/nav-buttons.css');
 import('../assets/css/user.css');
 import { reactive, ref, onMounted } from 'vue';
 import { vOnClickOutside } from '@vueuse/components'
-import { friendList, friendRequests, groupInvites, groupList} from '../core/userInfo'
-import {todayDate, monthNames} from '../core/month'
+import { friendList, groupList} from '../core/userInfo'
 
 function hideSideBar() {
   if(showInterface.showSideBar && event.target.id != 'showSideBar')
@@ -39,12 +38,9 @@ onMounted(() => {
 
   const mainHeader = document.getElementById('main-header');
   const sidebar = document.getElementById('sidebar');
-  const usernav = document.getElementById('usernavmenu');
   let parentElement = mainHeader.parentElement;
-  let heightPercentage = (mainHeader.offsetHeight / parentElement.offsetHeight) * 100;
+  let heightPercentage = (mainHeader.offsetHeight / parentElement.offsetHeight) * 100 - 18;
   sidebar.style.height = 'calc(100% - ' + heightPercentage + 'px)';
-  sidebar.style.top = heightPercentage + 20 + 'px';
-  usernav.style.top = heightPercentage + 20 + 'px';
 });
 
 function rotateTag(showProp, isExplicit = false) {
@@ -67,8 +63,6 @@ const showInterface = reactive({
     showSideBar: false,
     showFriendList: false,
     showGroupList: false,
-    showFriendInvites: false,
-    showGroupInvites: false,
 });
 
 const showUserNav = ref(false);
@@ -85,17 +79,17 @@ const showUserNav = ref(false);
         <button id="user-icon-button" @click="showUserNav = !showUserNav" class="user-icon" v-on-click-outside="hideUserNav"></button>
       </div>
     </div>
-    <h1 class="h1-date">{{ todayDate.getDate() }} {{  monthNames[todayDate.getMonth()] }} {{ todayDate.getFullYear() }}</h1>
     <Transition name="usernav">
       <div id="usernavmenu" v-show="showUserNav" class="user-nav">
-        <button class="button-nav-user button-nav-profile"></button>
-        <button class="button-nav-user button-nav-settings"></button>
-        <button class="button-nav-user button-nav-logout"></button>
+        <router-link to="/profile" class="button-nav-user button-nav-profile"></router-link>
+        <router-link to="/logout" class="button-nav-user button-nav-logout"></router-link>
       </div>
     </Transition>
 
     <Transition name="sidebar">
       <div id="sidebar" v-show="showInterface.showSideBar" class="sidenav" v-on-click-outside="hideSideBar">
+        <router-link to="/addfriend" class="add-button add-friend-button custom-button"></router-link>
+        <router-link to="/addgroup" class="add-button add-group-button custom-button"></router-link>
         <div class="nav-header">
           <p class="single-line">Friends</p>
           <hr class="nav-hr"/>
@@ -121,41 +115,6 @@ const showUserNav = ref(false);
             <div v-for="(group ,index) in groupList" :key="index" class="sidebar-entity-box">
               <p style="display: inline;">{{ group.name }}</p>
               <button class="button-nav custom-button"></button>
-            </div>
-          </div>
-        </Transition>
-
-        <div class="nav-header">
-          <p class="single-line">Requests</p>
-          <hr class="nav-hr"/>
-          <button id="showFriendInvites" @click="rotateTag('showFriendInvites')" class="expend-info custom-button" />
-        </div>
-        <Transition name="navlists">
-          <div v-if="showInterface.showFriendInvites" class="main-nav-div">
-            <div v-for="(request ,index) in friendRequests" :key="index" class="sidebar-entity-box">
-              <p style="display: inline;">{{ request.name }}</p>
-              <div style="display: block;">
-                <button class="button-accept custom-button"></button>
-                <button class="button-decline custom-button"></button>
-              </div>
-            </div>
-          </div>
-        </Transition>
-
-        
-        <div class="nav-header">
-          <p class="single-line">Invites</p>
-          <hr class="nav-hr"/>
-          <button id="showGroupInvites" @click="rotateTag('showGroupInvites')" class="expend-info custom-button" />
-        </div>
-        <Transition name="navlists">
-          <div v-if="showInterface.showGroupInvites" class="main-nav-div" style="margin-bottom: 20px;">
-            <div v-for="(invite ,index) in groupInvites" :key="index" class="sidebar-entity-box">
-              <p style="display: inline;">{{ invite.name }}</p>
-              <div style="display: block;">
-                <button class="button-accept custom-button"></button>
-                <button class="button-decline custom-button"></button>
-              </div>
             </div>
           </div>
         </Transition>

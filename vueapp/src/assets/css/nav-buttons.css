@@ -67,6 +67,23 @@
     margin-right: 1em;
 }
 
+.add-button{
+    display: inline-block;
+    height: 2em;
+    width: 2em;    
+    background-color: #03f7ff;
+    padding: 5px;
+    margin-left: 10px;
+}
+
+.add-friend-button{
+    background-image: url('../svg/Sidebar/addfriend.svg');
+}
+
+.add-group-button{
+    background-image: url('../svg/Sidebar/addgroup.svg');
+}
+
 @media(max-width: 900px){
     .expend-info{
         height: 2em;

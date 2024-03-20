@@ -12,8 +12,6 @@
     opacity: 0;
 }
 
-
-
 .navlists-enter-active, .navlists-leave-active {
     transition: all 0.3s ease-out;
 }
@@ -38,6 +36,8 @@
 .sidebar-entity-box{
     display: flex;
     flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
     border-bottom: black 1px solid;
     padding: 5px;
     margin: 2px;

@@ -1,7 +1,8 @@
 import { ref } from 'vue';
 
 export const user = ref({
-    name: 'Osminogka'
+    name: 'Osminogka',
+    email: 'davidkorobcenko@gmail.com'
 });
 
 export const friendList = ref([

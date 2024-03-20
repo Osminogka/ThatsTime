@@ -68,13 +68,3 @@
     align-items: flex-end;
     justify-items: center;
 }
-
-.h1-date {
-    font-size: 2em;
-    color: #333;
-    padding: 10px;
-    text-align: right;
-    border-bottom: 2px solid #333;
-    font-family: 'Tahoma';
-    font-size: 1.3em;
-}

@@ -15,10 +15,7 @@ import { todayDate, monthNames } from './core/month';
       <router-link to="/records" class="custom-link">Records</router-link>
     </div>
     <h1 class="h1-date">{{ todayDate.getDate() }} {{  monthNames[todayDate.getMonth()] }} {{ todayDate.getFullYear() }}</h1>
-    <router-view v-slot="{ Component }">
-      <keep-alive>
-        <component :is="Component" />
-      </keep-alive>
+    <router-view>
     </router-view>
   </main>
 </template>

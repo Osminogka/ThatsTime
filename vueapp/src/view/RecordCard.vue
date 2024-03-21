@@ -12,13 +12,15 @@ const isTimeCorrent = () =>{
 </script>
 
 <template>
-    <div class="record-card">
-        <div><label>Date:</label> {{ record.selectedDay }} {{ monthNames[record.selectedMonth - 1] }} {{ record.selectedYear }}</div>
-        <div><label>Record creator:</label> {{ record.Creator }}</div>
-        <div><label>For user:</label> {{ record.selectedObject }}</div>
-        <div v-if="isTimeCorrent"><label>Time:</label> {{ record.hour }} : {{ record.minute }}</div>
-        <div class="record-name">{{ record.recordName }}</div>
-        <div class="record-content"><p>{{ record.recordContent }}</p></div>
+    <div>
+        <div class="record-card">
+            <div><label>Date:</label> {{ record.selectedDay }} {{ monthNames[record.selectedMonth - 1] }} {{ record.selectedYear }}</div>
+            <div><label>Record creator:</label> {{ record.Creator }}</div>
+            <div><label>For user:</label> {{ record.selectedObject }}</div>
+            <div v-if="isTimeCorrent"><label>Time:</label> {{ record.hour }} : {{ record.minute }}</div>
+            <div class="record-name">{{ record.recordName }}</div>
+            <div class="record-content"><p>{{ record.recordContent }}</p></div>
+        </div>
     </div>
 </template>
 
@@ -33,8 +35,9 @@ const isTimeCorrent = () =>{
     padding: 5px;
     border-radius: 5px;
     background-color: #AFFFF5;
-    max-width: 50%;
+    max-width: 20em;
     height: auto;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
 }
 
 label{
@@ -43,6 +46,7 @@ label{
 
 .record-name{
     font-size: 1.2em;
+    font-family: 'Brush Script MT', cursive;
     font-weight: bold;
     text-align: center;
     margin: 5px;
@@ -50,6 +54,7 @@ label{
 }
 
 .record-content{
+    font-family: 'Trebuchet MS', sans-serif;
     width: 100%;
     overflow: auto;
     word-wrap: break-word;

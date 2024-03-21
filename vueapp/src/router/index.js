@@ -20,9 +20,9 @@ const routes = [
         }
     },
     {
-        path: "/addfriend",
-        name: "AddFriend",
-        component: () => import("../components/AddFriend.vue"),
+        path: "/social",
+        name: "AddSocial",
+        component: () => import("../components/AddSocial.vue"),
         meta:{
             title: "Add Friend",
             requireAuth: true

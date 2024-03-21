@@ -60,13 +60,6 @@
     justify-self: flex-end;
 }
 
-.nav-hr{
-    width: 100%;
-    background-color: black;
-    margin-left: 1em;
-    margin-right: 1em;
-}
-
 .add-button{
     display: inline-block;
     height: 2em;

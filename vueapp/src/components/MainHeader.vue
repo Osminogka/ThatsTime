@@ -3,6 +3,7 @@ import('../assets/css/header.css');
 import('../assets/css/navigation.css');
 import('../assets/css/nav-buttons.css');
 import('../assets/css/user.css');
+import CustomHideShow from '@/view/CustomHideShow.vue';
 import { reactive, ref, onMounted } from 'vue';
 import { vOnClickOutside } from '@vueuse/components'
 import { friendList, groupList} from '../core/userInfo'
@@ -11,15 +12,13 @@ function hideSideBar() {
   if(showInterface.showSideBar && event.target.id != 'showSideBar')
   {
     showInterface.showSideBar = false;
-    rotateTag('showSideBar', true);
+    rotateTag(true);
   }
 }
 
 function hideUserNav() {
   if(showUserNav.value && event.target.id != 'user-icon-button')
-  {
     showUserNav.value = false;
-  }
 }
 
 onMounted(() => {
@@ -39,24 +38,20 @@ onMounted(() => {
   const mainHeader = document.getElementById('main-header');
   const sidebar = document.getElementById('sidebar');
   let parentElement = mainHeader.parentElement;
-  let heightPercentage = (mainHeader.offsetHeight / parentElement.offsetHeight) * 100 - 18;
+  let heightPercentage = (mainHeader.offsetHeight / parentElement.offsetHeight) * 100 - 13;
   sidebar.style.height = 'calc(100% - ' + heightPercentage + 'px)';
 });
 
-function rotateTag(showProp, isExplicit = false) {
-  let tempProp = showInterface[showProp];
+function rotateTag(isExplicit = false) {
+  let tempProp = showInterface.showSideBar;
   if(!isExplicit) tempProp = !tempProp;
-  showInterface[showProp] = tempProp;
-  var new_value = "";
-  if(tempProp)
-    if(showProp == 'showSideBar')
-      new_value = 'rotate(90deg)';
-    else
-      new_value = "rotate(180deg)";
-  else
-    new_value = "rotate(0deg)";
-  
-  document.getElementById(showProp).style.transform = new_value;
+  showInterface.showSideBar = tempProp;
+  let new_value = tempProp ? 'rotate(90deg)' : "rotate(0deg)";
+  document.getElementById('showSideBar').style.transform = new_value;
+}
+
+function showList(list){
+  showInterface[list] = !showInterface[list];
 }
 
 const showInterface = reactive({
@@ -73,7 +68,7 @@ const showUserNav = ref(false);
 <template>
     <div id="main-header" class="main-header">
       <div class="main-header">
-        <button id="showSideBar" class="show-nav-button" @click="rotateTag('showSideBar')">
+        <button id="showSideBar" class="show-nav-button" @click="rotateTag()">
         </button>
         <h1 class="header-text">That's Time!</h1>
         <button id="user-icon-button" @click="showUserNav = !showUserNav" class="user-icon" v-on-click-outside="hideUserNav"></button>
@@ -88,13 +83,10 @@ const showUserNav = ref(false);
 
     <Transition name="sidebar">
       <div id="sidebar" v-show="showInterface.showSideBar" class="sidenav" v-on-click-outside="hideSideBar">
-        <router-link to="/addfriend" class="add-button add-friend-button custom-button"></router-link>
-        <router-link to="/addgroup" class="add-button add-group-button custom-button"></router-link>
-        <div class="nav-header">
-          <p class="single-line">Friends</p>
-          <hr class="nav-hr"/>
-          <button id="showFriendList" @click="rotateTag('showFriendList')" class="expend-info custom-button" />
-        </div>
+        <router-link to="/social" class="add-button add-friend-button custom-button"></router-link>
+        <custom-hide-show :showInterface="showInterface.showFriendList" @showList="showList" :showType="'showFriendList'">
+          Friends
+        </custom-hide-show>
         <Transition name="navlists">
           <div v-if="showInterface.showFriendList" class="main-nav-div">
             <div v-for="(friend ,index) in friendList" :key="index" class="sidebar-entity-box">
@@ -104,12 +96,9 @@ const showUserNav = ref(false);
           </div>
         </Transition>
 
-
-        <div class="nav-header">
-          <p class="single-line">Groups</p>
-          <hr class="nav-hr"/>
-          <button id="showGroupList" @click="rotateTag('showGroupList')" class="expend-info custom-button" />
-        </div>
+        <custom-hide-show :showInterface="showInterface.showGroupList" @showList="showList" :showType="'showGroupList'">
+          Groups
+        </custom-hide-show>
         <Transition name="navlists">
           <div v-if="showInterface.showGroupList" class="main-nav-div">
             <div v-for="(group ,index) in groupList" :key="index" class="sidebar-entity-box">

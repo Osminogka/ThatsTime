@@ -1,10 +1,27 @@
 import { reactive } from "vue";
 import { friendList, groupList, user } from "./userInfo";
+import { todayDate } from "./month";
 
-var records = reactive([{
+var records = reactive([]);
+
+let recordOnServer = [{
     selectedYear: 2023,
     selectedMonth: 3,
-    selectedDay: 10,
+    selectedDay: 19,
+    selectedObject: "John",
+    Creator: "Osminogka",
+    yourSelf: false,
+    showGroupList: false,
+    hour: 12,
+    minute: 30,
+    recordName: "Meeting",
+    recordContent: "Discuss the project plan",
+    
+},
+{
+    selectedYear: 2023,
+    selectedMonth: 3,
+    selectedDay: todayDate.getDate(),
     selectedObject: "John",
     Creator: "Osminogka",
     yourSelf: false,
@@ -13,10 +30,43 @@ var records = reactive([{
     minute: 30,
     recordName: "Meeting",
     recordContent: "Discuss the project plan"
-}]);
+},
+{
+    selectedYear: 2023,
+    selectedMonth: 3,
+    selectedDay: todayDate.getDate(),
+    selectedObject: "John",
+    Creator: "Osminogka",
+    yourSelf: false,
+    showGroupList: false,
+    hour: 12,
+    minute: 30,
+    recordName: "Meeting",
+    recordContent: "Discuss the project plan"
+},
+{
+    selectedYear: 2023,
+    selectedMonth: 3,
+    selectedDay: todayDate.getDate() + 1,
+    selectedObject: "John",
+    Creator: "Osminogka",
+    yourSelf: false,
+    showGroupList: false,
+    hour: 12,
+    minute: 30,
+    recordName: "Meeting",
+    recordContent: "Discuss the project plan"
+}
+]
 
-export const getRecords = () => {
-    return records;
+export const getRecords = (date) => {
+    let startDay = Math.min(date, todayDate.getDate());
+    let endDay = Math.max(date, todayDate.getDate());
+    return records.filter(record => todayDate.getDate() == date? record.selectedDay === date : record.selectedDay > startDay && record.selectedDay < endDay);
+}
+
+export const getRecordsFromServer = () =>{
+    records = recordOnServer;
 }
 
 export const postRecord = (record) => {
@@ -24,7 +74,7 @@ export const postRecord = (record) => {
     if(erroList.length === 0) {
         record.Creator = user.value.name;
         record.selectedMonth += 1;
-        records.push(record);
+        recordOnServer.push(record);
         return [];
     } else {
         return erroList;

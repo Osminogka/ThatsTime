@@ -1,7 +1,8 @@
 <script setup>
-import('../assets/css/profile.css')
+import('../assets/css/profile.css');
+import CustomHideShow from '../view/CustomHideShow.vue';
 import { reactive} from 'vue';
-import { friendList, friendRequests, groupInvites, groupList, user} from '../core/userInfo'
+import { friendList, friendRequests, groupInvites, groupList, user} from '../core/userInfo';
 
 function showList(list){
   showInterface[list] = !showInterface[list];
@@ -22,14 +23,11 @@ const showInterface = reactive({
         <p>{{ user.email }}</p>
     </div>
     <div class="user-info-list">
-        <div class="nav-header">
-          <p class="single-line">Friends</p>
-          <hr class="nav-hr"/>
-          <div @click="showList('showFriendList')" class="arrow-select-user" 
-            :class="{ 'expanded-user' : showInterface.showFriendList }"></div>
-        </div>
+        <custom-hide-show :showInterface="showInterface.showFriendList" @showList="showList" :showType="'showFriendList'">
+          Friends
+        </custom-hide-show>
         <Transition name="navlists">
-          <div v-if="showInterface.showFriendList" class="main-nav-div">
+          <div v-if="showInterface.showFriendList" class="main-profile-div">
             <div v-for="(friend ,index) in friendList" :key="index" class="entity">
               <p style="display: inline;">{{ friend.name }}</p>
               <button class="button-nav custom-button"></button>
@@ -39,14 +37,11 @@ const showInterface = reactive({
         </Transition>
 
 
-        <div class="nav-header">
-          <p class="single-line">Groups</p>
-          <hr class="nav-hr"/>
-          <div @click="showList('showGroupList')" class="arrow-select-user" 
-            :class="{ 'expanded-user' : showInterface.showGroupList }"></div>
-        </div>
+        <custom-hide-show :showInterface="showInterface.showGroupList" @showList="showList" :showType="'showGroupList'">
+          Groups
+        </custom-hide-show>
         <Transition name="navlists">
-          <div v-if="showInterface.showGroupList" class="main-nav-div">
+          <div v-if="showInterface.showGroupList" class="main-profile-div">
             <div v-for="(group ,index) in groupList" :key="index" class="entity">
               <p style="display: inline;">{{ group.name }}</p>
               <button class="button-nav custom-button"></button>
@@ -55,14 +50,11 @@ const showInterface = reactive({
           </div>
         </Transition>
 
-        <div class="nav-header">
-          <p class="single-line">Requests</p>
-          <hr class="nav-hr"/>
-          <div @click="showList('showFriendInvites')" class="arrow-select-user" 
-            :class="{ 'expanded-user' : showInterface.showFriendInvites }"></div>
-        </div>
+        <custom-hide-show :showInterface="showInterface.showFriendInvites" @showList="showList" :showType="'showFriendInvites'">
+          Invites
+        </custom-hide-show>
         <Transition name="navlists">
-          <div v-if="showInterface.showFriendInvites" class="main-nav-div">
+          <div v-if="showInterface.showFriendInvites" class="main-profile-div">
             <div v-for="(request ,index) in friendRequests" :key="index" class="entity">
               <p style="display: inline;">{{ request.name }}</p>
               <div style="display: block;">
@@ -74,14 +66,11 @@ const showInterface = reactive({
         </Transition>
 
         
-        <div class="nav-header">
-          <p class="single-line">Invites</p>
-          <hr class="nav-hr"/>
-          <div @click="showList('showGroupInvites')" class="arrow-select-user" 
-            :class="{ 'expanded-user' : showInterface.showGroupInvites }"></div>
-        </div>
+        <custom-hide-show :showInterface="showInterface.showGroupInvites" @showList="showList" :showType="'showGroupInvites'">
+          Group Invites
+        </custom-hide-show>
         <Transition name="navlists">
-          <div v-if="showInterface.showGroupInvites" class="main-nav-div">
+          <div v-if="showInterface.showGroupInvites" class="main-profile-div">
             <div v-for="(invite ,index) in groupInvites" :key="index" class="entity">
               <p style="display: inline;">{{ invite.name }}</p>
               <div style="display: block;">

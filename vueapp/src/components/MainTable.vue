@@ -163,7 +163,7 @@ let animateCell = (event) => {
     button.classList.add('animate');
     setTimeout(() => {
         button.classList.remove('animate');
-        recordCreationForm.selectedDay = event.target.textContent;
+        recordCreationForm.selectedDay = parseInt(event.target.textContent);
     }, 300);
 }
 

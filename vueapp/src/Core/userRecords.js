@@ -1,11 +1,11 @@
 import { reactive } from "vue";
 import { friendList, groupList, user } from "./userInfo";
-import { todayDate } from "./month";
+import { todayDate, shortMonthNames } from "./month";
 
 var records = reactive([]);
 
 let recordOnServer = [{
-    selectedYear: 2023,
+    selectedYear: 2024,
     selectedMonth: 3,
     selectedDay: 19,
     selectedObject: "John",
@@ -19,7 +19,7 @@ let recordOnServer = [{
     
 },
 {
-    selectedYear: 2023,
+    selectedYear: 2024,
     selectedMonth: 3,
     selectedDay: todayDate.getDate(),
     selectedObject: "John",
@@ -32,7 +32,7 @@ let recordOnServer = [{
     recordContent: "Discuss the project plan"
 },
 {
-    selectedYear: 2023,
+    selectedYear: 2024,
     selectedMonth: 3,
     selectedDay: todayDate.getDate(),
     selectedObject: "John",
@@ -45,7 +45,7 @@ let recordOnServer = [{
     recordContent: "Discuss the project plan"
 },
 {
-    selectedYear: 2023,
+    selectedYear: 2024,
     selectedMonth: 3,
     selectedDay: todayDate.getDate() + 1,
     selectedObject: "John",
@@ -62,7 +62,13 @@ let recordOnServer = [{
 export const getRecords = (date) => {
     let startDay = Math.min(date, todayDate.getDate());
     let endDay = Math.max(date, todayDate.getDate());
-    return records.filter(record => todayDate.getDate() == date? record.selectedDay === date : record.selectedDay > startDay && record.selectedDay < endDay);
+    return records.filter(record => record.selectedMonth === todayDate.getMonth() + 1 && record.selectedYear === todayDate.getFullYear() 
+        && (todayDate.getDate() == date? record.selectedDay === date : record.selectedDay > startDay && record.selectedDay < endDay));
+}
+
+export const getCertainRecord = (date) => {
+    let monthIndex = shortMonthNames.indexOf(date.month) + 1;
+    return records.filter(record => record.selectedDay === date.day && record.selectedMonth === monthIndex && record.selectedYear === date.year);
 }
 
 export const getRecordsFromServer = () =>{
@@ -84,7 +90,7 @@ export const postRecord = (record) => {
 function isRecordValid (record) {
     let errorList = [];
 
-    if (!(2020 <= record.selectedYear && record.selectedYear <= 2030)) {
+    if (!(todayDate.getFullYear() - 10 <= record.selectedYear && record.selectedYear <= todayDate.getFullYear() + 10)) {
         errorList.push('selectedYear');
     }
     // Check if selectedDay is a valid day

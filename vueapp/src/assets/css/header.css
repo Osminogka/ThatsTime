@@ -39,30 +39,6 @@
     transform: rotate(var(--rotation, 0deg));
 }
 
-.user-icon{
-    background-image: url('../svg/Header/user.svg');
-    background-size:contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    align-self: center;
-    justify-self: center;
-    margin-left: auto;
-    margin-right: 1em;
-    height: 2em;
-    width: 2em;
-    border: none;
-    background-color: aqua;
-}
-
-.user-icon:hover {
-    opacity: 0.8;
-}
-
-/* Optional focus effect */
-.user-icon:focus {
-    outline: none; /* Remove focus outline */
-}
-
 .profile-box{
     display: flex;
     align-items: flex-end;

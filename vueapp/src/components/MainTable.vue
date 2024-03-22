@@ -316,10 +316,10 @@ const weeks = computed(() => {
             <div>
                 <label class="custom-label">Record Name</label>
                 <p class="error-message" v-if="errorList.recordName.error">{{ errorList.recordName.message }}</p>
-                <input :class="{'error-input':errorList.recordName.error}" type="text" v-model="recordCreationForm.recordName" />
+                <input class="input-form" :class="{'error-input':errorList.recordName.error}" type="text" v-model="recordCreationForm.recordName" />
                 <label class="custom-label">Record Content</label>
                 <p class="error-message" v-if="errorList.recordContent.error">{{ errorList.recordContent.message }}</p>
-                <textarea :class="{'error-input': errorList.recordContent.error}" class="input-record-content" v-model="recordCreationForm.recordContent"></textarea>
+                <textarea class="textarea-form input-record-content" :class="{'error-input': errorList.recordContent.error}"  v-model="recordCreationForm.recordContent"></textarea>
             </div>
             <button @click.prevent="submitForm" class="submit-button">Create Record</button>
             <Transition name="showTimeEnter">

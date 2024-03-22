@@ -1,7 +1,8 @@
 <script setup>
 import RecordCard from '../view/RecordCard.vue'
 import CustomHideShow from '@/view/CustomHideShow.vue';
-import { getRecords, getRecordsFromServer } from '../core/userRecords'
+import DateSelector from '@/view/DateSelector.vue';
+import { getRecords, getCertainRecord,getRecordsFromServer } from '../core/userRecords'
 import { todayDate } from '@/core/month';
 
 import { ref, onMounted } from 'vue';
@@ -29,6 +30,10 @@ const records = ref([
         records: [],
         isGotBefore: false,
         isHidden: true
+    },
+    {
+        showType: -1,
+        records: [],
     }
 ]);
 
@@ -42,6 +47,19 @@ function getRecordsLocal(date){
 
 function getVisibility(showType){
     return !records.value.find(record => record.showType == showType).isHidden;
+}
+
+const selectedDay = ref(null);
+const selectedMonth = ref(null);
+const selectedYear = ref(null);
+
+function searchRecord(){
+    let date = {
+        day: selectedDay.value,
+        month: selectedMonth.value,
+        year: selectedYear.value
+    }
+    records.value.find(record => record.showType == '-1').records = getCertainRecord(date);
 }
 </script>
 
@@ -87,10 +105,13 @@ function getVisibility(showType){
             </Transition>
         </div>
         <div class="search-record-box">
-            <div><input placeholder="Day"/></div>
-            <div><input placeholder="Month"/></div>
-            <div><input placeholder="Year"/></div>
-            <button class="search-button custom-button"></button> 
+            <date-selector v-model="selectedDay" type="day"/>
+            <date-selector v-model="selectedMonth" type="month"/>
+            <date-selector v-model="selectedYear" type="year"/>
+            <button @click="searchRecord" class="search-button custom-button"></button> 
+        </div>
+        <div class="container-week">
+            <record-card v-for="(record, index) in records.find(record => record.showType == '-1').records" :record="record" :key="index"/>
         </div>
     </div>
 </template>

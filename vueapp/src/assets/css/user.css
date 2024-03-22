@@ -1,3 +1,19 @@
+.user-icon{
+    background-image: url('../svg/Header/user.svg');
+    background-size:contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    align-self: center;
+    justify-self: center;
+    margin-left: auto;
+    margin-right: 1em;
+    height: 2em;
+    width: 2em;
+    border: none;
+    background-color: aqua;
+    cursor: pointer;
+}
+
 .user-nav{
     display: flex;
     flex-direction: column;
@@ -25,10 +41,6 @@
 
 .button-nav-profile{
     background-image: url('../svg/UserInfoNav/profile.svg');
-}
-
-.button-nav-settings{
-    background-image: url('../svg/UserInfoNav/settings.svg');
 }
 
 .button-nav-logout{

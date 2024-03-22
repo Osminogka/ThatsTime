@@ -48,7 +48,7 @@
     background-position: center;
 }
 
-input, textarea {
+.input-form, .textarea-form {
     display: block;
     background-color: #55FFEF;
     border-style: solid;
@@ -62,7 +62,7 @@ input:hover, textarea:hover {
     background-color: #01EED6;
 }
 
-textarea{
+.textarea-form{
     border-width: 0.2em;
 }
 

@@ -181,7 +181,7 @@ function inviteFriend(friendName){
     margin-left: auto;
 }
 
-@media (max-width: 600px){
+@media (max-width: 600px) or (max-height: 1600px) {
     .friends-to-invite-container{
         height: 20em;
     }  

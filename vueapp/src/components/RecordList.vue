@@ -65,7 +65,6 @@ function searchRecord(){
 
 <template>
     <div class="container-records">
-        <div>
             <custom-hide-show :showInterface="records.find(record => record.showType == '-7').isHidden"  @showList="getRecordsLocal" :showType="'-7'">
                 Last week
             </custom-hide-show>
@@ -77,8 +76,6 @@ function searchRecord(){
                     </div>
                 </div>
             </Transition>
-        </div>
-        <div>
             <custom-hide-show :showInterface="records.find(record => record.showType == '0').isHidden" @showList="getRecordsLocal" :showType="'0'">
                 Today
             </custom-hide-show>
@@ -90,8 +87,6 @@ function searchRecord(){
                     </div>
                 </div>
             </Transition>
-        </div>
-        <div>
             <custom-hide-show :showInterface="records.find(record => record.showType == '7').isHidden" @showList="getRecordsLocal" :showType="'7'">
                 Next week
             </custom-hide-show>
@@ -103,13 +98,12 @@ function searchRecord(){
                     </div>
                 </div>
             </Transition>
-        </div>
         <div class="search-record-box">
             <date-selector v-model="selectedDay" type="day"/>
             <date-selector v-model="selectedMonth" type="month"/>
             <date-selector v-model="selectedYear" type="year"/>
-            <button @click="searchRecord" class="search-button custom-button"></button> 
-        </div>
+            <button @click="searchRecord" class="search-button custom-button"></button>
+        </div> 
         <div class="container-week">
             <record-card v-for="(record, index) in records.find(record => record.showType == '-1').records" :record="record" :key="index"/>
         </div>
@@ -119,7 +113,7 @@ function searchRecord(){
 <style scoped>
 
 .container-records{
-    margin: 1em;
+    margin: 0.2em;
 }
 
 .container-week{

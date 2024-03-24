@@ -23,8 +23,37 @@ const routes = [
         path: "/social",
         name: "AddSocial",
         component: () => import("../components/AddSocial.vue"),
+        children:[
+            {
+                path: "addfriend",
+                name: "AddFriend",
+                component: () => import("../components/AddFriend.vue"),
+                meta:{
+                    title: "Add Friend",
+                    requireAuth: true
+                }
+            },
+            {
+                path: "addgroup",
+                name: "AddGroup",
+                component: () => import("../components/AddGroup.vue"),
+                meta: {
+                    title: "Add Group",
+                    requireAuth: true
+                }
+            },
+            {
+                path:"creategroup",
+                name: "CreateGroup",
+                component: () => import("../components/CreateGroup.vue"),
+                meta: {
+                    title: "Create Group",
+                    requireAuth: true
+                }
+            }
+        ],
         meta:{
-            title: "Add Friend",
+            title: "Add Social",
             requireAuth: true
         }
     },

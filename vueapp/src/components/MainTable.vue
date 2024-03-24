@@ -3,6 +3,9 @@ import('../assets/css/table.css')
 import('../assets/css/mainForm.css')
 import('../assets/css/user.css')
 import('../assets/css/customSelect.css')
+
+import TimeSelector from '@/view/TimeSelector.vue'
+
 import { friendList, groupList, user} from '../core/userInfo'
 import {todayDate, monthNames} from '../core/month'
 import { postRecord } from '@/core/userRecords';
@@ -305,12 +308,8 @@ const weeks = computed(() => {
             </div>
             <Transition name="showTimeEnter">
                 <div v-if="recordCreationForm.enterTime">
-                    <label class="custom-label">Hour</label>
-                    <p class="error-message" v-if="errorList.hour.error">{{ errorList.hour.message }}</p>
-                    <input :class="{'error-input':errorList.hour.error}" v-model="recordCreationForm.hour" type="number" step="1" min="0" max="23" />
-                    <label class="custom-label">Minute</label>
-                    <p class="error-message" v-if="errorList.minute.error">{{ errorList.minute.message }}</p>
-                    <input :class="{'error-input':errorList.minute.error}" v-model="recordCreationForm.minute" type="number" step="1" min="0" max="59" />
+                    <time-selector v-model="recordCreationForm.hour" type="hour" :error="errorList.hour.error"/>
+                    <time-selector v-model="recordCreationForm.minute" type="minute" :error="errorList.minute.error"/>
                 </div>
             </Transition>
             <div>

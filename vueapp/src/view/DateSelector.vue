@@ -75,6 +75,7 @@ let timer = ref(null);
 function startAutoDay(isNextDayCalled) {
     let func = () => isNextDayCalled? nextDay() : prevDay();
     func();
+    
     timer.value = setInterval(() => {func()}, 200); // Call increment every 500ms
 }
 function stopAutoDay() {
@@ -103,9 +104,9 @@ function stopAutoYear() {
 
 <template>
     <div class="container-date-select">
-        <input v-if="type === 'day'" v-model="model" class="record-date-selector" placeholder="DD" type="number" step="1" :min="1" :max="daysInSelectedMonth"/>
-        <input v-else-if="type === 'month'" v-model="model" class="record-date-selector" placeholder="MM" type="text" step="1" :min="todayDate.getFullYear() - 10" :max="todayDate.getFullYear"/>
-        <input v-else-if="type === 'year'" v-model="model" class="record-date-selector" placeholder="YYYY" type="number" step="1" :min="todayDate.getFullYear() - 10" :max="todayDate.getFullYear"/>
+        <input v-if="type === 'day'" v-model="model" class="record-date-selector" placeholder="DD" type="number"/>
+        <div v-else-if="type === 'month'" class="record-date-selector" placeholder="MM" type="text">{{ model }}</div>
+        <div v-else-if="type === 'year'" class="record-date-selector" placeholder="YYYY" type="number">{{ model }}</div>
         <div class="container-record-button" v-if="type === 'day'">
             <button @mousedown="startAutoDay(true)" @mouseup="stopAutoDay" class="up-button custom-button"></button>
             <button  @mousedown="startAutoDay(false)" @mouseup="stopAutoYear" class="down-button custom-button"></button>

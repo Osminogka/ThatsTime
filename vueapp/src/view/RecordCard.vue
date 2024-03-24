@@ -12,15 +12,13 @@ const isTimeCorrent = () =>{
 </script>
 
 <template>
-    <div>
-        <div class="record-card">
-            <div><label>Date:</label> {{ record.selectedDay }} {{ monthNames[record.selectedMonth - 1] }} {{ record.selectedYear }}</div>
-            <div><label>Record creator:</label> {{ record.Creator }}</div>
-            <div><label>For user:</label> {{ record.selectedObject }}</div>
-            <div v-if="isTimeCorrent"><label>Time:</label> {{ record.hour }} : {{ record.minute }}</div>
-            <div class="record-name">{{ record.recordName }}</div>
-            <div class="record-content"><p>{{ record.recordContent }}</p></div>
-        </div>
+    <div class="record-card">
+        <div><label>Date:</label> {{ record.selectedDay }} {{ monthNames[record.selectedMonth - 1] }} {{ record.selectedYear }}</div>
+        <div><label>Record creator:</label> {{ record.Creator }}</div>
+        <div><label>For user:</label> {{ record.selectedObject }}</div>
+        <div v-if="isTimeCorrent"><label>Time:</label> {{ record.hour }} : {{ record.minute }}</div>
+        <div class="record-name">{{ record.recordName }}</div>
+        <div class="record-content"><p>{{ record.recordContent }}</p></div>
     </div>
 </template>
 

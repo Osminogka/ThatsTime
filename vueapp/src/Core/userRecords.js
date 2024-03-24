@@ -107,11 +107,11 @@ function isRecordValid (record) {
         errorList.push('selectedObject');
     }
     // Check if hour is a valid hour
-    if (!(0 <= record.hour && record.hour <= 23)) {
+    if (!(0 <= parseInt(record.hour) && parseInt(record.hour) <= 23)) {
         errorList.push('hour');
     }
     // Check if minute is a valid minute
-    if (!(0 <= record.minute && record.minute <= 59)) {
+    if (!(0 <= parseInt(record.minute) && parseInt(record.minute) <= 59)) {
         errorList.push('minute');
     }
     // Check if recordName is not empty

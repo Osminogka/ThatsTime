@@ -5,7 +5,7 @@ export const user = ref({
     email: 'davidkorobcenko@gmail.com'
 });
 
-export const friendList = ref([
+const friendListOnServer = ref([
     { name: 'Friend1' },
     { name: 'Friend2' },
     { name: 'Friend3' },
@@ -18,7 +18,7 @@ export const friendList = ref([
     { name: 'Friend10' }
 ]);
   
-export const groupList = ref([
+const groupListOnServer = ref([
     { name: 'Group1' },
     { name: 'Group2' },
     { name: 'Group3' },
@@ -41,7 +41,7 @@ export const groupList = ref([
     { name: 'Group20' }
 ]);
   
-export const friendRequests = ref([
+const friendRequestsOnServer = ref([
     { name: 'Friend Request 1' },
     { name: 'Friend Request 2' },
     { name: 'Friend Request 3' },
@@ -49,10 +49,55 @@ export const friendRequests = ref([
     { name: 'Friend Request 5' }
 ]);
   
-export const groupInvites = ref([
+const groupInvitesOnServer = ref([
     { name: 'Group Invite 1' },
     { name: 'Group Invite 2' },
     { name: 'Group Invite 3' },
     { name: 'Group Invite 4' },
     { name: 'Group Invite 5' }
 ]);
+
+export const friendList = ref([
+
+]);
+  
+export const groupList = ref([
+
+]);
+  
+export const friendRequests = ref([
+
+]);
+  
+export const groupInvites = ref([
+
+]);
+
+export const getMyFriendList = async () => {
+    if(friendList.value.length === 0) {
+        friendList.value = friendListOnServer.value;
+    }
+    return friendList.value;
+}
+
+export const getMyGroupList = async () => {
+    if(groupList.value.length === 0) {
+        groupList.value = groupListOnServer.value;
+    }
+    return groupList.value;
+}
+
+export const getMyFriendRequests = async () => {
+    if(friendRequests.value.length === 0) {
+        friendRequests.value = friendRequestsOnServer.value;
+    }
+    return friendRequests.value;
+}
+
+export const getMyGroupInvites = async () => {
+    if(groupInvites.value.length === 0) {
+        groupInvites.value = groupInvitesOnServer.value;
+    }
+    return groupInvites.value;
+}
+

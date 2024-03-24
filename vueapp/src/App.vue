@@ -2,6 +2,14 @@
 import('./assets/css/router.css');
 import MainHeader from './components/MainHeader.vue';
 import { todayDate, monthNames } from './core/month';
+import { getMyFriendList, getMyGroupList} from './core/userInfo';
+
+import { onBeforeMount } from 'vue';
+
+onBeforeMount(async () => {
+  await getMyFriendList();
+  await getMyGroupList();
+});
 
 </script>
 
@@ -29,6 +37,7 @@ import { todayDate, monthNames } from './core/month';
   border-bottom: 2px solid #333;
   font-family: 'Tahoma';
   font-size: 1.3em;
+  margin-right: 0.2em;
 }
 
 </style>

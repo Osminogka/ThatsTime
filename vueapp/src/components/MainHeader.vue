@@ -83,7 +83,7 @@ const showUserNav = ref(false);
 
     <Transition name="sidebar">
       <div id="sidebar" v-show="showInterface.showSideBar" class="sidenav" v-on-click-outside="hideSideBar">
-        <router-link to="/social" class="add-button add-friend-button custom-button"></router-link>
+        <router-link :to="{ name: 'AddFriend', query: { page: 0 } }" class="add-button add-friend-button custom-button" @click="hideSideBar"></router-link>
         <custom-hide-show :showInterface="showInterface.showFriendList" @showList="showList" :showType="'showFriendList'">
           Friends
         </custom-hide-show>

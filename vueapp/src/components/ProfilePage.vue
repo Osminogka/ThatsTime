@@ -1,8 +1,14 @@
 <script setup>
 import('../assets/css/profile.css');
 import CustomHideShow from '../view/CustomHideShow.vue';
-import { reactive} from 'vue';
+import { reactive, onBeforeMount} from 'vue';
 import { friendList, friendRequests, groupInvites, groupList, user} from '../core/userInfo';
+import { getMyFriendRequests, getMyGroupInvites} from '../core/userInfo';
+
+onBeforeMount(async () => {
+  await getMyFriendRequests();
+  await getMyGroupInvites();
+});
 
 function showList(list){
   showInterface[list] = !showInterface[list];

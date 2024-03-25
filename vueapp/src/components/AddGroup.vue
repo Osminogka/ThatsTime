@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { getGroupByName, getGroupList } from '../core/addGroup';
 
 import SocialEntity from '@/view/SocialEntity.vue';
+import LoadingAnimation from '@/view/LoadingAnimation.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -79,7 +80,7 @@ function searchGroup(){
             </form>
         </div>
         <div class="friend-display-container">
-            <div v-if="loading" class="loading">Loading...</div>
+            <loading-animation v-if="loading" />
             <div v-else-if="error" class="error">{{ error.message }}</div>
             <div v-if="groups.length > 0">
                 <social-entity v-for="(group, index) in groups" :name="group" type='group' :key="index"/>

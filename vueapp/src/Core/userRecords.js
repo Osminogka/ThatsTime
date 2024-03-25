@@ -56,6 +56,58 @@ let recordOnServer = [{
     minute: 30,
     recordName: "Meeting",
     recordContent: "Discuss the project plan"
+},
+{
+    selectedYear: 2024,
+    selectedMonth: 3,
+    selectedDay: todayDate.getDate() + 1,
+    selectedObject: "Friend1",
+    Creator: "Osminogka",
+    yourSelf: false,
+    showGroupList: false,
+    hour: 12,
+    minute: 30,
+    recordName: "Meeting",
+    recordContent: "Discuss the project plan"
+},
+{
+    selectedYear: 2024,
+    selectedMonth: 3,
+    selectedDay: todayDate.getDate() + 1,
+    selectedObject: "Friend1",
+    Creator: "Osminogka",
+    yourSelf: false,
+    showGroupList: false,
+    hour: 12,
+    minute: 30,
+    recordName: "Meeting",
+    recordContent: "Discuss the project plan"
+},
+{
+    selectedYear: 2024,
+    selectedMonth: 3,
+    selectedDay: todayDate.getDate() + 1,
+    selectedObject: "Friend2",
+    Creator: "Osminogka",
+    yourSelf: false,
+    showGroupList: false,
+    hour: 12,
+    minute: 30,
+    recordName: "Meeting",
+    recordContent: "Discuss the project plan"
+},
+{
+    selectedYear: 2024,
+    selectedMonth: 3,
+    selectedDay: todayDate.getDate() + 1,
+    selectedObject: "Group1",
+    Creator: "Osminogka",
+    yourSelf: false,
+    showGroupList: true,
+    hour: 12,
+    minute: 30,
+    recordName: "Meeting",
+    recordContent: "Discuss the project plan"
 }
 ]
 
@@ -68,7 +120,38 @@ export const getRecords = (date) => {
 
 export const getCertainRecord = (date) => {
     let monthIndex = shortMonthNames.indexOf(date.month) + 1;
-    return records.filter(record => record.selectedDay === date.day && record.selectedMonth === monthIndex && record.selectedYear === date.year);
+    return recordOnServer.filter(record => record.selectedDay === date.day && record.selectedMonth === monthIndex && record.selectedYear === date.year);
+}
+
+export const getRecordsWithFriend = (friendName) => {
+    if(friendList.value.some(obj => obj.name === friendName)) 
+        return {
+            isFriend: true,
+            records: [...recordOnServer.filter(record => (record.selectedObject === friendName  || record.Creator === friendName) && record.yourSelf === false && record.showGroupList === false)]
+        };
+    else
+        return {
+            isFriend: false,
+            records: []
+        };
+}
+
+export const getRecordsWithGroup = (groupName) => {
+    if(groupList.value.some(obj => obj.name === groupName)) 
+        return {
+            isMember: true,
+            isCreator: groupList.value.find(obj => obj.name === groupName).creator === user.value.name,
+            Creator: groupList.value.find(obj => obj.name === groupName).creator,
+            members: ['test1', 'test2', 'test3'],
+            records: recordOnServer.filter(record => record.selectedObject === groupName && record.showGroupList === true)
+        };
+    else
+        return {
+            isMember: false,
+            isCreator: false,
+            members: [],
+            records: []
+        };
 }
 
 export const getRecordsFromServer = () =>{

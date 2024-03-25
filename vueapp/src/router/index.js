@@ -74,6 +74,34 @@ const routes = [
             title: "Records",
             requireAuth: true
         }
+    },
+    {
+        path: "/friend/:nickname",
+        name: "Friend",
+        component: () => import("../components/MoreFriend.vue"),
+        meta:{
+            title: "Friend",
+            requireAuth: true
+        }
+    },
+    {
+        path: "/group/:groupname",
+        name: "Group",
+        component: () => import("../components/MoreGroup.vue"),
+        meta:{
+            title: "Group",
+            requireAuth: true
+        }
+    },
+    {
+        path: "/:pathMatch(.*)*",
+        name: "NotFound",
+        component: () => import("../components/NotFound.vue"),
+        meta:{
+            title: "Not Found",
+            requireAuth: false
+        }
+    
     }
 ];
 

@@ -19,26 +19,26 @@ const friendListOnServer = ref([
 ]);
   
 const groupListOnServer = ref([
-    { name: 'Group1' },
-    { name: 'Group2' },
-    { name: 'Group3' },
-    { name: 'Group4' },
-    { name: 'Group5' },
-    { name: 'Group6' },
-    { name: 'Group7' },
-    { name: 'Group8' },
-    { name: 'Group9' },
-    { name: 'Group10' },
-    { name: 'Group11' },
-    { name: 'Group12' },
-    { name: 'Group13' },
-    { name: 'Group14' },
-    { name: 'Group15' },
-    { name: 'Group16' },
-    { name: 'Group17' },
-    { name: 'Group18' },
-    { name: 'Group19' },
-    { name: 'Group20' }
+    { name: 'Group1', creator: 'Osminogka'},
+    { name: 'Group2' , creator: 'Osminogka'},
+    { name: 'Group3' , creator: 'Osminogka'},
+    { name: 'Group4' , creator: 'Osminogka'},
+    { name: 'Group5' , creator: 'Osminogka'},
+    { name: 'Group6' , creator: 'Osminogka'},
+    { name: 'Group7' , creator: 'Osminogka'},
+    { name: 'Group8' , creator: 'Osminogka'},
+    { name: 'Group9' , creator: 'Osminogka'},
+    { name: 'Group10', creator: 'Osminogka' },
+    { name: 'Group11', creator: 'Osminogka' },
+    { name: 'Group12', creator: 'Osminogka' },
+    { name: 'Group13', creator: 'Osminogka' },
+    { name: 'Group14', creator: 'Osminogka' },
+    { name: 'Group15', creator: 'Osminogka' },
+    { name: 'Group16', creator: 'Osminogka' },
+    { name: 'Group17', creator: 'Osminogka' },
+    { name: 'Group18', creator: 'Osminogka' },
+    { name: 'Group19', creator: 'Osminogka' },
+    { name: 'Group20', creator: 'Osminogka' }
 ]);
   
 const friendRequestsOnServer = ref([

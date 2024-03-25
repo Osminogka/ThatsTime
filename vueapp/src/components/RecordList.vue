@@ -5,9 +5,9 @@ import DateSelector from '@/view/DateSelector.vue';
 import { getRecords, getCertainRecord,getRecordsFromServer } from '../core/userRecords'
 import { todayDate } from '@/core/month';
 
-import { ref, onMounted } from 'vue';
+import { ref, onBeforeMount } from 'vue';
 
-onMounted(() => {
+onBeforeMount(() => {
     getRecordsFromServer();
     records.value.find(record => record.showType == 0).records = getRecords(todayDate.getDate());
 });

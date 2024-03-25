@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { getFriendList, getFriendByNickname } from '../core/addFriend';
 
 import SocialEntity from '@/view/SocialEntity.vue';
+import LoadingAnimation from '@/view/LoadingAnimation.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -82,7 +83,7 @@ function seachFriend(){
             </form>
         </div>
         <div class="friend-display-container">
-            <div v-if="loading" class="loading">Loading...</div>
+            <loading-animation v-if="loading" />
             <div v-else-if="error" class="error">{{ error.message }}</div>
             <div v-if="users.length > 0">
                 <social-entity v-for="(user, index) in users" :name="user" type='friend' :key="index"/>

@@ -91,7 +91,7 @@ const showUserNav = ref(false);
           <div v-if="showInterface.showFriendList" class="main-nav-div">
             <div v-for="(friend ,index) in friendList" :key="index" class="sidebar-entity-box">
               <p style="display: inline;">{{ friend.name }}</p>
-              <button class="button-nav custom-button"></button>
+              <router-link :to="{ name: 'Friend', params: { nickname: friend.name } }" class="button-nav custom-button" @click="hideSideBar"/>
             </div>
           </div>
         </Transition>
@@ -103,7 +103,7 @@ const showUserNav = ref(false);
           <div v-if="showInterface.showGroupList" class="main-nav-div">
             <div v-for="(group ,index) in groupList" :key="index" class="sidebar-entity-box">
               <p style="display: inline;">{{ group.name }}</p>
-              <button class="button-nav custom-button"></button>
+              <router-link :to="{ name: 'Group', params: { groupname: group.name } }" class="button-nav custom-button" @click="hideSideBar"/>
             </div>
           </div>
         </Transition>

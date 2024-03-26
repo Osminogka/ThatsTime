@@ -6,7 +6,7 @@ import { useRoute } from 'vue-router';
 
 import { getRecordsWithFriend } from '../core/userRecords';
 
-import RecordCard from '@/view/RecordCard.vue';
+import RecordList from '@/view/RecordsList.vue';
 import LoadingAnimation from '@/view/LoadingAnimation.vue';
 
 const route = useRoute();
@@ -49,6 +49,10 @@ async function fetchData() {
         loading.value = false;
     }
 }
+
+function deleteFriend(){
+
+}
 </script>
 
 <template>
@@ -57,13 +61,12 @@ async function fetchData() {
     </div>
     <loading-animation v-else-if="loading" />
     <div v-else-if="infoAboutFriend.isFriend">
-        <div class="friend-info-header">{{ route.params.nickname }}</div>
-        <div v-if="infoAboutFriend.records.length === 0">
-            <p>There are no records yet</p>
+        <div class="friend-manage-container">
+            <div class="friend-info-header">{{ route.params.nickname }}</div>
+            <button class="delete-friend-button custom-button" @click="deleteFriend"/>
         </div>
-        <div v-else>
-            <record-card v-for="(record, index) in infoAboutFriend.records" :key="index" :record="record" />
-        </div>
+        <h2 style="text-align: center;">Friend Records</h2>
+        <record-list :no-recent="infoAboutFriend.records.length === 0" :friend="route.params.nickname" />
     </div>
     <div v-if="!infoAboutFriend.isFriend">
         <h1 class="not-your-friend">You don't have such friend</h1>
@@ -72,10 +75,17 @@ async function fetchData() {
 
 <style scoped>
 
+.friend-manage-container{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
 .friend-info-header{
     font-size: 24px;
     font-weight: bold;
     margin-bottom: 20px;
+    margin-left: 10px;
 }
 
 .not-your-friend{
@@ -83,6 +93,22 @@ async function fetchData() {
     font-weight: bold;
     margin-bottom: 20px;
     text-align: center;
+}
+
+.delete-friend-button{
+    background-image: url('../assets/svg/Profile/bin.svg');
+    background-color: white;
+    margin-right: 10px;
+}
+
+.custom-button{
+    background-position: center;
+    background-size:contain;
+    background-repeat: no-repeat;
+    border: none;
+    cursor: pointer;
+    height: 2em;
+    width: 2em;
 }
 
 </style>

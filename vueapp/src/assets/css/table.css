@@ -18,12 +18,12 @@
     padding-right: 1em;
 }
 
+
 table{
     border-collapse: collapse;
     width: 40em;
     height: 25em;
-    border-style: solid;
-    border-radius: 10px;
+    border: 5px solid black;
     margin: 1em;
     margin-top: 0.2em;
 }

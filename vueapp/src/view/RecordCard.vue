@@ -12,51 +12,64 @@ const isTimeCorrent = () =>{
 </script>
 
 <template>
-    <div class="record-card">
-        <div><label>Date:</label> {{ record.selectedDay }} {{ monthNames[record.selectedMonth - 1] }} {{ record.selectedYear }}</div>
-        <div><label>Record creator:</label> {{ record.Creator }}</div>
-        <div><label>For user:</label> {{ record.selectedObject }}</div>
-        <div v-if="isTimeCorrent"><label>Time:</label> {{ record.hour }} : {{ record.minute }}</div>
-        <div class="record-name">{{ record.recordName }}</div>
-        <div class="record-content"><p>{{ record.recordContent }}</p></div>
+<div class="card">
+    <div class="card-title">{{ record.recordName }}</div>
+    <div class="info-item">
+        <span>Date of Creating:</span> {{ record.selectedDay }} {{ monthNames[record.selectedMonth - 1] }} {{ record.selectedYear }}
     </div>
+    <div class="info-item">
+        <span>Record Creator:</span> {{ record.Creator }}
+    </div>
+    <div class="info-item">
+        <span>Created for:</span> {{ record.selectedObject }}
+    </div>
+    <div v-if="isTimeCorrent()" class="info-item">
+        <span>Time:</span> {{ record.hour }}:{{ record.minute }}
+    </div>
+    <div class="record-content">
+        <p>{{ record.recordContent }}</p>
+    </div>
+</div>
 </template>
 
 <style scoped>
-
-.record-card{
-    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
-    border: 0.2em solid black;
-    margin: 5px;
-    padding: 5px;
-    border-radius: 5px;
-    background-color: #AFFFF5;
-    max-width: 20em;
-    height: auto;
-    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+.card {
+    margin: 10px;
+    font-family: 'Roboto', sans-serif;
+    width: 300px;
+    background-color: #ffffff;
+    border: 2px solid #00a8ff;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    box-sizing: border-box;
+    color: #333333;
 }
 
-label{
+.card-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #00a8ff;
+}
+
+.info-item {
+    margin-bottom: 10px;
+}
+
+.info-item span {
     font-weight: bold;
 }
 
-.record-name{
-    font-size: 1.2em;
-    font-family: 'Brush Script MT', cursive;
-    font-weight: bold;
-    text-align: center;
-    margin: 5px;
-    color: rgb(6, 6, 197);
+.record-content {
+    border-top: 2px solid #00a8ff;
+    padding-top: 10px;
+    margin-top: 10px;
 }
 
-.record-content{
-    font-family: 'Trebuchet MS', sans-serif;
-    width: 100%;
-    overflow: auto;
-    word-wrap: break-word;
-    word-break: break-all;
+@media (max-width: 768px) {
+    .card {
+        width: 90%;
+    }
 }
-
 </style>

@@ -1,14 +1,43 @@
 <script setup>
-import RecordCard from '../view/RecordCard.vue'
+import RecordCard from '@/view/RecordCard.vue'
 import CustomHideShow from '@/view/CustomHideShow.vue';
 import DateSelector from '@/view/DateSelector.vue';
 import { getRecords, getCertainRecord,getRecordsFromServer } from '../core/userRecords'
 import { todayDate } from '@/core/month';
 
-import { ref, onBeforeMount } from 'vue';
+import { ref, onBeforeMount, defineProps, computed } from 'vue';
+
+const props = defineProps({
+    noRecent: {
+        type: Boolean,
+        required: true,
+    },
+    group: String,
+    friend: String,
+    all: Boolean
+})
 
 onBeforeMount(() => {
-    getRecordsFromServer();
+    if(props.all)
+        getRecordsFromServer({ 
+            all: true,
+            isGroup: false,
+            isFriend: false, 
+        });
+    else if(props.group)
+        getRecordsFromServer({
+            all: false,
+            isGroup: true,
+            isFriend: false,
+            name: props.group
+        });
+    else
+        getRecordsFromServer({
+            all: false,
+            isGroup: false,
+            isFriend: true,
+            name: props.friend
+        });
     records.value.find(record => record.showType == 0).records = getRecords(todayDate.getDate());
 });
 
@@ -53,51 +82,64 @@ const selectedDay = ref(null);
 const selectedMonth = ref(null);
 const selectedYear = ref(null);
 
-function searchRecord(){
-    let date = {
+async function searchRecord(){
+    records.value.find(record => record.showType == '-1').records = await getCertainRecord({
         day: selectedDay.value,
         month: selectedMonth.value,
-        year: selectedYear.value
-    }
-    records.value.find(record => record.showType == '-1').records = getCertainRecord(date);
+        year: selectedYear.value,
+        all: props.all,
+        isGroup: props.group? true : false,
+        isFriend: props.friend? true : false,
+        name: props.friend? props.friend : props.group
+    });
 }
+
+const lastWeek = computed(() => records.value.find(record => record.showType == -7));
+const today = computed(() => records.value.find(record => record.showType == 0));
+const nextWeek = computed(() => records.value.find(record => record.showType == 7));
+const certain = computed(() => records.value.find(record => record.showType == -1));
 </script>
 
 <template>
-    <div class="container-records">
-            <custom-hide-show :showInterface="records.find(record => record.showType == '-7').isHidden"  @showList="getRecordsLocal" :showType="'-7'">
+    <div v-if="!props.noRecent" class="container-records">
+            <custom-hide-show :showInterface="lastWeek.isHidden"  @showList="getRecordsLocal" :showType="'-7'">
                 Last week
             </custom-hide-show>
             <Transition  name="fadey">
                 <div v-if="getVisibility('-7')">
-                    <div v-if="records.find(record => record.showType == '-7').records.length == 0">No records</div>
+                    <div v-if="lastWeek.records.length == 0">No records</div>
                     <div v-else  class="container-week">
-                        <record-card v-for="(record, index) in records.find(record => record.showType == '-7').records" :record="record" :key="index"/>
+                        <record-card v-for="(record, index) in lastWeek.records" :record="record" :key="index"/>
                     </div>
                 </div>
             </Transition>
-            <custom-hide-show :showInterface="records.find(record => record.showType == '0').isHidden" @showList="getRecordsLocal" :showType="'0'">
+            <custom-hide-show :showInterface="today.isHidden" @showList="getRecordsLocal" :showType="'0'">
                 Today
             </custom-hide-show>
             <Transition  name="fadey">
                 <div v-if="getVisibility('0')">
-                    <div v-if="records.find(record => record.showType == '0').records.length == 0">No records</div>
+                    <div v-if="today.records.length == 0">No records</div>
                     <div v-else  class="container-week">
-                        <record-card v-for="(record, index) in records.find(record => record.showType == '0').records" :record="record" :key="index"/>
+                        <record-card v-for="(record, index) in today.records" :record="record" :key="index"/>
                     </div>
                 </div>
             </Transition>
-            <custom-hide-show :showInterface="records.find(record => record.showType == '7').isHidden" @showList="getRecordsLocal" :showType="'7'">
+            <custom-hide-show :showInterface="nextWeek.isHidden" @showList="getRecordsLocal" :showType="'7'">
                 Next week
             </custom-hide-show>
             <Transition name="fadey">
                 <div v-if="getVisibility('7')">
-                    <div v-if="records.find(record => record.showType == '7').records.length == 0">No records</div>
+                    <div v-if="nextWeek.records.length == 0">No records</div>
                     <div v-else  class="container-week">
-                        <record-card v-for="(record, index) in records.find(record => record.showType == '7').records" :record="record" :key="index"/>
+                        <record-card v-for="(record, index) in nextWeek.records" :record="record" :key="index"/>
                     </div>
                 </div>
             </Transition>
+    </div>
+    <div v-else>
+        <p style="text-align: center;">There is no recent records yet!</p>
+    </div>
+    <div>
         <div class="search-record-box">
             <date-selector v-model="selectedDay" type="day"/>
             <date-selector v-model="selectedMonth" type="month"/>
@@ -105,7 +147,9 @@ function searchRecord(){
             <button @click="searchRecord" class="search-button custom-button"></button>
         </div> 
         <div class="container-week">
-            <record-card v-for="(record, index) in records.find(record => record.showType == '-1').records" :record="record" :key="index"/>
+            <div v-if="certain.records.length == 0">No records</div>
+            <div v-else>{{ certain.records.length }} records were found</div>
+            <record-card v-for="(record, index) in certain.records" :record="record" :key="index"/>
         </div>
     </div>
 </template>

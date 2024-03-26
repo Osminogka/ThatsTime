@@ -168,7 +168,7 @@ function inviteFriend(friendName){
 }
 
 .send-invitation-button{
-    background-image: url('../assets/svg/Social/sendgroupinvite.svg');
+    background-image: url('../assets/svg/Social/addfriend.svg');
     background-position: center;
     background-size:contain;
     background-repeat: no-repeat;

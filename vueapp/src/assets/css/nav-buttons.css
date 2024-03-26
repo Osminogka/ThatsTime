@@ -50,17 +50,6 @@
     cursor: pointer;
 }
 
-.expend-info{
-    background-image: url('../svg/Sidebar/expend.svg');
-    height: 2em;
-    width: 2em;
-    background-color: #03f7ff;
-    transition: transform 0.3s ease;
-    --rotation: 0deg;
-    transform: rotate(var(--rotation, 0deg));
-    justify-self: flex-end;
-}
-
 .add-button{
     display: inline-block;
     height: 2em;

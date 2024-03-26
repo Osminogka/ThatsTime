@@ -118,9 +118,18 @@ export const getRecords = (date) => {
         && (todayDate.getDate() == date? record.selectedDay === date : record.selectedDay > startDay && record.selectedDay < endDay));
 }
 
-export const getCertainRecord = (date) => {
-    let monthIndex = shortMonthNames.indexOf(date.month) + 1;
-    return recordOnServer.filter(record => record.selectedDay === date.day && record.selectedMonth === monthIndex && record.selectedYear === date.year);
+export const getCertainRecord = async (date) =>  {
+    let selectedMonth = shortMonthNames.indexOf(date.month) + 1;
+    let selectedDay = date.day;
+    let selectedYear = date.year;
+    if(date.all)
+        return recordOnServer.filter(record => record.selectedDay === selectedDay && record.selectedMonth === selectedMonth && record.selectedYear === selectedYear);
+    if(date.isGroup)
+        return recordOnServer.filter(record => record.selectedDay === selectedDay && record.selectedMonth === selectedMonth && record.selectedYear === selectedYear 
+            && record.showGroupList === true && record.selectedObject === date.name);
+    if(date.isFriend)
+        return recordOnServer.filter(record => record.selectedDay === selectedDay && record.selectedMonth === selectedMonth && record.selectedYear === selectedYear 
+            && record.showGroupList === false && record.selectedObject === date.name);
 }
 
 export const getRecordsWithFriend = (friendName) => {
@@ -154,8 +163,13 @@ export const getRecordsWithGroup = (groupName) => {
         };
 }
 
-export const getRecordsFromServer = () =>{
-    records = recordOnServer;
+export const getRecordsFromServer = (recordsInfo) =>{
+    if(recordsInfo.all)
+        records = recordOnServer;
+    if(recordsInfo.isGroup)
+        records = recordOnServer.filter(record => record.yourSelf === false && record.showGroupList === true && record.selectedObject === recordsInfo.name);
+    if(recordsInfo.isFriend)
+        records = recordOnServer.filter(record => record.yourSelf === false && record.showGroupList === false && record.selectedObject === recordsInfo.name);
 }
 
 export const postRecord = (record) => {

@@ -7,7 +7,7 @@ var records = reactive([]);
 let recordOnServer = [{
     selectedYear: 2024,
     selectedMonth: 3,
-    selectedDay: 19,
+    selectedDay: todayDate.getDate() - 1,
     selectedObject: "John",
     Creator: "Osminogka",
     yourSelf: false,

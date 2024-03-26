@@ -7,7 +7,7 @@
         <div class="social-navigation-container">
             <router-link :to="{ name: 'AddFriend', query: { page: 0 } }"  class="social-link">Add Friend</router-link>
             <router-link :to="{ name: 'AddGroup', query: { page: 0 } }" class="social-link">Add Group</router-link>
-            <router-link :to="{ name: 'CreateGroup'}" class="create-group-button"></router-link>
+            <router-link :to="{ name: 'CreateGroup'}" class="social-link create-group-button"></router-link>
         </div>
         <router-view v-slot="{ Component }">
             <component :is="Component" />

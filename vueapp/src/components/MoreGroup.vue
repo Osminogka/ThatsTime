@@ -1,13 +1,15 @@
 <script setup>
 import('../assets/css/loadingAnimation.css');
 
-import { ref, reactive, watch, onMounted } from 'vue';
+import { ref, reactive, watch, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { getRecordsWithGroup } from '../core/userRecords';
 
 import RecordCard from '@/view/RecordCard.vue';
 import LoadingAnimation from '@/view/LoadingAnimation.vue';
+import { friendList } from '@/core/userInfo';
+import { inviteFriendToGroup, removeMemberFromGroup, promoteMemberInGroup, demoteMemberInGroup } from '../core/groupInfo'
 
 const route = useRoute();
 
@@ -37,16 +39,8 @@ async function fetchData() {
     error.value = null;
     loading.value = true;
     try{
-        let newData = await new Promise((resolve, reject) => {
-            setTimeout(async () => {
-                try {
-                    const data = await getRecordsWithGroup(route.params.groupname);
-                    resolve(data);
-                } catch (e) {
-                    reject(e);
-                }
-            }, 2000); // 2000 ms delay
-        });
+        let newData = await getRecordsWithGroup(route.params.groupname);
+
         // Clear the current object
         for (let key in infoAboutGroup) {
             delete infoAboutGroup[key];
@@ -61,6 +55,29 @@ async function fetchData() {
         loading.value = false;
     }
 }
+
+const lastMember = computed(() => infoAboutGroup.members[infoAboutGroup.members.length - 1]);
+
+const friendToInvite = ref([...friendList.value])
+
+const lastToInvite = computed(() => friendToInvite.value[friendToInvite.value.length - 1].name);
+
+async function removeMember(memberName){
+    await removeMemberFromGroup(memberName);
+}
+
+async function inviteToGroup(friendName){
+    await inviteFriendToGroup(friendName);
+    friendToInvite.value = friendToInvite.value.filter(friend => friend.name !== friendName);
+}
+
+async function promoteMember(memberName){
+    await promoteMemberInGroup(memberName);
+}
+
+async function demoteMember(memberName){
+    await demoteMemberInGroup(memberName);
+}
 </script>
 
 <template>
@@ -71,12 +88,27 @@ async function fetchData() {
         <loading-animation v-else-if="loading" />
         <div v-else-if="infoAboutGroup.isMember">
             <div class="friend-info-header">{{ route.params.groupname }}</div>
+            <button class="group-show-info-button" @clikc="showGroupInfo()" />
             <div class="info-header">Created by: {{ infoAboutGroup.Creator }}</div>
-            <div class="info-header">Members</div>
-            <div class="members-container">
-                <div class="member-enitity" v-for="(member, index) in infoAboutGroup.members" :key="index">
-                    <p>{{ member }}</p>
-                    <button class="remove-friend-button" v-if="infoAboutGroup.isCreator" @click="removeMember(member)">Remove</button>
+            <div class="social-action-container">
+                <div class="members-container">
+                    <div class="info-social-header">Members</div>
+                    <div v-for="(member, index) in infoAboutGroup.members" 
+                        :class="{'member-enitity': member !== lastMember,'member-enitity-last': member === lastMember}" :key="index">
+                        <p>{{ member }}</p>
+                        <div v-if="infoAboutGroup.isCreator">
+                            <button class="promote-member" @click="promoteMember(member)"/>
+                            <button class="demote-member" @click="demoteMember(member)" />
+                            <button class="remove-friend-button custom-button" @click="removeMember(member)" />
+                        </div>
+                    </div>
+                </div>
+                <div class="members-container">
+                    <div class="info-social-header">Invite</div>
+                    <div :class="{'member-enitity': member !== lastToInvite,'member-enitity-last': member === lastToInvite}" v-for="(friend, index) in friendToInvite" :key="index">
+                        <p>{{ friend.name }}</p>
+                        <button class="invite-friend-button custom-button" @click="inviteToGroup(friend.name)" />
+                    </div>
                 </div>
             </div>
             <div v-if="infoAboutGroup.records.length === 0">
@@ -114,7 +146,19 @@ async function fetchData() {
     padding-right: 10px;
     max-height: 250px;
     overflow-y: auto;
-    max-width: 70%;
+    max-width: 40%;
+}
+
+.social-action-container{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.invite-friend-button{
+    background-image: url('../assets/svg/Social/sendgroupinvite.svg');
+    background-color: white;
 }
 
 .friend-info-header{
@@ -140,14 +184,51 @@ async function fetchData() {
     padding-right: 10px;
 }
 
+.member-enitity-last{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: none;
+    margin-top: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
 .info-header{
     font-size: 1.2em;
     font-family: 'Brush Script MT', cursive;
     font-weight: bold;
 }
 
-.remove-friend-button{
+.info-social-header{
+    font-size: 1.2em;
+    font-family: 'Brush Script MT', cursive;
+    font-weight: bold;
+    text-align: center;
+}
 
+.remove-friend-button{
+    background-image: url('../assets/svg/Profile/bin.svg');
+    background-color: white;
+    padding: 5px;
+    margin-left: 20px;
+    margin-right: 10px;
+}
+
+.custom-button{
+    background-position: center;
+    background-size:contain;
+    background-repeat: no-repeat;
+    border: none;
+    cursor: pointer;
+    height: 2em;
+    width: 2em;
+}
+
+@media (max-width: 600px) {
+    .member-enitity {
+        width: 70%;
+    }
 }
 
 </style>

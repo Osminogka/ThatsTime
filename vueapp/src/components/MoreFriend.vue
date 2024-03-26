@@ -34,16 +34,7 @@ async function fetchData() {
     error.value = null;
     loading.value = true;
     try{
-        let newData = await new Promise((resolve, reject) => {
-            setTimeout(async () => {
-                try {
-                    const data = await getRecordsWithFriend(route.params.nickname);
-                    resolve(data);
-                } catch (e) {
-                    reject(e);
-                }
-            }, 2000); // 2000 ms delay
-        });
+        let newData = await getRecordsWithFriend(route.params.nickname);
         // Clear the current object
         for (let key in infoAboutFriend) {
             delete infoAboutFriend[key];

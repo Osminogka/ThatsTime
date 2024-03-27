@@ -24,6 +24,7 @@ function hideUserNav() {
 onMounted(() => {
   window.addEventListener('scroll', hideSideBar);
   window.addEventListener('scroll', hideUserNav);
+
   let animateButton = document.getElementById('user-icon-button');
 
   animateButton.addEventListener('click', () => {
@@ -33,7 +34,7 @@ onMounted(() => {
     setTimeout(() => {
       animateButton.classList.remove('animate');
     }, 300);
-});
+  });
 
   const mainHeader = document.getElementById('main-header');
   const sidebar = document.getElementById('sidebar');
@@ -82,7 +83,7 @@ const showUserNav = ref(false);
     </Transition>
 
     <Transition name="sidebar">
-      <div id="sidebar" v-show="showInterface.showSideBar" class="sidenav" v-on-click-outside="hideSideBar">
+      <div ref="scrollable" id="sidebar" v-show="showInterface.showSideBar" class="sidenav" v-on-click-outside="hideSideBar">
         <router-link :to="{ name: 'AddFriend', query: { page: 0 } }" class="add-button add-friend-button custom-button" @click="hideSideBar"></router-link>
         <custom-hide-show :showInterface="showInterface.showFriendList" @showList="showList" :showType="'showFriendList'">
           Friends

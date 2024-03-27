@@ -15,10 +15,10 @@ const isTimeCorrent = () =>{
 <div class="card">
     <div class="card-title">{{ record.recordName }}</div>
     <div class="info-item">
-        <span>Date of Creating:</span> {{ record.selectedDay }} {{ monthNames[record.selectedMonth - 1] }} {{ record.selectedYear }}
+        <span>Date: </span> {{ record.selectedDay }} {{ monthNames[record.selectedMonth - 1] }} {{ record.selectedYear }}
     </div>
     <div class="info-item">
-        <span>Record Creator:</span> {{ record.Creator }}
+        <span>Creator:</span> {{ record.Creator }}
     </div>
     <div class="info-item">
         <span>Created for:</span> {{ record.selectedObject }}

@@ -36,6 +36,8 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.MapGet("/", () => { return "Hello World"; });
+
 app.UseDefaultFiles();
 app.UseStaticFiles();
 

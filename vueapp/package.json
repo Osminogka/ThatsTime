@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "node aspnetcore-https.js && run serve",
-    "build": "run build",
-    "lint": "run lint"
+    "serve": "node aspnetcore-https.js && vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "@vueuse/components": "^10.9.0",

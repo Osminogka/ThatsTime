@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.Extensions.FileProviders;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,9 +37,13 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapGet("/", () => { return "Hello World"; });
+IWebHostEnvironment env = app.Services.GetRequiredService<IWebHostEnvironment>();
 
-app.UseDefaultFiles();
-app.UseStaticFiles();
+app.MapGet("/", () => "Hello World");
+
+app.UseDefaultFiles(new DefaultFilesOptions { DefaultFileNames = new List<string> { "index.html" } });
+app.UseStaticFiles(new StaticFileOptions { FileProvider = new PhysicalFileProvider(Path.Combine(env.ContentRootPath, "wwwroot")) });
+
+app.MapFallbackToFile("index.html");
 
 app.Run();

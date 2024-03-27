@@ -25,7 +25,7 @@ module.exports = {
         },
         proxy: {
             '/api': {
-                target: 'https://localhost:7069/'
+                target: 'https://localhost:5001/'
             }
         },
         port: 443

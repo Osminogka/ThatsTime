@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Microsoft.Extensions.FileProviders;
+using static Microsoft.AspNetCore.Http.StatusCodes;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,6 +28,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddControllers();
 
+builder.Services.AddHttpsRedirection(options =>
+{
+    options.RedirectStatusCode = Status307TemporaryRedirect;
+    options.HttpsPort = 5001;
+});
+
 var app = builder.Build();
 
 app.UseHttpsRedirection();
@@ -35,15 +41,10 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
-
-IWebHostEnvironment env = app.Services.GetRequiredService<IWebHostEnvironment>();
-
-app.MapGet("/", () => "Hello World");
-
-app.UseDefaultFiles(new DefaultFilesOptions { DefaultFileNames = new List<string> { "index.html" } });
-app.UseStaticFiles(new StaticFileOptions { FileProvider = new PhysicalFileProvider(Path.Combine(env.ContentRootPath, "wwwroot")) });
-
+app.UseRouting();
+app.UseStaticFiles();
 app.MapFallbackToFile("index.html");
+
+app.MapControllers();
 
 app.Run();

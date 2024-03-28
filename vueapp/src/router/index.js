@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 
+import { getCurrentUser } from '@/core/authentication'; 
+
 const routes = [
     {
         path: "/login",
@@ -118,11 +120,14 @@ const router = createRouter({
     history: createWebHistory(),
     routes
 });
-// router.beforeEach((to) => {
-//     if(to.meta.requireAuth){
-//         return {name: "Login", query: {redirect: to.fullPath}};
-//     }
-// });
+
+router.beforeEach((to) => {
+    const loggedIn = getCurrentUser();
+    
+    if(to.meta.requireAuth && !loggedIn){
+        return {name: "Login", query: {redirect: to.fullPath}};
+    }
+});
 
 router.beforeEach((to, from, next) => {
     document.title = to.meta.title || 'Default Title';

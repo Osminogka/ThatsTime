@@ -1,5 +1,23 @@
 <script setup>
+import { signIn } from '@/core/authentication';
 
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+const username = ref('');
+const password = ref('');
+const error = ref('');
+
+async function login(){
+  error.value = '';
+  let result = await signIn(username.value, password.value);
+  if(!result.success)
+    error.value = 'Invalid username or password';
+  else
+    router.push({ name: 'Mainpage' });
+}
 
 </script>
 
@@ -7,10 +25,11 @@
 <div class="login-container">
     <div class="login-form">
         <h1>Login</h1>
+        <p style="color: red;">{{ error }}</p>
         <form>
-            <input type="text" placeholder="Username" required>
-            <input type="password" placeholder="Password" required>
-            <button type="submit">Login</button>
+            <input v-model="username" type="text" placeholder="Username" required>
+            <input v-model="password" type="password" placeholder="Password" required>
+            <button type="submit" @click.prevent="login()">Login</button>
         </form>
         <router-link :to="{ name: 'Register' }" class="register-link">Register here</router-link>
     </div>

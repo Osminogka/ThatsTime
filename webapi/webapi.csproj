@@ -13,9 +13,4 @@
   <ItemGroup>
     <Folder Include="Models\" />
   </ItemGroup>
-  <ItemGroup>
-	  <ProjectReference Include="..\vueapp\vueapp.esproj">
-		  <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-	  </ProjectReference>
-  </ItemGroup>
 </Project>

@@ -31,7 +31,7 @@ builder.Services.AddControllers();
 builder.Services.AddHttpsRedirection(options =>
 {
     options.RedirectStatusCode = Status307TemporaryRedirect;
-    options.HttpsPort = 5001;
+    options.HttpsPort = 5000;
 });
 
 var app = builder.Build();
@@ -44,6 +44,8 @@ app.UseAuthorization();
 app.UseRouting();
 app.UseStaticFiles();
 app.MapFallbackToFile("index.html");
+
+app.MapGet("/", () => "Hello World");
 
 app.MapControllers();
 

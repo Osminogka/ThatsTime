@@ -67,8 +67,6 @@ app.UseRouting();
 app.UseStaticFiles();
 app.MapFallbackToFile("index.html");
 
-app.MapGet("/", () => "Hello World");
-
 app.MapControllers();
 
 app.Run();

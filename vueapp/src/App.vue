@@ -3,7 +3,7 @@ import('./assets/css/router.css');
 import MainHeader from './components/MainHeader.vue';
 import { todayDate, monthNames } from './core/month';
 import { getMyFriendList, getMyGroupList} from './core/userInfo';
-import { getCurrentUser } from '@/core/authentication'; 
+import { isAuthenticated } from '@/core/authentication'; 
 
 import { onBeforeMount } from 'vue';
 
@@ -15,11 +15,11 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <header v-if="getCurrentUser()">
+  <header v-if="isAuthenticated">
     <main-header />
   </header>
   <main>
-    <div v-if="getCurrentUser()">
+    <div v-if="isAuthenticated">
       <div class="link-container">
         <router-link to="/" class="custom-link" >Main Page</router-link>
         <router-link to="/records" class="custom-link">Records</router-link>

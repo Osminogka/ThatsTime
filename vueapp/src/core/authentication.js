@@ -1,4 +1,5 @@
 import { user } from '@/core/userInfo';
+import { computed } from 'vue';
 
 export async function signIn(username, password ) {
     const response = await fetch('/api/auth/signin', {
@@ -15,7 +16,20 @@ export async function signIn(username, password ) {
     if(response.ok){
         let responseData = await response.json();
         if(responseData.success)
+        {
+            let token = responseData.token;
+            const parts = token.split('.');
+            if (parts.length !== 3) {
+                return null;
+            }
+
+            // Decode the payload
+            const decoded = atob(parts[1]);
+            const payload = JSON.parse(decoded);
+            user.value.name = payload.unique_name;
+            user.value.email = payload.email;
             localStorage.setItem('user', JSON.stringify(responseData.token));
+        }
         return {...responseData};
     }
 
@@ -37,8 +51,21 @@ export async function signUp(username, email, password) {
     
     if(response.ok){
         let responseData = await response.json();
-        if(responseData.success)
+        if(responseData.success){
+            let token = responseData.token;
+            const parts = token.split('.');
+            if (parts.length !== 3) {
+                return null;
+            }
+
+            // Decode the payload
+            const decoded = atob(parts[1]);
+            const payload = JSON.parse(decoded);
+
+            user.value.name = payload.unique_name;
+            user.value.email = payload.email;
             localStorage.setItem('user', JSON.stringify(responseData.token));
+        }
         return {...responseData};
     }
     return {sucess: false, message: 'Server error'};
@@ -70,3 +97,7 @@ export function getCurrentUser() {
     user.value.email = payload.email;
     return payload;
 }
+
+export const isAuthenticated = computed(() => {
+    return user.value.name !== '';
+});

@@ -31,9 +31,9 @@ async function register(){
                 <input v-model="username" type="text" placeholder="Username" required>
                 <input v-model="email" type="text" placeholder="Email" required>
                 <input v-model="password" type="password" placeholder="Password" required>
-                <button type="submit" @click.prevent="register()">Login</button>
+                <button type="submit" @click.prevent="register()">Register</button>
             </form>
-            <router-link :to="{ name: 'Register' }" class="register-link">Register here</router-link>
+            <router-link :to="{ name: 'Login' }" class="register-link">Click here to login</router-link>
         </div>
     </div>
     </template>

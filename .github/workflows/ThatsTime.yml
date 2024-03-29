@@ -2,7 +2,7 @@ name: Build and deploy .NET Core application to Web App ThatsTime
 on:
   push:
     branches:
-    - master
+    - published
 env:
   AZURE_WEBAPP_NAME: ThatsTime
   AZURE_WEBAPP_PACKAGE_PATH: webapi\published

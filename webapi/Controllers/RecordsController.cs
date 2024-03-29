@@ -10,8 +10,31 @@ namespace webapi.Controllers
     [Route("api/records")]
     public class RecordsController : ControllerBase
     {
-        [HttpGet]
-        public async Task<IActionResult> getRecords(){
+        public async Task<IActionResult> postRecordAsync()
+        {
+            return Ok();
+        }
+
+        [HttpGet("certain")]
+        public async Task<IActionResult> getCertainRecordAsync(){
+            return Ok();
+        }
+
+        [HttpGet("friend")]
+        public async Task<IActionResult> getRecordsWithFriendAsync()
+        {
+            return Ok();
+        }
+
+        [HttpGet("group")]
+        public async Task<IActionResult> getRecordsWithGroupAsync()
+        {
+            return Ok();
+        }
+
+        [HttpGet("recent")]
+        public async Task<IActionResult> getRecentRecordsAsyncAsync()
+        {
             return Ok();
         }
     }

@@ -5,13 +5,19 @@ namespace webapi.Models
     public class GroupMemberList
     {
         [Key]
-        public int Id { get; set; }
+        public long Id { get; set; }
 
-        [Required]
-        public string GroupId { get; set; } = string.Empty;
+        //Foreign key to GroupsCreatorList.GroupId
+        public long GroupId { get; set; }
 
-        [Required]
-        public string MemberId { get; set; } = string.Empty;
+        //Navigation property to GroupsCreatorsList
+        public GroupsCreatorsList RelatedGroup { get; set; }
+
+        //Foreign key to UserInfo.UserId
+        public long MemberId { get; set; }
+
+        //Navigation property to UserInfo
+        public UserInfo RelatedUser { get; set; }
 
         [Required]
         public string MemberDegree { get; set; } = string.Empty;

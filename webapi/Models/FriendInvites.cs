@@ -1,16 +1,21 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace webapi.Models
 {
     public class FriendInvites
     {
         [Key]
-        public int Id { get; set; }
+        public long Id { get; set; }
 
-        [Required]
-        public string SenderUserId { get; set; } = string.Empty;
+        //Foreign key to UserInfo userId
+        public long SenderUserId { get; set; }
 
-        [Required]
-        public string TargetUserId { get; set; } = string.Empty;
+        //Navigation property
+        public UserInfo SenderUserInfo { get; set; }
+
+        public long TargetUserId { get; set; }
+
+        public UserInfo TargetUserInfo { get; set; }
     }
 }

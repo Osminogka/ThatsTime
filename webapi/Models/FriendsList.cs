@@ -5,12 +5,16 @@ namespace webapi.Models
     public class FriendsList
     {
         [Key]
-        public int Id { get; set; }
+        public long Id { get; set; }
 
-        [Required]
-        public string FirstUserId { get; set; } = string.Empty;
+        //Foreign key to UserInfo userId
+        public long FirstUserId { get; set; }
 
-        [Required]
-        public string SecondUserId { get; set; } = string.Empty;
+        public UserInfo FirstUserInfo { get; set; }
+
+        //Foreign key to UserInfo userId
+        public long SecondUserId { get; set; }
+
+        public UserInfo SecondUserInfo { get; set; }
     }
 }

@@ -13,6 +13,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<IdentityContext>(opts =>
     opts.UseSqlServer(builder.Configuration["ConnectionStrings:IdentityConnection"]));
 
+builder.Services.AddDbContext<DataContext>(opts =>
+    opts.UseSqlServer(builder.Configuration["ConnectionStrings:DataConnection"]));
+
 //User account configs
 builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<IdentityContext>();
 builder.Services.Configure<IdentityOptions>(opts =>

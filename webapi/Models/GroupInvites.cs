@@ -5,12 +5,18 @@ namespace webapi.Models
     public class GroupInvites
     {
         [Key]
-        public int Id { get; set; }
+        public long Id { get; set; }
 
-        [Required]
-        public int GroupId { get; set; }
+        //Foreign key property to GroupsCreatorsList
+        public long GroupId { get; set; }
 
-        [Required]
-        public string TargetUserId { get; set; } = string.Empty;
+        //Navigation property for GroupCreatorList
+        public GroupsCreatorsList GroupEntity { get; set; }
+
+        //Foreign key property to UserInfo
+        public long TargetUserId { get; set; }
+    
+        //Navigation property to UserInfo
+        public UserInfo UserEntity { get; set; }
     }
 }

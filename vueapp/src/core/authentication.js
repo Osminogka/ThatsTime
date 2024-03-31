@@ -28,7 +28,7 @@ export async function signIn(username, password ) {
             const payload = JSON.parse(decoded);
             user.value.name = payload.unique_name;
             user.value.email = payload.email;
-            localStorage.setItem('user', JSON.stringify(responseData.token));
+            localStorage.setItem('jwtToken', JSON.stringify(responseData.token));
         }
         return {...responseData};
     }
@@ -64,7 +64,7 @@ export async function signUp(username, email, password) {
 
             user.value.name = payload.unique_name;
             user.value.email = payload.email;
-            localStorage.setItem('user', JSON.stringify(responseData.token));
+            localStorage.setItem('jwtToken', JSON.stringify(responseData.token));
         }
         return {...responseData};
     }
@@ -72,11 +72,11 @@ export async function signUp(username, email, password) {
 }
 
 export function signout() {
-    localStorage.removeItem('user');
+    localStorage.removeItem('jwtToken');
 }
 
 export function getCurrentUser() {
-    const token = JSON.parse(localStorage.getItem('user'));
+    const token = JSON.parse(localStorage.getItem('jwtToken'));
     if (!token) {
         return null;
     }
@@ -93,7 +93,7 @@ export function getCurrentUser() {
 
     console.log(payload);
 
-    user.value.name = payload.unique_name;
+    user.value.name = payload.name;
     user.value.email = payload.email;
     return payload;
 }

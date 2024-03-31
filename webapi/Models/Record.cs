@@ -1,22 +1,42 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using webapi.Controllers;
 
 namespace webapi.Models
 {
     public class Record
     {
+        public Record()
+        {
+
+        }
+
+        public Record(RecordFromFrontEnd recordFromFrontEnd, long selectedObjectId, long creatorId)
+        {
+            DateTime = new DateTime(recordFromFrontEnd.selectedYear, recordFromFrontEnd.selectedMonth, recordFromFrontEnd.selectedDay,recordFromFrontEnd.hour, recordFromFrontEnd.minute, 0);
+            IsRecordForGroup = recordFromFrontEnd.showGroupList;
+            if(IsRecordForGroup)
+            {
+                RelatedGroupId = selectedObjectId;
+                RelatedUserId = null;
+            }
+            else
+            {
+                RelatedUserId = selectedObjectId;
+                RelatedGroupId = null;
+            }
+            CreatorId = creatorId;
+            IsRecordForYourSelf = recordFromFrontEnd.yourSelf;
+            if(IsRecordForYourSelf)
+                RelatedUserId = creatorId;
+            Importance = recordFromFrontEnd.importance;
+            RecordName = recordFromFrontEnd.recordName;
+            RecordContent = recordFromFrontEnd.recordContent;
+        }
+
         [Key]
         public int RecordId { get; set; }
 
-        [Required]
-        public int SelectedYear { get; set; }
-
-        [Required]
-        [Range(1, 12)]
-        public int SelectedMonth { get; set; }
-
-        [Required]
-        [Range(1, 31)]
-        public int SelectedDay { get; set; }
+        public DateTime DateTime { get; set; }
 
         public bool IsRecordForGroup { get; set; }
 
@@ -35,12 +55,7 @@ namespace webapi.Models
         public bool IsRecordForYourSelf { get; set; }
 
         [Required]
-        [Range(0, 23)]
-        public int Hour { get; set; }
-
-        [Required]
-        [Range(0, 59)]
-        public int Minute { get; set; }
+        public int Importance { get; set; }
 
         [Required]
         [StringLength(1, MinimumLength = 50)]

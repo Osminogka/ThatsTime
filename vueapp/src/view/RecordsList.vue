@@ -83,15 +83,26 @@ const selectedMonth = ref(null);
 const selectedYear = ref(null);
 
 async function searchRecord(){
-    records.value.find(record => record.showType == '-1').records = await getCertainRecord({
-        day: selectedDay.value,
-        month: selectedMonth.value,
-        year: selectedYear.value,
-        all: props.all,
+    let certainRecords = await getCertainRecord({
+        relatedObject: props.friend? props.friend : props.group,
+        forYourSelf: props.all,
         isGroup: props.group? true : false,
-        isFriend: props.friend? true : false,
-        name: props.friend? props.friend : props.group
+        year: selectedYear.value,
+        month: selectedMonth.value,
+        day: selectedDay.value,
     });
+
+    if(certainRecords.success && certainRecords.length == 0){
+        records.value.find(record => record.showType == -1).records = [];
+        return;
+    }
+
+    if(!certainRecords.success){
+        alert('An error occured while searching records');
+        return;
+    }
+    
+    records.value.find(record => record.showType == '-1').records = certainRecords.records;
 }
 
 const lastWeek = computed(() => records.value.find(record => record.showType == -7));

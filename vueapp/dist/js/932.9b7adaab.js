@@ -1,2 +1,0 @@
-"use strict";(self["webpackChunkvueapp"]=self["webpackChunkvueapp"]||[]).push([[932],{1091:function(e,u,n){n.r(u),n.d(u,{default:function(){return p}});var r=n(641),a=n(132),s={__name:"AllUserRecords",setup(e){return(e,u)=>((0,r.uX)(),(0,r.Wv)(a.A,{all:!0}))}};const t=s;var p=t}}]);
-//# sourceMappingURL=932.9b7adaab.js.map

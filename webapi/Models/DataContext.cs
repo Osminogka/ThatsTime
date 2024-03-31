@@ -51,43 +51,42 @@ namespace webapi.Models
                 .HasForeignKey(e => e.MemberId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<FriendInvites>()
-                .Property(e => e.SenderUserId).HasMaxLength(450);
-
-            modelBuilder.Entity<FriendInvites>()
-                .Property(e => e.TargetUserId).HasMaxLength(450);
-
-            //UserInfo userId & Friend Invites sender user id
+            //UserInfo userId & Friend Invites sender userId
             modelBuilder.Entity<FriendInvites>()
                 .HasOne(e => e.SenderUserInfo)
                 .WithMany(e => e.SenderUsers)
                 .HasForeignKey(e => e.SenderUserId)
                 .IsRequired();
 
+            //UserInfo userId & Friend Invites targer userId
             modelBuilder.Entity<FriendInvites>()
                 .HasOne(e => e.TargetUserInfo)
                 .WithMany(e => e.TargetUsers)
                 .HasForeignKey(e => e.TargetUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            //UserInfo userId & Friends List First userId
             modelBuilder.Entity<FriendsList>()
                 .HasOne(e => e.FirstUserInfo)
                 .WithMany(e => e.FirstFromFriendList)
                 .HasForeignKey(e => e.FirstUserId)
                 .IsRequired();
 
+            //UserInfo userId & Friend List Secord userId
             modelBuilder.Entity<FriendsList>()
                 .HasOne(e => e.SecondUserInfo)
                 .WithMany(e => e.SecondFromFriendList)
                 .HasForeignKey(e => e.SecondUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            //GroupCreatorList GroupId & Record related group
             modelBuilder.Entity<Record>()
                 .HasOne(e => e.RelatedGroup)
                 .WithMany(e => e.RecordsForThisGroup)
                 .HasForeignKey(e => e.RelatedGroupId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            //UserInfo userId & Record related user
             modelBuilder.Entity<Record>()
                 .HasOne(e => e.RelatedUser)
                 .WithMany(e => e.RecordsForThisUser)

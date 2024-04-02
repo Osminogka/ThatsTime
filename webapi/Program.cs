@@ -21,15 +21,15 @@ if (builder.Environment.IsDevelopment())
 }
 else
 {
-    ThatsTimeData = Environment.GetEnvironmentVariable("DataConnection");
-    Accounts = Environment.GetEnvironmentVariable("IdentityConnection");
+    ThatsTimeData = builder.Configuration.GetConnectionString("DataConnection");
+    Accounts = builder.Configuration.GetConnectionString("IdentityConnection");
 }
 
 builder.Services.AddDbContext<IdentityContext>(opts =>
-    opts.UseSqlServer(ThatsTimeData));
+    opts.UseSqlServer(Accounts));
 
 builder.Services.AddDbContext<DataContext>(opts =>
-    opts.UseSqlServer(Accounts));
+    opts.UseSqlServer(ThatsTimeData));
 
 //User account configs
 builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<IdentityContext>();
@@ -82,5 +82,9 @@ app.MapControllers();
 
 app.UseStaticFiles();
 app.MapFallbackToFile("index.html");
+
+var scope = app.Services.CreateScope();
+scope.ServiceProvider.GetRequiredService<DataContext>().Database.Migrate();
+scope.ServiceProvider.GetRequiredService<IdentityContext>().Database.Migrate();
 
 app.Run();

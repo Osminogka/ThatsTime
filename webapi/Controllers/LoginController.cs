@@ -31,7 +31,7 @@ namespace webapi.Controllers
         [HttpPost("signin")]
         public async Task<IActionResult> ApiSignIn([FromBody] SigningCredentials creds)
         {
-            var response = new Response();
+            var response = new LoginResponse();
             response.Message = "Invalid username or password";
 
             IdentityUser user = await UserManager.FindByNameAsync(creds.Username);
@@ -43,7 +43,11 @@ namespace webapi.Controllers
             {
                 SecurityTokenDescriptor descriptor = new SecurityTokenDescriptor
                 {
-                    Subject = (await SignInManager.CreateUserPrincipalAsync(user)).Identities.First(),
+                    Subject = new ClaimsIdentity(new Claim[]
+                    {
+                        new Claim(ClaimTypes.Name, user.UserName),
+                        new Claim(ClaimTypes.Email, user.Email)
+                    }),
                     Expires = DateTime.MaxValue,
                     SigningCredentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(
                         new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
@@ -66,13 +70,17 @@ namespace webapi.Controllers
             IdentityUser user = new IdentityUser { UserName = creds.Username, Email = creds.Email };
             IdentityResult result = await UserManager.CreateAsync(user, creds.Password);
 
-            var response = new Response();
+            var response = new LoginResponse();
 
             if (result.Succeeded)
             {
                 SecurityTokenDescriptor descriptor = new SecurityTokenDescriptor
                 {
-                    Subject = (await SignInManager.CreateUserPrincipalAsync(user)).Identities.First(),
+                    Subject = new ClaimsIdentity(new Claim[]
+                    {
+                        new Claim(ClaimTypes.Name, user.UserName),
+                        new Claim(ClaimTypes.Email, user.Email)
+                    }),
                     Expires = DateTime.MaxValue,
                     SigningCredentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(
                         new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
@@ -104,7 +112,7 @@ namespace webapi.Controllers
         public string Password { get; set; } = string.Empty;
     }
 
-    public class Response
+    public class LoginResponse
     {
         public bool Success { get; set; } = false;
         public string Message { get; set; } = "";

@@ -1,115 +1,9 @@
 import { reactive } from "vue";
 import { friendList, groupList, user } from "./userInfo";
-import { todayDate, shortMonthNames } from "./month";
+import { todayDate } from "./month";
 
 var records = reactive([]);
-
-let recordOnServer = [{
-    selectedYear: 2024,
-    selectedMonth: 3,
-    selectedDay: todayDate.getDate() - 1,
-    selectedObject: "John",
-    Creator: "Osminogka",
-    yourSelf: false,
-    showGroupList: false,
-    hour: 12,
-    minute: 30,
-    recordName: "Meeting",
-    recordContent: "Discuss the project plan",
-    
-},
-{
-    selectedYear: 2024,
-    selectedMonth: 3,
-    selectedDay: todayDate.getDate(),
-    selectedObject: "John",
-    Creator: "Osminogka",
-    yourSelf: false,
-    showGroupList: false,
-    hour: 12,
-    minute: 30,
-    recordName: "Meeting",
-    recordContent: "Discuss the project plan"
-},
-{
-    selectedYear: 2024,
-    selectedMonth: 3,
-    selectedDay: todayDate.getDate(),
-    selectedObject: "John",
-    Creator: "Osminogka",
-    yourSelf: false,
-    showGroupList: false,
-    hour: 12,
-    minute: 30,
-    recordName: "Meeting",
-    recordContent: "Discuss the project plan"
-},
-{
-    selectedYear: 2024,
-    selectedMonth: 3,
-    selectedDay: todayDate.getDate() + 1,
-    selectedObject: "John",
-    Creator: "Osminogka",
-    yourSelf: false,
-    showGroupList: false,
-    hour: 12,
-    minute: 30,
-    recordName: "Meeting",
-    recordContent: "Discuss the project plan"
-},
-{
-    selectedYear: 2024,
-    selectedMonth: 3,
-    selectedDay: todayDate.getDate() + 1,
-    selectedObject: "Friend1",
-    Creator: "Osminogka",
-    yourSelf: false,
-    showGroupList: false,
-    hour: 12,
-    minute: 30,
-    recordName: "Meeting",
-    recordContent: "Discuss the project plan"
-},
-{
-    selectedYear: 2024,
-    selectedMonth: 3,
-    selectedDay: todayDate.getDate() + 1,
-    selectedObject: "Friend1",
-    Creator: "Osminogka",
-    yourSelf: false,
-    showGroupList: false,
-    hour: 12,
-    minute: 30,
-    recordName: "Meeting",
-    recordContent: "Discuss the project plan"
-},
-{
-    selectedYear: 2024,
-    selectedMonth: 3,
-    selectedDay: todayDate.getDate() + 1,
-    selectedObject: "Friend2",
-    Creator: "Osminogka",
-    yourSelf: false,
-    showGroupList: false,
-    hour: 12,
-    minute: 30,
-    recordName: "Meeting",
-    recordContent: "Discuss the project plan"
-},
-{
-    selectedYear: 2024,
-    selectedMonth: 3,
-    selectedDay: todayDate.getDate() + 1,
-    selectedObject: "Group1",
-    Creator: "Osminogka",
-    yourSelf: false,
-    showGroupList: true,
-    hour: 12,
-    minute: 30,
-    recordName: "Meeting",
-    recordContent: "Discuss the project plan"
-}
-]
+let recordOnServer = [];
 
 export const getRecords = (date) => {
     let startDay = Math.min(date, todayDate.getDate());
@@ -118,18 +12,25 @@ export const getRecords = (date) => {
         && (todayDate.getDate() == date? record.selectedDay === date : record.selectedDay > startDay && record.selectedDay < endDay));
 }
 
-export const getCertainRecord = async (date) =>  {
-    let selectedMonth = shortMonthNames.indexOf(date.month) + 1;
-    let selectedDay = date.day;
-    let selectedYear = date.year;
-    if(date.all)
-        return recordOnServer.filter(record => record.selectedDay === selectedDay && record.selectedMonth === selectedMonth && record.selectedYear === selectedYear);
-    if(date.isGroup)
-        return recordOnServer.filter(record => record.selectedDay === selectedDay && record.selectedMonth === selectedMonth && record.selectedYear === selectedYear 
-            && record.showGroupList === true && record.selectedObject === date.name);
-    if(date.isFriend)
-        return recordOnServer.filter(record => record.selectedDay === selectedDay && record.selectedMonth === selectedMonth && record.selectedYear === selectedYear 
-            && record.showGroupList === false && record.selectedObject === date.name);
+export const getCertainRecord = async (CertainRecord) =>  {
+    let searchParams = new URLSearchParams({
+        ...CertainRecord
+    });
+    let response = await fetch(`/api/records/certain?${searchParams}`,
+        {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
+                'Content-Type': 'application/json'
+            }
+        }
+    );
+    if(response.ok) {
+        let responseData = response.json();
+        return {...responseData};
+    }
+    else
+        return {success: false, message: 'Server error'};
 }
 
 export const getRecordsWithFriend = (friendName) => {
@@ -172,16 +73,45 @@ export const getRecordsFromServer = (recordsInfo) =>{
         records = recordOnServer.filter(record => record.yourSelf === false && record.showGroupList === false && record.selectedObject === recordsInfo.name);
 }
 
-export const postRecord = (record) => {
-    let erroList = isRecordValid(record);
-    if(erroList.length === 0) {
-        record.Creator = user.value.name;
-        record.selectedMonth += 1;
-        recordOnServer.push(record);
-        return [];
-    } else {
-        return erroList;
+export const postRecord = async (record) => {
+    let errorList = isRecordValid(record);
+    if(!errorList.length === 0) {
+        return {success: false, message: 'Invalid record', records: errorList};
     }
+
+    const recordCreationFromFrontEnd = reactive({
+        selectedYear: record.selectedYear,
+        selectedMonth: record.selectedMonth,
+        selectedDay: record.selectedDay,
+        showGroupList: record.showGroupList,
+        yourSelf: record.yourSelf,
+        selectedObject: record.selectedObject,
+        importance: record.importance,
+        hour: record.hour,
+        minute: record.minute,
+        recordName: record.recordName,
+        recordContent: record.recordContent
+    });
+
+    if(record.yourSelf)
+        record.selectedObject = user.value.name;
+    record.selectedMonth += 1;
+    let response = await fetch('/api/records/newrecord',
+        {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('jwtToken').replace(/"/g, ''),
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(recordCreationFromFrontEnd)
+        });
+    if(response.ok) {
+        let responseData = response.json();
+        if(responseData.success)
+            return {...responseData};
+    }
+    else
+        return {success: false, message: 'Server error'};
 }
 
 function isRecordValid (record) {

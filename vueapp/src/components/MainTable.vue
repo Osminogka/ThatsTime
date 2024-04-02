@@ -19,16 +19,22 @@ const recordCreationStatus = reactive({
 })
 
 async function submitForm() {
-    let result = postRecord({...toRaw(recordCreationForm)});
+    let result = await postRecord({...toRaw(recordCreationForm)});
     for(let key in errorList) 
         errorList[key].error = false;
-    if(result.length > 0){
-        for(let key of result) 
+    if(!result.success && result.message == 'Invalid record'){
+        for(let key of result.records) 
             errorList[key].error = true;
         recordCreationStatus.showMessage = true;
         recordCreationStatus.message = 'Record creation failed!';
         recordCreationStatus.status = false;
         clearInputs(false);
+    }
+    else if(!result.success && result.message == 'Server error'){
+        recordCreationStatus.showMessage = true;
+        recordCreationStatus.message = 'Server error!';
+        recordCreationStatus.status = false;
+        clearInputs(true);
     }
     else{
         recordCreationStatus.showMessage = true;
@@ -63,8 +69,8 @@ const importanceList = [
 
 const recordCreationForm = reactive({
     selectedYear: todayDate.getFullYear(),
-    selectedDay: 1,
     selectedMonth: todayDate.getMonth(),
+    selectedDay: 1,
     showGroupList: false,
     yourSelf: false,
     selectedObject: friendList.value[0].name,

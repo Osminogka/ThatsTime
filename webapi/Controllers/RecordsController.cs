@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using webapi.Models;
-using webapi.Infrastructure;
+using System.Security.Claims;
 
 namespace webapi.Controllers
 {
@@ -28,8 +28,6 @@ namespace webapi.Controllers
             if (!recordFromFrontEnd.isValid())
                 return Ok(response);
 
-            JwtTokenHandle jwtToken = new JwtTokenHandle(HttpContext.Request.Headers["Authorization"]);
-
             try
             {
                 GroupsCreatorsList? relatedGroup = null;
@@ -44,7 +42,7 @@ namespace webapi.Controllers
 
                 long selectedObjectId = recordFromFrontEnd.showGroupList ? relatedGroup.GroupId : relatedUser.UserId;
 
-                UserInfo? mainUser = await DataContext.UserInfo.SingleOrDefaultAsync(obj => obj.UserName == jwtToken.getUser());
+                UserInfo? mainUser = await DataContext.UserInfo.SingleOrDefaultAsync(obj => obj.UserName == getUserName());
 
                 if (mainUser == null)
                     return Ok(response);
@@ -130,9 +128,6 @@ namespace webapi.Controllers
         public async Task<IActionResult> getRecordsWithFriendAsync()
         {
             RecordResponse response = new RecordResponse();
-            JwtTokenHandle jwtToken = new JwtTokenHandle(HttpContext.Request.Headers["Authorization"]);
-
-            string username = jwtToken.getUser();
 
             return Ok(response);
         }
@@ -169,6 +164,11 @@ namespace webapi.Controllers
 
             return true;
         }
+
+        private string getUserName()
+        {
+            return HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name).Value;
+        }
     }
 
     public class RecordResponse
@@ -197,15 +197,12 @@ namespace webapi.Controllers
         public bool isValid()
         {
             if(!isDateValid() ||
-                !(selectedMonth >= 1 && selectedMonth <= 12) ||
-                !(selectedDay >= 1 && selectedDay <= DateTime.DaysInMonth(selectedYear, selectedMonth)) ||
-                !(selectedMonth >= 1 && selectedMonth <= 12) ||
                 selectedObject.IsNullOrEmpty() ||
                 !(0 <= hour && hour <= 23) ||
                 !(0 <= minute && minute <= 59) ||
                 !(recordName.Length >= 1 && recordName.Length <= 50) ||
                 !(recordContent.Length >= 1 && recordContent.Length <= 500) ||
-                !(importance >= 1 && importance <= 3)
+                !(importance >= 0 && importance <= 2)
                 )
                 return false;
            return true;

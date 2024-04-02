@@ -10,11 +10,26 @@ using webapi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 //Database setup
+string ThatsTimeData = string.Empty;
+string Accounts = string.Empty;
+
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddEnvironmentVariables().AddJsonFile("appsettings.Development.json");
+    ThatsTimeData = builder.Configuration.GetConnectionString("DataConnection");
+    Accounts = builder.Configuration.GetConnectionString("IdentityConnection");
+}
+else
+{
+    ThatsTimeData = Environment.GetEnvironmentVariable("DataConnection");
+    Accounts = Environment.GetEnvironmentVariable("IdentityConnection");
+}
+
 builder.Services.AddDbContext<IdentityContext>(opts =>
-    opts.UseSqlServer(builder.Configuration["ConnectionStrings:IdentityConnection"]));
+    opts.UseSqlServer(ThatsTimeData));
 
 builder.Services.AddDbContext<DataContext>(opts =>
-    opts.UseSqlServer(builder.Configuration["ConnectionStrings:DataConnection"]));
+    opts.UseSqlServer(Accounts));
 
 //User account configs
 builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<IdentityContext>();

@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Security.Claims;
+using webapi.Models;
 
 namespace webapi.Controllers
 {
@@ -20,12 +21,14 @@ namespace webapi.Controllers
         private SignInManager<IdentityUser> SignInManager;
         private UserManager<IdentityUser> UserManager;
         private IConfiguration Configuration;
+        private DataContext DataContext;
 
-        public ApiAuthController(SignInManager<IdentityUser> signMgr, UserManager<IdentityUser> usrMgr,IConfiguration config)
+        public ApiAuthController(SignInManager<IdentityUser> signMgr, UserManager<IdentityUser> usrMgr,IConfiguration config, DataContext ctx)
         {
             SignInManager = signMgr;
             UserManager = usrMgr;
             Configuration = config;
+            DataContext = ctx;
         }
 
         [HttpPost("signin")]
@@ -74,6 +77,14 @@ namespace webapi.Controllers
 
             if (result.Succeeded)
             {
+                UserInfo newUser = new UserInfo()
+                {
+                    UserName = user.UserName
+                };
+
+                await DataContext.UserInfo.AddAsync(newUser);
+                await DataContext.SaveChangesAsync();
+
                 SecurityTokenDescriptor descriptor = new SecurityTokenDescriptor
                 {
                     Subject = new ClaimsIdentity(new Claim[]

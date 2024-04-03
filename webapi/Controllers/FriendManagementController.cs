@@ -10,7 +10,7 @@ namespace webapi.Controllers
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     [Route("api/friends")]
-    public class FriendManagementController : Controller
+    public class FriendManagementController : MyBaseController
     {
         DataContext DataContext;
 
@@ -30,24 +30,15 @@ namespace webapi.Controllers
                 if (mainUser == null)
                     return Ok(response);
 
-                List<long> friendListRaw = await DataContext.FriendsLists
+                List<string> friendList = await DataContext.FriendsLists
                     .Where(obj => obj.FirstUserId == mainUser.UserId || obj.SecondUserId == mainUser.UserId)
-                    .Select(obj => obj.FirstUserId == mainUser.UserId ? obj.FirstUserId : obj.SecondUserId).ToListAsync();
-                List<string> friendList = new List<string>();
-                foreach(var relation in friendListRaw)
-                {
-                    UserInfo friendName = await DataContext.UserInfo.SingleOrDefaultAsync(obj => obj.UserId == relation);
-                    if (friendName == null)
-                        continue;
-                    friendList.Append(friendName.UserName);
-                }
+                    .Select(obj => obj.FirstUserId == mainUser.UserId ? obj.FirstUserInfo.UserName : obj.SecondUserInfo.UserName).ToListAsync();
 
                 response.FriendList = friendList;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
-                return StatusCode(500, "Server error!");
+                return HandleException(ex);
             }
 
             response.Success = true;
@@ -78,8 +69,7 @@ namespace webapi.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
-                return StatusCode(500, "Server error!");
+                return HandleException(ex);
             }
 
             response.Success = true;
@@ -112,8 +102,7 @@ namespace webapi.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
-                return StatusCode(500, "Server Error!");
+                return HandleException(ex);
             }
 
             response.Success = true;
@@ -157,8 +146,7 @@ namespace webapi.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
-                return StatusCode(500, "Server Error!");
+                return HandleException(ex);
             }
 
             response.Success = true;
@@ -196,8 +184,7 @@ namespace webapi.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
-                return StatusCode(500, "Server Error!");
+                return HandleException(ex);
             }
 
             response.Success = true;
@@ -238,11 +225,6 @@ namespace webapi.Controllers
                 Console.WriteLine(ex);
                 return friendsInfo;
             }
-        }
-
-        private string getUserName()
-        {
-            return HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name).Value;
         }
 
         private class FriendsInfo

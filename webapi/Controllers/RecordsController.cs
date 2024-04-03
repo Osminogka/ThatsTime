@@ -11,7 +11,7 @@ namespace webapi.Controllers
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     [Route("api/records")]
-    public class RecordsController : ControllerBase
+    public class RecordsController : MyBaseController
     {
         public DataContext DataContext;
 
@@ -54,15 +54,9 @@ namespace webapi.Controllers
                 await DataContext.Records.AddAsync(record);
                 await DataContext.SaveChangesAsync();
             }
-            catch (DbUpdateException ex)
+            catch (Exception ex)
             {
-                Console.WriteLine(ex);
-                return StatusCode(500, "An error occurred while updating the database.");
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine(ex);
-                return StatusCode(500, "An unexpected error occurred.");
+                return HandleException(ex);
             }
 
             response.Success = true;
@@ -99,26 +93,11 @@ namespace webapi.Controllers
                 records = await DataContext.Records.Where(obj => certainRecord.IsGroup ? obj.RelatedGroupId == relatedObjectId : obj.RelatedUserId == relatedObjectId).ToListAsync();
                 response.Records = records;
             }
-            catch (ArgumentNullException ex)
+            catch (Exception ex)
             {
-                Console.WriteLine(ex);
-                return StatusCode(500, "An error occurred while processing the request.");
+                return HandleException(ex);
             }
-            catch (InvalidOperationException ex)
-            {
-                Console.WriteLine(ex);
-                return StatusCode(500, "More than one element satisfies the condition in SingleOrDefault.");
-            }
-            catch (DbUpdateException ex)
-            {
-                Console.WriteLine(ex);
-                return StatusCode(500, "An error occurred while updating the database.");
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine(ex);
-                return StatusCode(500, "An unexpected error occurred.");
-            }
+
             response.Success = true;
             response.Message = "Got all records";
             return Ok(response);
@@ -129,19 +108,50 @@ namespace webapi.Controllers
         {
             RecordResponse response = new RecordResponse();
 
+            try
+            {
+
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
+
             return Ok(response);
         }
 
         [HttpGet("group")]
         public async Task<IActionResult> getRecordsWithGroupAsync()
         {
-            return Ok();
+            RecordResponse response = new RecordResponse();
+
+            try
+            {
+
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
+
+            return Ok(response);
         }
 
         [HttpGet("recent")]
         public async Task<IActionResult> getRecentRecordsAsync()
         {
-            return Ok();
+            RecordResponse response = new RecordResponse();
+
+            try
+            {
+
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
+
+            return Ok(response);
         }
 
         private async Task<bool> canUserMakeAction(long relatedObjectId, long mainUserId, bool isGroup)

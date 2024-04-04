@@ -90,9 +90,14 @@ const showUserNav = ref(false);
         </custom-hide-show>
         <Transition name="navlists">
           <div v-if="showInterface.showFriendList" class="main-nav-div">
-            <div v-for="(friend ,index) in friendList" :key="index" class="sidebar-entity-box">
-              <p style="display: inline;">{{ friend.name }}</p>
-              <router-link :to="{ name: 'Friend', params: { nickname: friend.name } }" class="button-nav custom-button" @click="hideSideBar"/>
+            <div v-if="friendList.length == 0">
+              <p class="no-info-p">No friends</p>
+            </div>
+            <div v-else>
+              <div v-for="(friend ,index) in friendList" :key="index" class="sidebar-entity-box">
+                <p style="display: inline;">{{ friend.name }}</p>
+                <router-link :to="{ name: 'Friend', params: { nickname: friend.name } }" class="button-nav custom-button" @click="hideSideBar"/>
+              </div>
             </div>
           </div>
         </Transition>
@@ -102,12 +107,29 @@ const showUserNav = ref(false);
         </custom-hide-show>
         <Transition name="navlists">
           <div v-if="showInterface.showGroupList" class="main-nav-div">
-            <div v-for="(group ,index) in groupList" :key="index" class="sidebar-entity-box">
-              <p style="display: inline;">{{ group.name }}</p>
-              <router-link :to="{ name: 'Group', params: { groupname: group.name } }" class="button-nav custom-button" @click="hideSideBar"/>
+            <div v-if="groupList.length == 0">
+              <p class="no-info-p">No groups</p>
+            </div>
+            <div v-else>
+              <div v-for="(group ,index) in groupList" :key="index" class="sidebar-entity-box">
+                <p style="display: inline;">{{ group.name }}</p>
+                <router-link :to="{ name: 'Group', params: { groupname: group.name } }" class="button-nav custom-button" @click="hideSideBar"/>
+              </div>
             </div>
           </div>
         </Transition>
       </div>
   </Transition>
 </template>
+
+<style scoped>
+
+.no-info-p{
+  margin: 0;
+  padding: 0;
+  font-size: 1.5em;
+  color: black;
+  text-align: center;
+}
+
+</style>

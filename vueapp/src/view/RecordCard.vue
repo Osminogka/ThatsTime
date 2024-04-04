@@ -9,6 +9,8 @@ const props = defineProps({
 const isTimeCorrent = () =>{
     return !(props.record.hour == 0 && props.record.minute == 0);
 };
+
+const importanceList = ['Low', 'Medium', 'High'];
 </script>
 
 <template>
@@ -18,10 +20,13 @@ const isTimeCorrent = () =>{
         <span>Date: </span> {{ record.selectedDay }} {{ monthNames[record.selectedMonth - 1] }} {{ record.selectedYear }}
     </div>
     <div class="info-item">
-        <span>Creator:</span> {{ record.Creator }}
+        <span>Creator:</span> {{ record.creator }}
     </div>
     <div class="info-item">
         <span>Created for:</span> {{ record.selectedObject }}
+    </div>
+    <div class="info-item">
+        <span>importance:</span> {{ importanceList[record.importance] }}
     </div>
     <div v-if="isTimeCorrent()" class="info-item">
         <span>Time:</span> {{ record.hour }}:{{ record.minute }}

@@ -1,18 +1,36 @@
 import { reactive } from "vue";
 import { friendList, groupList, user } from "./userInfo";
-import { todayDate } from "./month";
+import { shortMonthNames, todayDate } from "./month";
 
 var records = reactive([]);
 let recordOnServer = [];
 
-export const getRecords = (date) => {
+export const getRecordsFromLocal = (date) => {
     let startDay = Math.min(date, todayDate.getDate());
     let endDay = Math.max(date, todayDate.getDate());
     return records.filter(record => record.selectedMonth === todayDate.getMonth() + 1 && record.selectedYear === todayDate.getFullYear() 
         && (todayDate.getDate() == date? record.selectedDay === date : record.selectedDay > startDay && record.selectedDay < endDay));
 }
 
+export const getRecords = async (date) => {
+    let searchParams = new URLSearchParams({
+        ...date
+    });
+    let response = await fetch(`/api/records/recent?${searchParams}`, {
+        method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('jwtToken').replace(/"/g, ''),
+                'Content-Type': 'application/json'
+            }
+    });
+    if(response.ok) {
+        let responseData = await response.json();
+        records = responseData.records;
+    }
+}
+
 export const getCertainRecord = async (CertainRecord) =>  {
+    CertainRecord.month = shortMonthNames.indexOf(CertainRecord.month) + 1;
     let searchParams = new URLSearchParams({
         ...CertainRecord
     });
@@ -20,14 +38,14 @@ export const getCertainRecord = async (CertainRecord) =>  {
         {
             method: 'GET',
             headers: {
-                'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
+                'Authorization': 'Bearer ' + localStorage.getItem('jwtToken').replace(/"/g, ''),
                 'Content-Type': 'application/json'
             }
         }
     );
     if(response.ok) {
-        let responseData = response.json();
-        return {...responseData};
+        let responseData = await response.json();
+        return responseData;
     }
     else
         return {success: false, message: 'Server error'};
@@ -64,38 +82,26 @@ export const getRecordsWithGroup = (groupName) => {
         };
 }
 
-export const getRecordsFromServer = (recordsInfo) =>{
-    if(recordsInfo.all)
-        records = recordOnServer;
-    if(recordsInfo.isGroup)
-        records = recordOnServer.filter(record => record.yourSelf === false && record.showGroupList === true && record.selectedObject === recordsInfo.name);
-    if(recordsInfo.isFriend)
-        records = recordOnServer.filter(record => record.yourSelf === false && record.showGroupList === false && record.selectedObject === recordsInfo.name);
-}
-
 export const postRecord = async (record) => {
     let errorList = isRecordValid(record);
     if(!errorList.length === 0) {
         return {success: false, message: 'Invalid record', records: errorList};
     }
 
-    const recordCreationFromFrontEnd = reactive({
+    const recordCreationFromFrontEnd = {
         selectedYear: record.selectedYear,
-        selectedMonth: record.selectedMonth,
+        selectedMonth: record.selectedMonth + 1,
         selectedDay: record.selectedDay,
         showGroupList: record.showGroupList,
         yourSelf: record.yourSelf,
-        selectedObject: record.selectedObject,
+        Creator: user.value.name,
+        selectedObject: record.yourSelf ? user.value.name : record.selectedObject,
         importance: record.importance,
         hour: record.hour,
         minute: record.minute,
         recordName: record.recordName,
         recordContent: record.recordContent
-    });
-
-    if(record.yourSelf)
-        record.selectedObject = user.value.name;
-    record.selectedMonth += 1;
+    };
     let response = await fetch('/api/records/newrecord',
         {
             method: 'POST',
@@ -106,12 +112,11 @@ export const postRecord = async (record) => {
             body: JSON.stringify(recordCreationFromFrontEnd)
         });
     if(response.ok) {
-        let responseData = response.json();
-        if(responseData.success)
-            return {...responseData};
+        let responseData = await response.json();
+        return responseData;
     }
     else
-        return {success: false, message: 'Server error'};
+        return {success: false, message: 'Server error', records: errorList};
 }
 
 function isRecordValid (record) {

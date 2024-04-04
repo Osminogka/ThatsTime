@@ -2,7 +2,7 @@
 import RecordCard from '@/view/RecordCard.vue'
 import CustomHideShow from '@/view/CustomHideShow.vue';
 import DateSelector from '@/view/DateSelector.vue';
-import { getRecords, getCertainRecord,getRecordsFromServer } from '../core/userRecords'
+import { getRecords, getCertainRecord, getRecordsFromLocal } from '../core/userRecords'
 import { todayDate } from '@/core/month';
 
 import { ref, onBeforeMount, defineProps, computed } from 'vue';
@@ -17,28 +17,13 @@ const props = defineProps({
     all: Boolean
 })
 
-onBeforeMount(() => {
-    if(props.all)
-        getRecordsFromServer({ 
-            all: true,
-            isGroup: false,
-            isFriend: false, 
-        });
-    else if(props.group)
-        getRecordsFromServer({
-            all: false,
-            isGroup: true,
-            isFriend: false,
-            name: props.group
-        });
-    else
-        getRecordsFromServer({
-            all: false,
-            isGroup: false,
-            isFriend: true,
-            name: props.friend
-        });
-    records.value.find(record => record.showType == 0).records = getRecords(todayDate.getDate());
+onBeforeMount(async () => {
+    await getRecords({
+        year: todayDate.getFullYear(),
+        month: todayDate.getMonth() + 1,
+        day: todayDate.getDate()
+    });
+    records.value.find(record => record.showType == 0).records = getRecordsFromLocal(todayDate.getDate());
 });
 
 const records = ref([
@@ -70,7 +55,7 @@ function getRecordsLocal(date){
     records.value.find(record => record.showType == date).isHidden = !records.value.find(record => record.showType == date).isHidden;
     if(records.value.find(record => record.showType == date).isGotBefore) 
         return;
-    records.value.find(record => record.showType == date).records = getRecords(todayDate.getDate() + parseInt(date));
+    records.value.find(record => record.showType == date).records = getRecordsFromLocal(todayDate.getDate() + parseInt(date));
     records.value.find(record => record.showType == date).isGotBefore = true;
 }
 
@@ -81,6 +66,8 @@ function getVisibility(showType){
 const selectedDay = ref(null);
 const selectedMonth = ref(null);
 const selectedYear = ref(null);
+
+const error= ref("");
 
 async function searchRecord(){
     let certainRecords = await getCertainRecord({
@@ -98,10 +85,10 @@ async function searchRecord(){
     }
 
     if(!certainRecords.success){
-        alert('An error occured while searching records');
+        error.value = "An error occured while searching records!";
         return;
     }
-    
+    error.value = "";
     records.value.find(record => record.showType == '-1').records = certainRecords.records;
 }
 
@@ -157,9 +144,10 @@ const certain = computed(() => records.value.find(record => record.showType == -
             <date-selector v-model="selectedYear" type="year"/>
             <button @click="searchRecord" class="search-button custom-button"></button>
         </div> 
+        <div style="text-align: center;" v-if="certain.records.length > 0">{{ certain.records.length }} records were found</div>
         <div class="container-week">
+            <div v-if="error.value">{{ error.value }}</div>
             <div v-if="certain.records.length == 0">No records</div>
-            <div v-else>{{ certain.records.length }} records were found</div>
             <record-card v-for="(record, index) in certain.records" :record="record" :key="index"/>
         </div>
     </div>

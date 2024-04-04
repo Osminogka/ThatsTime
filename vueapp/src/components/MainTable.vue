@@ -22,7 +22,7 @@ async function submitForm() {
     let result = await postRecord({...toRaw(recordCreationForm)});
     for(let key in errorList) 
         errorList[key].error = false;
-    if(!result.success && result.message == 'Invalid record'){
+    if(!result.success && result.message != 'Invalid record'){
         for(let key of result.records) 
             errorList[key].error = true;
         recordCreationStatus.showMessage = true;
@@ -73,7 +73,7 @@ const recordCreationForm = reactive({
     selectedDay: 1,
     showGroupList: false,
     yourSelf: false,
-    selectedObject: friendList.value[0].name,
+    selectedObject: "",
     importance: 0,
     enterTime: false,
     hour: 0,
@@ -103,6 +103,7 @@ const errorList = reactive({
     selectedObject: {
         error: false,
         message: 'Invalid person selected',
+        default: ''
     },
     hour: {
         error: false,
@@ -150,12 +151,15 @@ function selectObjectType(option) {
     if(option === 'Group'){
         recordCreationForm.showGroupList = !recordCreationForm.showGroupList;
         recordCreationForm.yourSelf = false;
-        recordCreationForm.selectedObject = recordCreationForm.showGroupList? groupList.value[0].name : friendList.value[0].name;
+        recordCreationForm.selectedObject = recordCreationForm.showGroupList? 
+            groupList.value.length > 0 ? groupList.value[0].name : "" :  
+            friendList.value.length > 0 ? friendList.value[0].name : "";
     }
     else{
         recordCreationForm.yourSelf = !recordCreationForm.yourSelf;
         recordCreationForm.showGroupList = false;
-        recordCreationForm.selectedObject = recordCreationForm.yourSelf? user.value.name : friendList.value[0].name;
+        recordCreationForm.selectedObject = recordCreationForm.yourSelf? user.value.name : 
+            friendList.value.length == 0 ? "" : friendList.value[0].name;
     }
 }
 
@@ -273,16 +277,23 @@ const weeks = computed(() => {
                 <div v-if="!recordCreationForm.yourSelf" class="aselect" :data-value="recordCreationForm.selectedObject" :data-list="recordCreationForm.showGroupList? groupList : friendList">
                     <div :class="{'error-input': errorList.selectedObject.error }" class="selector" @click="toggleObjectList()">
                         <div class="label">
-                            <span>{{ recordCreationForm.selectedObject }}</span>
+                            <span>{{ recordCreationForm.selectedObject == "" ?  
+                                recordCreationForm.showGroupList? "Choose group" : "Choose friend" 
+                                : recordCreationForm.selectedObject }}</span>
                         </div>
                         <div class="arrow-select" :class="{ expanded : recordCreationForm.showObjectList }"></div>
                         <Transition name="fadey">
                             <div v-if="recordCreationForm.showObjectList">
                                 <ul>
-                                    <li :class="{ current : item === value }" v-for="(item, index) in recordCreationForm.showGroupList? groupList : friendList" 
-                                    @click="selectObjectList(item.name)" :key="index">
-                                        {{ item.name }}
-                                    </li>
+                                    <div v-if="recordCreationForm.showGroupList? groupList.length == 0 : friendList.length == 0">
+                                        <p class="no-info-p">No {{ recordCreationForm.showGroupList? 'groups' : 'friends' }} found</p>
+                                    </div>
+                                    <div v-else>
+                                        <li :class="{ current : item === value }" v-for="(item, index) in recordCreationForm.showGroupList? groupList : friendList" 
+                                        @click="selectObjectList(item.name)" :key="index">
+                                            {{ item.name }}
+                                        </li>
+                                    </div>
                                 </ul>
                             </div>
                         </Transition>

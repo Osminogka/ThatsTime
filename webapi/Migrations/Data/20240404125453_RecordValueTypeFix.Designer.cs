@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using webapi.Models;
 
@@ -11,9 +12,11 @@ using webapi.Models;
 namespace webapi.Migrations.Data
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240404125453_RecordValueTypeFix")]
+    partial class RecordValueTypeFix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -182,8 +185,6 @@ namespace webapi.Migrations.Data
 
                     b.HasKey("RecordId");
 
-                    b.HasIndex("CreatorId");
-
                     b.HasIndex("RelatedGroupId");
 
                     b.HasIndex("RelatedUserId");
@@ -297,12 +298,6 @@ namespace webapi.Migrations.Data
 
             modelBuilder.Entity("webapi.Models.Record", b =>
                 {
-                    b.HasOne("webapi.Models.UserInfo", "CreatorUser")
-                        .WithMany("RecordsCreators")
-                        .HasForeignKey("CreatorId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("webapi.Models.GroupsCreatorsList", "RelatedGroup")
                         .WithMany("RecordsForThisGroup")
                         .HasForeignKey("RelatedGroupId")
@@ -313,8 +308,6 @@ namespace webapi.Migrations.Data
                         .HasForeignKey("RelatedUserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("CreatorUser");
 
                     b.Navigation("RelatedGroup");
 
@@ -339,8 +332,6 @@ namespace webapi.Migrations.Data
                     b.Navigation("GroupInvites");
 
                     b.Navigation("GroupMembers");
-
-                    b.Navigation("RecordsCreators");
 
                     b.Navigation("RecordsForThisUser");
 

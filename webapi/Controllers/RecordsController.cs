@@ -32,22 +32,25 @@ namespace webapi.Controllers
             {
                 GroupsCreatorsList? relatedGroup = null;
                 UserInfo? relatedUser = null;
-                if (recordFromFrontEnd.showGroupList)
-                    relatedGroup = await DataContext.GroupsCreatorsLists.SingleOrDefaultAsync(obj => obj.GroupName == recordFromFrontEnd.selectedObject);
-                else
-                    relatedUser = await DataContext.UserInfo.SingleOrDefaultAsync(obj => obj.UserName == recordFromFrontEnd.selectedObject);
+                long selectedObjectId = 0;
+                if (!recordFromFrontEnd.yourSelf)
+                {
+                    if (recordFromFrontEnd.showGroupList)
+                        relatedGroup = await DataContext.GroupsCreatorsLists.SingleOrDefaultAsync(obj => obj.GroupName == recordFromFrontEnd.selectedObject);
+                    else
+                        relatedUser = await DataContext.UserInfo.SingleOrDefaultAsync(obj => obj.UserName == recordFromFrontEnd.selectedObject);
 
-                if(recordFromFrontEnd.showGroupList ? relatedGroup == null : relatedUser == null)
-                    return Ok(response);
-
-                long selectedObjectId = recordFromFrontEnd.showGroupList ? relatedGroup.GroupId : relatedUser.UserId;
+                    if (recordFromFrontEnd.showGroupList ? relatedGroup == null : relatedUser == null)
+                        return Ok(response);
+                    selectedObjectId = recordFromFrontEnd.showGroupList ? relatedGroup.GroupId : relatedUser.UserId;
+                }
 
                 UserInfo? mainUser = await DataContext.UserInfo.SingleOrDefaultAsync(obj => obj.UserName == getUserName());
 
                 if (mainUser == null)
                     return Ok(response);
 
-                if (!(await canUserMakeAction(selectedObjectId, mainUser.UserId, recordFromFrontEnd.showGroupList)))
+                if (!recordFromFrontEnd.yourSelf && !(await canUserMakeAction(selectedObjectId, mainUser.UserId, recordFromFrontEnd.showGroupList)))
                     return Ok(response);
 
                 Record record = new Record(recordFromFrontEnd, selectedObjectId, mainUser.UserId);
@@ -67,31 +70,42 @@ namespace webapi.Controllers
         }
 
         [HttpGet("certain")]
-        public async Task<IActionResult> getCertainRecordAsync([FromBody] CertainRecord certainRecord)
+        public async Task<IActionResult> getCertainRecordAsync([FromQuery] CertainRecord certainRecord)
         {
             RecordResponse response = new RecordResponse();
+            List<Record> recordsRaw = new List<Record>();
+            DateTime date = new DateTime(certainRecord.Year, certainRecord.Month, certainRecord.Day);
             try
-            {
-                List<Record> records = new List<Record>();
-                GroupsCreatorsList? relatedGroup = null;
-                UserInfo? relatedUser = null;
+            { 
+                UserInfo? mainUser = await DataContext.UserInfo.SingleOrDefaultAsync(obj => obj.UserName == getUserName()); 
+                if (mainUser == null)
+                    return Ok(response);
                 if (certainRecord.ForYourSelf)
                 {
-
-                    records = await DataContext.Records.Where(obj => obj.CreatorId == 1).ToListAsync();
+                    recordsRaw.AddRange(await DataContext.Records.Where(obj => (obj.RelatedUserId == mainUser.UserId || obj.CreatorId == mainUser.UserId) && obj.DateTime.Date == date.Date).ToListAsync());
+                    List<GroupMemberList> userGroups = await DataContext.GroupMemberLists.Include(groupmember => groupmember.RelatedGroup.RecordsForThisGroup).Where(obj => obj.MemberId == mainUser.UserId).ToListAsync();
+                    foreach(GroupMemberList groupMember in userGroups)
+                        recordsRaw.AddRange(groupMember.RelatedGroup.RecordsForThisGroup.Where(obj => obj.DateTime. Date == date.Date));
                 }
-                if (certainRecord.IsGroup)
-                    relatedGroup = await DataContext.GroupsCreatorsLists.SingleOrDefaultAsync(obj => obj.GroupName == certainRecord.RelatedObject);
                 else
-                    relatedUser = await DataContext.UserInfo.SingleOrDefaultAsync(obj => obj.UserName == certainRecord.RelatedObject);
+                {
+                    GroupMemberList? relatedGroup = null;
+                    UserInfo? relatedUser = null;
+                    if (certainRecord.IsGroup)
+                        relatedGroup = await DataContext.GroupMemberLists.SingleOrDefaultAsync(obj => obj.MemberId == mainUser.UserId && obj.RelatedGroup.GroupName == certainRecord.RelatedObject);
+                    else
+                        relatedUser = await DataContext.UserInfo.SingleOrDefaultAsync(obj => obj.UserName == certainRecord.RelatedObject);
 
-                if (certainRecord.IsGroup ? relatedGroup == null : relatedUser == null)
-                    return Ok(response);
+                    if (certainRecord.IsGroup ? relatedGroup == null : relatedUser == null)
+                        return Ok(response);
 
-                long relatedObjectId = certainRecord.IsGroup ? relatedGroup.GroupId : relatedUser.UserId;
+                    long relatedObjectId = certainRecord.IsGroup ? relatedGroup.GroupId : relatedUser.UserId;
 
-                records = await DataContext.Records.Where(obj => certainRecord.IsGroup ? obj.RelatedGroupId == relatedObjectId : obj.RelatedUserId == relatedObjectId).ToListAsync();
-                response.Records = records;
+                    recordsRaw = await DataContext.Records
+                        .Where(obj => (certainRecord.IsGroup ? obj.RelatedGroupId == relatedObjectId :
+                            ((obj.RelatedUserId == relatedObjectId && obj.CreatorId == mainUser.UserId) || (obj.RelatedUserId == mainUser.UserId && obj.RelatedUserId == relatedObjectId))) && obj.DateTime.Date == date.Date)
+                        .ToListAsync();
+                }
             }
             catch (Exception ex)
             {
@@ -100,6 +114,7 @@ namespace webapi.Controllers
 
             response.Success = true;
             response.Message = "Got all records";
+            response.Records.AddRange(RecordFromFrontEnd.transformToFrontendRecords(recordsRaw));
             return Ok(response);
         }
 
@@ -138,19 +153,34 @@ namespace webapi.Controllers
         }
 
         [HttpGet("recent")]
-        public async Task<IActionResult> getRecentRecordsAsync()
+        public async Task<IActionResult> getRecentRecordsAsync([FromQuery]int year, [FromQuery] int month, [FromQuery] int day)
         {
             RecordResponse response = new RecordResponse();
-
+            List<Record> recordsRaw = new List<Record>();
+            DateTime sevenDaysAgo = new DateTime(year, month, day).AddDays(-7);
+            DateTime sevenDaysLater = new DateTime(year, month, day).AddDays(7);
             try
             {
+                UserInfo? mainUser = await DataContext.UserInfo.SingleOrDefaultAsync(obj => obj.UserName == getUserName());
+                if (mainUser == null)
+                    return Ok(response);
 
+                recordsRaw.AddRange(
+                    await DataContext.Records.Where(obj => (obj.RelatedUserId == mainUser.UserId || obj.CreatorId == mainUser.UserId) && obj.DateTime >= sevenDaysAgo && obj.DateTime <= sevenDaysLater)
+                    .ToListAsync()
+                );
+
+                foreach(GroupMemberList group in mainUser.GroupMembers ?? new List<GroupMemberList>())
+                    recordsRaw.AddRange(await DataContext.Records.Where(obj => obj.RelatedGroupId == group.GroupId && obj.DateTime >= sevenDaysAgo && obj.DateTime <= sevenDaysLater).ToListAsync());
             }
             catch (Exception ex)
             {
                 return HandleException(ex);
             }
 
+            response.Success = true;
+            response.Message = "Got all records";
+            response.Records.AddRange(RecordFromFrontEnd.transformToFrontendRecords(recordsRaw));
             return Ok(response);
         }
 
@@ -187,7 +217,7 @@ namespace webapi.Controllers
 
         public string Message { get; set; } = "Request has failed";
 
-        public List<Record> Records { get; set; } = new List<Record>();
+        public List<RecordFromFrontEnd> Records { get; set; } = new List<RecordFromFrontEnd>();
     }
 
     public class RecordFromFrontEnd
@@ -197,12 +227,40 @@ namespace webapi.Controllers
         public int selectedDay { get; set; }
         public bool showGroupList { get; set; }
         public bool yourSelf { get; set; }
+        public string Creator { get; set; }
         public string selectedObject { get; set; }
         public int importance { get; set; }
         public int hour { get; set; }
         public int minute { get; set; }
         public string recordName { get; set; }
         public string recordContent { get; set; }
+        
+        public static List<RecordFromFrontEnd> transformToFrontendRecords(List<Record> recordsRaw)
+        {
+            List<RecordFromFrontEnd> recordFromFrontEnds = new List<RecordFromFrontEnd>();
+
+            foreach(Record record in recordsRaw)
+            {
+                RecordFromFrontEnd tempRec = new RecordFromFrontEnd()
+                {
+                    selectedYear = record.DateTime.Year,
+                    selectedMonth = record.DateTime.Month,
+                    selectedDay = record.DateTime.Day,
+                    showGroupList = record.IsRecordForGroup,
+                    yourSelf = record.IsRecordForYourSelf,
+                    selectedObject = record.IsRecordForGroup ? record.RelatedGroup.GroupName : record.RelatedUser.UserName,
+                    Creator = record.CreatorUser.UserName,
+                    importance = record.Importance,
+                    hour = record.DateTime.Hour,
+                    minute = record.DateTime.Minute,
+                    recordName = record.RecordName,
+                    recordContent = record.RecordContent
+                };
+                recordFromFrontEnds.Add(tempRec);
+            }
+
+            return recordFromFrontEnds;
+        }
 
         public bool isValid()
         {

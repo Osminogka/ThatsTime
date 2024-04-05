@@ -21,7 +21,7 @@
   justify-content: center;
   position: fixed; /* Added */
   top: 50%; /* Added */
-  left: 50%; /* Added */
+  left: auto; /* Added */
   transform: translate(-50%, -50%);
 }
 

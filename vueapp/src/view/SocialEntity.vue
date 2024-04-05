@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps } from 'vue';
+import { defineProps, defineEmits } from 'vue';
 
 import { sendFriendRequest, sendGroupInvite } from '@/core/addFriend';
 
@@ -8,8 +8,13 @@ const props = defineProps({
     type: String
 });
 
-function friendRequest(){
-    sendFriendRequest(props.name);
+const emits = defineEmits(['friend-request', 'group-invite']);
+
+async function friendRequest(){
+    let response = await sendFriendRequest(props.name);
+    if(response.success){
+        emits('friend-request',props.name);
+    }
 }
 
 function inviteGroup(){

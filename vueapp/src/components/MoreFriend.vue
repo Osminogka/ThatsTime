@@ -1,5 +1,4 @@
 <script setup>
-import('../assets/css/loadingAnimation.css');
 
 import { ref, reactive, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';

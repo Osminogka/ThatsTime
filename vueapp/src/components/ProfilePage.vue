@@ -6,7 +6,13 @@ import { friendList, friendRequests, groupInvites, groupList, user} from '../cor
 import { getMyFriendRequests, getMyGroupInvites} from '../core/userInfo';
 
 onBeforeMount(async () => {
-  await getMyFriendRequests();
+  let friendInviteResponse = await getMyFriendRequests();
+  if(friendInviteResponse.success)
+    friendRequests.value = friendInviteResponse.friendList;
+  else{
+    friendRequests.value = [];
+    console.log("Error getting friend invites");
+  }
   await getMyGroupInvites();
 });
 

@@ -13,9 +13,6 @@ const groupListOnServer = ref([
     
 ]);
   
-const friendRequestsOnServer = ref([
-    
-]);
   
 const groupInvitesOnServer = ref([
     
@@ -52,10 +49,19 @@ export const getMyGroupList = async () => {
 }
 
 export const getMyFriendRequests = async () => {
-    if(friendRequests.value.length === 0) {
-        friendRequests.value = friendRequestsOnServer.value;
+    let response = await fetch("/api/friends/getrequests",{
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('jwtToken').replace(/"/g, ''),
+            'Content-Type': 'application/json'
+        }
+    });
+    if(response.ok){
+        let responseData = await response.json();
+        return responseData;
     }
-    return friendRequests.value;
+    else
+        return {success: false, message: 'Server error'};
 }
 
 export const getMyGroupInvites = async () => {

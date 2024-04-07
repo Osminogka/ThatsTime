@@ -1,6 +1,3 @@
-<script setup>
-</script>
-
 <template>
     <div class="loading-animation">
         <div class="circles-to-rhombuses-spinner">
@@ -19,9 +16,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  position: fixed; /* Added */
-  top: 50%; /* Added */
-  left: auto; /* Added */
+  position: fixed; 
+  top: 50%;
+  left: 50%;
   transform: translate(-50%, -50%);
 }
 

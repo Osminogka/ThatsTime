@@ -82,7 +82,10 @@ namespace webapi.Controllers
                     return Ok(response);
                 if (certainRecord.ForYourSelf)
                 {
-                    recordsRaw.AddRange(await DataContext.Records.Where(obj => (obj.RelatedUserId == mainUser.UserId || obj.CreatorId == mainUser.UserId) && obj.DateTime.Date == date.Date).ToListAsync());
+                    recordsRaw.AddRange(await DataContext.Records
+                        .Include(obj => obj.RelatedUser)
+                        .Include(obj => obj.CreatorUser)
+                        .Where(obj => (obj.RelatedUserId == mainUser.UserId || obj.CreatorId == mainUser.UserId) && obj.DateTime.Date == date.Date).ToListAsync());
                     List<GroupMemberList> userGroups = await DataContext.GroupMemberLists.Include(groupmember => groupmember.RelatedGroup.RecordsForThisGroup).Where(obj => obj.MemberId == mainUser.UserId).ToListAsync();
                     foreach(GroupMemberList groupMember in userGroups)
                         recordsRaw.AddRange(groupMember.RelatedGroup.RecordsForThisGroup.Where(obj => obj.DateTime. Date == date.Date));
@@ -102,6 +105,8 @@ namespace webapi.Controllers
                     long relatedObjectId = certainRecord.IsGroup ? relatedGroup.GroupId : relatedUser.UserId;
 
                     recordsRaw = await DataContext.Records
+                        .Include(obj => obj.RelatedUser)
+                        .Include(obj => obj.CreatorUser)
                         .Where(obj => (certainRecord.IsGroup ? obj.RelatedGroupId == relatedObjectId :
                             ((obj.RelatedUserId == relatedObjectId && obj.CreatorId == mainUser.UserId) || (obj.RelatedUserId == mainUser.UserId && obj.RelatedUserId == relatedObjectId))) && obj.DateTime.Date == date.Date)
                         .ToListAsync();
@@ -166,12 +171,15 @@ namespace webapi.Controllers
                     return Ok(response);
 
                 recordsRaw.AddRange(
-                    await DataContext.Records.Where(obj => (obj.RelatedUserId == mainUser.UserId || obj.CreatorId == mainUser.UserId) && obj.DateTime >= sevenDaysAgo && obj.DateTime <= sevenDaysLater)
+                    await DataContext.Records
+                    .Include(obj => obj.RelatedUser)
+                    .Include(obj => obj.CreatorUser)
+                    .Where(obj => (obj.RelatedUserId == mainUser.UserId || obj.CreatorId == mainUser.UserId) && obj.DateTime >= sevenDaysAgo && obj.DateTime <= sevenDaysLater)
                     .ToListAsync()
                 );
 
                 foreach(GroupMemberList group in mainUser.GroupMembers ?? new List<GroupMemberList>())
-                    recordsRaw.AddRange(await DataContext.Records.Where(obj => obj.RelatedGroupId == group.GroupId && obj.DateTime >= sevenDaysAgo && obj.DateTime <= sevenDaysLater).ToListAsync());
+                    recordsRaw.AddRange(await DataContext.Records.Include(obj => obj.RelatedGroup).Where(obj => obj.RelatedGroupId == group.GroupId && obj.DateTime >= sevenDaysAgo && obj.DateTime <= sevenDaysLater).ToListAsync());
             }
             catch (Exception ex)
             {

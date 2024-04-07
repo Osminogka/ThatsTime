@@ -26,7 +26,9 @@ export const getRecords = async (date) => {
     if(response.ok) {
         let responseData = await response.json();
         records = responseData.records;
+        return true;
     }
+    return false;
 }
 
 export const getCertainRecord = async (CertainRecord) =>  {

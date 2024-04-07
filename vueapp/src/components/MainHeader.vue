@@ -85,7 +85,7 @@ const showUserNav = ref(false);
     <Transition name="sidebar">
       <div ref="scrollable" id="sidebar" v-show="showInterface.showSideBar" class="sidenav" v-on-click-outside="hideSideBar">
         <router-link :to="{ name: 'AddFriend', query: { page: 0 } }" class="add-button add-friend-button custom-button" @click="hideSideBar"></router-link>
-        <custom-hide-show :showInterface="showInterface.showFriendList" @showList="showList" :showType="'showFriendList'">
+        <custom-hide-show :list="friendList" :showInterface="showInterface.showFriendList" @showList="showList" :showType="'showFriendList'">
           Friends
         </custom-hide-show>
         <Transition name="navlists">
@@ -95,14 +95,14 @@ const showUserNav = ref(false);
             </div>
             <div v-else>
               <div v-for="(friend ,index) in friendList" :key="index" class="sidebar-entity-box">
-                <p style="display: inline;">{{ friend.name }}</p>
-                <router-link :to="{ name: 'Friend', params: { nickname: friend.name } }" class="button-nav custom-button" @click="hideSideBar"/>
+                <p style="display: inline;">{{ friend }}</p>
+                <router-link :to="{ name: 'Friend', params: { nickname: friend } }" class="button-nav custom-button" @click="hideSideBar"/>
               </div>
             </div>
           </div>
         </Transition>
 
-        <custom-hide-show :showInterface="showInterface.showGroupList" @showList="showList" :showType="'showGroupList'">
+        <custom-hide-show :list="groupList" :showInterface="showInterface.showGroupList" @showList="showList" :showType="'showGroupList'">
           Groups
         </custom-hide-show>
         <Transition name="navlists">
@@ -112,8 +112,8 @@ const showUserNav = ref(false);
             </div>
             <div v-else>
               <div v-for="(group ,index) in groupList" :key="index" class="sidebar-entity-box">
-                <p style="display: inline;">{{ group.name }}</p>
-                <router-link :to="{ name: 'Group', params: { groupname: group.name } }" class="button-nav custom-button" @click="hideSideBar"/>
+                <p style="display: inline;">{{ group }}</p>
+                <router-link :to="{ name: 'Group', params: { groupname: group } }" class="button-nav custom-button" @click="hideSideBar"/>
               </div>
             </div>
           </div>

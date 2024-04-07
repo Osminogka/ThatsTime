@@ -37,7 +37,6 @@
     font-size: 1.2em;
     padding-right: 10px;
     max-height: 250px;
-    overflow-y: auto;
     margin-right: 50px;
 }
 
@@ -48,7 +47,7 @@
     align-items: center;
     padding: 1em;
     border-bottom: 1px solid #e0e0e0;
-    width: 100%;
+    width: 90%;
 }
 
 .delete-button{
@@ -66,4 +65,10 @@
     background-size:contain;
     background-repeat: no-repeat;
     border: none;
+}
+
+@media screen and (max-width: 600px){
+    .user-info-list{
+        width: 100%;
+    }
 }

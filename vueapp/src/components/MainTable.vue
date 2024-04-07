@@ -152,14 +152,14 @@ function selectObjectType(option) {
         recordCreationForm.showGroupList = !recordCreationForm.showGroupList;
         recordCreationForm.yourSelf = false;
         recordCreationForm.selectedObject = recordCreationForm.showGroupList? 
-            groupList.value.length > 0 ? groupList.value[0].name : "" :  
-            friendList.value.length > 0 ? friendList.value[0].name : "";
+            groupList.value.length > 0 ? groupList.value[0] : "" :  
+            friendList.value.length > 0 ? friendList.value[0]: "";
     }
     else{
         recordCreationForm.yourSelf = !recordCreationForm.yourSelf;
         recordCreationForm.showGroupList = false;
         recordCreationForm.selectedObject = recordCreationForm.yourSelf? user.value.name : 
-            friendList.value.length == 0 ? "" : friendList.value[0].name;
+            friendList.value.length == 0 ? "" : friendList.value[0];
     }
 }
 
@@ -290,8 +290,8 @@ const weeks = computed(() => {
                                     </div>
                                     <div v-else>
                                         <li :class="{ current : item === value }" v-for="(item, index) in recordCreationForm.showGroupList? groupList : friendList" 
-                                        @click="selectObjectList(item.name)" :key="index">
-                                            {{ item.name }}
+                                        @click="selectObjectList(item)" :key="index">
+                                            {{ item }}
                                         </li>
                                     </div>
                                 </ul>

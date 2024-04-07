@@ -1,6 +1,8 @@
 <script setup>
 import RecordCard from '@/view/RecordCard.vue'
 import CustomHideShow from '@/view/CustomHideShow.vue';
+import LoadingAnimation from '@/view/LoadingAnimation.vue';
+
 import DateSelector from '@/view/DateSelector.vue';
 import { getRecords, getCertainRecord, getRecordsFromLocal } from '../core/userRecords'
 import { todayDate } from '@/core/month';
@@ -17,32 +19,41 @@ const props = defineProps({
     all: Boolean
 })
 
+const error = ref("");
+const loading = ref(false);
+
 onBeforeMount(async () => {
-    await getRecords({
+    loading.value = true;
+    let response = await getRecords({
         year: todayDate.getFullYear(),
         month: todayDate.getMonth() + 1,
         day: todayDate.getDate()
     });
-    records.value.find(record => record.showType == 0).records = getRecordsFromLocal(todayDate.getDate());
+
+    if(response){
+        records.value.find(record => record.showType == 0).records = getRecordsFromLocal(todayDate.getDate());
+        records.value.find(record => record.showType == 7).records = getRecordsFromLocal(todayDate.getDate() + 7);
+        records.value.find(record => record.showType == -7).records = getRecordsFromLocal(todayDate.getDate() - 7);
+    }
+    else
+        error.value = "An error occured while getting records!";
+    loading.value = false;
 });
 
 const records = ref([
     {
         showType: -7,
         records: [],
-        isGotBefore: false,
         isHidden: true
     },
     {
         showType: 0,
         records: [],
-        isGotBefore: false,
         isHidden: false
     },
     {
         showType: 7,
         records: [],
-        isGotBefore: false,
         isHidden: true
     },
     {
@@ -53,10 +64,6 @@ const records = ref([
 
 function getRecordsLocal(date){
     records.value.find(record => record.showType == date).isHidden = !records.value.find(record => record.showType == date).isHidden;
-    if(records.value.find(record => record.showType == date).isGotBefore) 
-        return;
-    records.value.find(record => record.showType == date).records = getRecordsFromLocal(todayDate.getDate() + parseInt(date));
-    records.value.find(record => record.showType == date).isGotBefore = true;
 }
 
 function getVisibility(showType){
@@ -67,9 +74,11 @@ const selectedDay = ref(null);
 const selectedMonth = ref(null);
 const selectedYear = ref(null);
 
-const error= ref("");
+const certainError= ref("");
+const certainLoading = ref(false);
 
 async function searchRecord(){
+    certainLoading.value = true;
     let certainRecords = await getCertainRecord({
         relatedObject: props.friend? props.friend : props.group,
         forYourSelf: props.all,
@@ -81,15 +90,18 @@ async function searchRecord(){
 
     if(certainRecords.success && certainRecords.length == 0){
         records.value.find(record => record.showType == -1).records = [];
+        certainLoading.value = false;
         return;
     }
 
     if(!certainRecords.success){
-        error.value = "An error occured while searching records!";
+        certainError.value = "An certainError occured while searching records!";
+        certainLoading.value = false;
         return;
     }
-    error.value = "";
+    certainError.value = "";
     records.value.find(record => record.showType == '-1').records = certainRecords.records;
+    certainLoading.value = false;
 }
 
 const lastWeek = computed(() => records.value.find(record => record.showType == -7));
@@ -99,8 +111,14 @@ const certain = computed(() => records.value.find(record => record.showType == -
 </script>
 
 <template>
-    <div v-if="!props.noRecent" class="container-records">
-            <custom-hide-show :showInterface="lastWeek.isHidden"  @showList="getRecordsLocal" :showType="'-7'">
+    <div class="loading-animation" v-if="loading">
+        <loading-animation />
+    </div>
+    <div v-else-if="error">
+        <p style="text-align: center;">{{ error }}</p>
+    </div>
+    <div v-else-if="!props.noRecent && !error" class="container-records">
+            <custom-hide-show :list="lastWeek.records" :showInterface="lastWeek.isHidden"  @showList="getRecordsLocal" :showType="'-7'">
                 Last week
             </custom-hide-show>
             <Transition  name="fadey">
@@ -111,7 +129,7 @@ const certain = computed(() => records.value.find(record => record.showType == -
                     </div>
                 </div>
             </Transition>
-            <custom-hide-show :showInterface="today.isHidden" @showList="getRecordsLocal" :showType="'0'">
+            <custom-hide-show :list="today.records" :showInterface="today.isHidden" @showList="getRecordsLocal" :showType="'0'">
                 Today
             </custom-hide-show>
             <Transition  name="fadey">
@@ -122,7 +140,7 @@ const certain = computed(() => records.value.find(record => record.showType == -
                     </div>
                 </div>
             </Transition>
-            <custom-hide-show :showInterface="nextWeek.isHidden" @showList="getRecordsLocal" :showType="'7'">
+            <custom-hide-show :list="nextWeek.records" :showInterface="nextWeek.isHidden" @showList="getRecordsLocal" :showType="'7'">
                 Next week
             </custom-hide-show>
             <Transition name="fadey">
@@ -146,9 +164,14 @@ const certain = computed(() => records.value.find(record => record.showType == -
         </div> 
         <div style="text-align: center;" v-if="certain.records.length > 0">{{ certain.records.length }} records were found</div>
         <div class="container-week">
-            <div v-if="error.value">{{ error.value }}</div>
-            <div v-if="certain.records.length == 0">No records</div>
-            <record-card v-for="(record, index) in certain.records" :record="record" :key="index"/>
+            <div v-if="certainLoading">
+                <loading-animation/>
+            </div>
+            <div v-else>
+                <div v-if="certainError.value">{{ certainError.value }}</div>
+                <div v-if="certain.records.length == 0">No records</div>
+                <record-card v-for="(record, index) in certain.records" :record="record" :key="index"/>
+            </div>
         </div>
     </div>
 </template>
@@ -201,6 +224,12 @@ const certain = computed(() => records.value.find(record => record.showType == -
     height: 2em;
     margin-left: 10px;
     cursor: pointer;
+}
+
+.loading-animation{
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 </style>

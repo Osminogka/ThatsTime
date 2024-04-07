@@ -2,8 +2,12 @@
 import { defineProps, defineEmits } from 'vue'
 
 defineProps({
-  showInterface: Object,
-  showType: String
+    showInterface: Object,
+    showType: String,
+    list: {
+        type: Array,
+        default: () => []
+    },
 });
 
 const emits = defineEmits(['showList']);
@@ -15,7 +19,7 @@ function showHidden(propName){
 
 <template>
     <div @click="showHidden(showType)" class="nav-header">
-          <p class="single-line"><slot/></p>
+          <p class="single-line"><slot/><span v-if="list.length > 0">(<span class="amount-number">{{ list.length }}</span>)</span></p>
           <hr class="nav-hr"/>
           <div class="arrow-select-user" 
             :class="{ 'expanded-user' : showInterface }"></div>
@@ -58,6 +62,10 @@ function showHidden(propName){
 .single-line{
     font-size: 1.2em;
     white-space: nowrap;
+}
+
+.amount-number{
+  color: rgb(1, 184, 7)
 }
 
 </style>

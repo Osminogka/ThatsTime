@@ -4,20 +4,7 @@ export const user = ref({
     name: '',
     email: ''
 });
-
-const friendListOnServer = ref([
-    
-]);
   
-const groupListOnServer = ref([
-    
-]);
-  
-  
-const groupInvitesOnServer = ref([
-    
-]);
-
 export const friendList = ref([
 
 ]);
@@ -35,21 +22,41 @@ export const groupInvites = ref([
 ]);
 
 export const getMyFriendList = async () => {
-    if(friendList.value.length === 0) {
-        friendList.value = friendListOnServer.value;
+    let response = await fetch("/api/friends/getfriends",{
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('jwtToken').replace(/"/g, ''),
+            'Content-Type': 'application/json'
+        }
+    });
+    if(response.ok){
+        let responseData = await response.json();
+        if(responseData.success)
+            friendList.value = responseData.friendList;
     }
-    return friendList.value;
+    else
+        return {success: false, message: 'Server error'};
 }
 
 export const getMyGroupList = async () => {
-    if(groupList.value.length === 0) {
-        groupList.value = groupListOnServer.value;
+    let response = await fetch("/api/friends/getgroups",{
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('jwtToken').replace(/"/g, ''),
+            'Content-Type': 'application/json'
+        }
+    });
+    if(response.ok){
+        let responseData = await response.json();
+        if(responseData.success)
+            groupList.value = responseData.groupList;
     }
-    return groupList.value;
+    else
+        return {success: false, message: 'Server error'};
 }
 
 export const getMyFriendRequests = async () => {
-    let response = await fetch("/api/friends/getrequests",{
+    let response = await fetch("/api/friends/getinvites",{
         method: 'GET',
         headers: {
             'Authorization': 'Bearer ' + localStorage.getItem('jwtToken').replace(/"/g, ''),
@@ -65,9 +72,62 @@ export const getMyFriendRequests = async () => {
 }
 
 export const getMyGroupInvites = async () => {
-    if(groupInvites.value.length === 0) {
-        groupInvites.value = groupInvitesOnServer.value;
+    let response = await fetch("/api/groups/getinvites",{
+        method: 'GET',
+        headers: {'Authorization': 'Bearer ' + localStorage.getItem('jwtToken').replace(/"/g, ''),
+        'Content-Type': 'application/json'
     }
-    return groupInvites.value;
+    });
+    if(response.ok){
+        let responseData = await response.json();
+        return responseData;
+    }
+    else
+        return {success: false, message: 'Server error'};
 }
 
+export const acceptFriendRequest = async (friendname) => {
+    let response = await fetch("/api/friends/acceptinvite?friendName=" + friendname,{
+        method: 'GET',
+        headers: {'Authorization': 'Bearer ' + localStorage.getItem('jwtToken').replace(/"/g, ''),
+        'Content-Type': 'application/json'
+    }
+    });
+    if(response.ok){
+        let responseData = await response.json();
+        return responseData;
+    }
+    else
+        return {success: false, message: 'Server error'};
+}
+
+export const declineFriendRequest = async (friendname) => {
+    let response = await fetch("/api/friends/declineinvite?friendName=" + friendname,{
+        method: 'GET',
+        headers: {'Authorization': 'Bearer ' + localStorage.getItem('jwtToken').replace(/"/g, ''),
+        'Content-Type': 'application/json'
+    }
+    });
+    if(response.ok){
+        let responseData = await response.json();
+        return responseData;
+    }
+    else
+        return {success: false, message: 'Server error'};
+}
+
+export const deleteFriend = async (friendname) => {
+    let response = await fetch("/api/friends/deletefriend?friendName=" + friendname,{
+        method: 'GET',
+        headers: {
+        'Authorization': 'Bearer ' + localStorage.getItem('jwtToken').replace(/"/g, ''),
+        'Content-Type': 'application/json'
+    }
+    });
+    if(response.ok){
+        let responseData = await response.json();
+        if(responseData.success)
+            return true;
+    }
+    return false;
+}

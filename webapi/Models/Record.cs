@@ -51,6 +51,8 @@ namespace webapi.Models
         [Required]
         public long CreatorId { get; set; }
 
+        public UserInfo CreatorUser { get; set; }
+
         [Required]
         public bool IsRecordForYourSelf { get; set; }
 

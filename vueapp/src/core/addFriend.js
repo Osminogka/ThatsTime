@@ -1,44 +1,39 @@
-const friendListOnServer = [
-    'John',
-    'Jane',
-    'Michael',
-    'Emily',
-    'William',
-    'Sophia',
-    'James',
-    'Olivia',
-    'Benjamin',
-    'Isabella',
-    'Matthew',
-    'Ava',
-    'Jacob',
-    'Mia',
-    'Ethan',
-    'Charlotte',
-    'Daniel',
-    'Amelia',
-    'Alexander',
-    'Harper',
-    'Henry',
-    'Ella',
-    'Joseph',
-    'Abigail',
-    'Samuel'
-];
+const friendListOnServer = [];
 
 export const getFriendList = async (page) => {
-    const pageSize = 5;
-    const start = (page) * pageSize || 0;
-    const end = start + pageSize;
-    return friendListOnServer.slice(start, end);
+    let response = await fetch("/api/friends/getusers?page="+page,{
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('jwtToken').replace(/"/g, ''),
+            'Content-Type': 'application/json'
+        }
+    });
+    if(response.ok){
+        let responseData = await response.json();
+        return responseData;
+    }
+    else
+        return {success: false, message: 'Server error'};
   }
 
 export const getFriendByNickname = async (nickname) => {
     return friendListOnServer.find(friend => friend === nickname);
 }
 
-export const sendFriendRequest = async () => {
-    
+export const sendFriendRequest = async (username) => {
+    let response = await fetch("/api/friends/sendinvite?friendname=" + username,{
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('jwtToken').replace(/"/g, ''),
+            'Content-Type': 'application/json'
+        }
+    });
+    if(response.ok){
+        let responseData = await response.json();
+        return responseData;
+    }
+    else
+        return {success: false, message: 'Server error'};
 }
 
 export const sendGroupInvite = async () => {

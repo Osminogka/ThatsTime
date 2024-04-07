@@ -3,13 +3,14 @@ import('./assets/css/router.css');
 import MainHeader from './components/MainHeader.vue';
 import { todayDate, monthNames } from './core/month';
 import { getMyFriendList, getMyGroupList} from './core/userInfo';
-import { isAuthenticated } from '@/core/authentication'; 
+import { isAuthenticated, getCurrentUser } from '@/core/authentication'; 
 
 import { onBeforeMount } from 'vue';
 
 onBeforeMount(async () => {
   await getMyFriendList();
   await getMyGroupList();
+  getCurrentUser();
 });
 
 </script>

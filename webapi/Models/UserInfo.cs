@@ -31,5 +31,7 @@ namespace webapi.Models
         public ICollection<FriendsList> SecondFromFriendList;
 
         public ICollection<Record> RecordsForThisUser;
+
+        public ICollection<Record> RecordsCreators;
     }
 }

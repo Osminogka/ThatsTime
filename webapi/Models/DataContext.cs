@@ -16,6 +16,13 @@ namespace webapi.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            //Set value types
+            modelBuilder.Entity<Record>()
+                .Property(e => e.RecordContent).HasColumnType("nvarchar(500)");
+
+            modelBuilder.Entity<Record>()
+                .Property(e => e.RecordName).HasColumnType("nvarchar(50)");
+
             //Group Main table groupId & Group invites groupId set up
             modelBuilder.Entity<GroupsCreatorsList>()
                 .HasMany(e => e.GroupInvites)
@@ -77,6 +84,13 @@ namespace webapi.Models
                 .HasOne(e => e.SecondUserInfo)
                 .WithMany(e => e.SecondFromFriendList)
                 .HasForeignKey(e => e.SecondUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            //Creator
+            modelBuilder.Entity<Record>()
+                .HasOne(e => e.CreatorUser)
+                .WithMany(e => e.RecordsCreators)
+                .HasForeignKey(e => e.CreatorId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             //GroupCreatorList GroupId & Record related group

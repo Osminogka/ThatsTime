@@ -20,7 +20,17 @@ const username = ref('');
 async function loadUsers(){
     loading.value = true;
     try{
-        users.value = await getFriendList(parseInt(currentPage.value));
+        let response = await getFriendList(parseInt(currentPage.value));
+        if(response.success)
+        {
+            users.value = response.friendList;
+            error.value = "";
+        }
+        else
+        {
+            users.value = [];
+            error.value = "Server error!";
+        }
         loading.value = false;
     }
     catch(err) {
@@ -65,11 +75,15 @@ function prevPage(){
     router.push({ query: { page: currentPage.value } });
 }
 
-function seachFriend(){
+function searchFriend(){
     if(username.value == '') 
         loadUsers();
     else
         getCertainUser();
+}
+
+function inviteIsSent(name){
+    users.value = users.value.filter(user => user !== name);
 }
 
 </script>
@@ -79,22 +93,22 @@ function seachFriend(){
         <div class="search-container">
             <form>
                 <input class="search-input-box" v-model="username" type="text" placeholder="Search.." name="search">
-                <button class="search-friend-button custom-button" type="submit" @click.prevent="seachFriend"><i class="fa fa-search"></i></button>
+                <button class="search-friend-button custom-button" type="submit" @click.prevent="searchFriend"><i class="fa fa-search"></i></button>
             </form>
         </div>
         <div class="friend-display-container">
             <loading-animation v-if="loading" />
             <div v-else-if="error" class="error">{{ error.message }}</div>
             <div v-if="users.length > 0">
-                <social-entity v-for="(user, index) in users" :name="user" type='friend' :key="index"/>
+                <social-entity v-for="(user, index) in users" :name="user" type='friend' @friend-request="inviteIsSent" :key="index"/>
             </div>
-            <div v-else>
+            <div v-else-if="!loading">
                 <p>Such user don't exist</p>
             </div>
         </div>
         <div class="page-nav-button-container">
-            <button class="page-nav-button page-nav-button-prev" @click="prevPage" />
-            <button class="page-nav-button page-nav-button-next" @click="nextPage" />
+            <button v-if="currentPage > 0" class="page-nav-button page-nav-button-prev" @click="prevPage" />
+            <button v-if="users.length > 9" class="page-nav-button page-nav-button-next" @click="nextPage" />
         </div>
     </div>
 </template>
@@ -124,7 +138,6 @@ function seachFriend(){
     flex-direction: row;
     margin-top: auto;
     justify-content: flex-end;
-    align-items: center;
     width: 100%;
 }
 

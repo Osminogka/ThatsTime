@@ -22,6 +22,15 @@ const routes = [
         }
     },
     {
+        path: "/logout",
+        name: "Logout",
+        component: () => import("../components/LogoutPage.vue"),
+        meta:{
+            title: "Logout",
+            requireAuth: true
+        }
+    },
+    {
         path: "/profile",
         name: "Profile",
         component: () => import("../components/ProfilePage.vue"),

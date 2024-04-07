@@ -93,7 +93,7 @@ export function getCurrentUser() {
 
     console.log(payload);
 
-    user.value.name = payload.name;
+    user.value.name = payload.unique_name;
     user.value.email = payload.email;
     return payload;
 }

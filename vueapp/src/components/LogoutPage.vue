@@ -1,10 +1,14 @@
 <script setup>
+import { user } from '@/core/userInfo';
+
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
 function logout(){
     localStorage.removeItem('jwtToken');
+    user.value.name = '';
+    user.value.email = ''; 
     router.push({ name: 'Login' });
 }
 

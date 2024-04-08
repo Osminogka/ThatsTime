@@ -5,6 +5,7 @@ import { useRoute, useRouter } from 'vue-router';
 
 import { getRecordsWithGroup } from '../core/userRecords';
 import { user } from '@/core/userInfo';
+import { todayDate } from '@/core/month';
 
 import RecordList from '@/view/RecordsList.vue'
 import LoadingAnimation from '@/view/LoadingAnimation.vue';
@@ -46,15 +47,24 @@ async function fetchData() {
     error.value = null;
     loading.value = true;
     try{
-        let newData = await getRecordsWithGroup(route.params.groupname);
-
-        // Clear the current object
-        for (let key in infoAboutGroup) {
-            delete infoAboutGroup[key];
+        let result = await getRecordsWithGroup(route.params.groupname,{
+            year: todayDate.getFullYear(),
+            month: todayDate.getMonth() + 1,
+            day: todayDate.getDate()
+        });
+        if(result.isMember){
+            infoAboutGroup.records = result.records;
+            infoAboutGroup.members = result.members;
+            infoAboutGroup.isMember = result.isMember;
+            infoAboutGroup.isCreator = result.isCreator;
+            infoAboutGroup.Creator = result.creator;
         }
-        // Add new properties
-        for (let key in newData) {
-            infoAboutGroup[key] = newData[key];
+        else{
+            infoAboutGroup.records = [];
+            infoAboutGroup.members = [];
+            infoAboutGroup.isMember = false;
+            infoAboutGroup.isCreator = false;
+            infoAboutGroup.Creator = '';
         }
     } catch (e) {
         error.value = e;
@@ -92,7 +102,7 @@ async function removeMember(memberName){
 
 async function inviteToGroup(friendName){
     await inviteFriendToGroup(friendName);
-    friendToInvite.value = friendToInvite.value.filter(friend => friend.name !== friendName);
+    friendToInvite.value = friendToInvite.value.filter(friend => friend !== friendName);
 }
 
 async function promoteMember(memberName){
@@ -124,7 +134,7 @@ async function demoteMember(memberName){
                         <div v-if="showInterface.showFriendInviteBox" class="frieds-container">
                             <div class="info-social-header">Invite</div>
                             <div :class="{'member-enitity': member !== lastToInvite,'member-enitity-last': member === lastToInvite}" v-for="(friend, index) in friendToInvite" :key="index">
-                                <p>{{ friend.name }}</p>
+                                <p>{{ friend }}</p>
                                 <button class="invite-friend-button custom-button" @click="inviteToGroup(friend.name)" />
                             </div>
                         </div>
@@ -151,7 +161,7 @@ async function demoteMember(memberName){
                 </div>
             </div>
                 <h2 style="text-align: center;">Group Records</h2>
-                <record-list :no-recent="infoAboutGroup.records.length === 0" :group="$route.params.groupname" />
+                <record-list :records="infoAboutGroup.records" :group="$route.params.groupname" />
         </div>
         <div v-if="!infoAboutGroup.isMember">
             <h1 class="not-your-friend">You are not member of such group</h1>

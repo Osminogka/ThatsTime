@@ -19,8 +19,77 @@ namespace webapi.Controllers
             DataContext = ctx;
         }
 
+        [HttpGet("getgroups")]
+        public async Task<IActionResult> getGroupsAsync([FromQuery] int page)
+        {
+            GroupResponse response = new GroupResponse();
+            const int pageSize = 10;
+            try
+            {
+                string mainUserName = getUserName();
+                response.Groups.AddRange(await DataContext.GroupsCreatorsLists
+                    .Where(obj => obj.GroupMembers.Where(member => member.RelatedUser.UserName == mainUserName).Count() == 0)
+                    .Skip(page * pageSize)
+                    .Take(pageSize)
+                    .Select(obj => obj.GroupName)
+                    .ToListAsync());
+            }
+            catch(Exception ex)
+            {
+                return HandleException(ex);
+            }
+
+            response.Success = true;
+            response.Message = "Got all groups";
+            return Ok(response);
+        }
+
+        [HttpGet("getcertaingroup")]
+        public async Task<IActionResult> getCertainGroupAsync([FromQuery] string groupname)
+        {
+            GroupResponse response = new GroupResponse();
+            try
+            {
+                string mainUserName = getUserName();
+                GroupsCreatorsList? group = await DataContext.GroupsCreatorsLists
+                    .SingleOrDefaultAsync(obj => obj.GroupName == groupname && obj.GroupMembers.Where(member => member.RelatedUser.UserName == mainUserName).Count() == 0);
+                if(group == null)
+                {
+                    response.Message = "Such groupo doesn't exist";
+                    return Ok(response);
+                }
+
+                response.Groups.Add(group.GroupName);
+            }
+            catch(Exception ex)
+            {
+                return HandleException(ex);
+            }
+
+            response.Success = true;
+            response.Message = "Got certain group";
+            return Ok(response);
+        }
+
+        [HttpGet("getmygroups")]
+        public async Task<IActionResult> getMyGroupsAsync()
+        {
+            GroupResponse response = new GroupResponse();
+            try
+            {
+                response.Groups.AddRange(await DataContext.GroupMemberLists.Where(obj => obj.RelatedUser.UserName == getUserName()).Select(obj => obj.RelatedGroup.GroupName).ToListAsync());
+            }
+            catch(Exception ex)
+            {
+                return HandleException(ex);
+            }
+            response.Success = true;
+            response.Message = "Got all groups";
+            return Ok(response);
+        } 
+
         [HttpPost("create")]
-        public async Task<IActionResult> createGroupAsync([FromBody] string groupname)
+        public async Task<IActionResult> createGroupAsync([FromQuery] string groupname)
         {
             GroupResponse response = new GroupResponse();
 
@@ -40,7 +109,7 @@ namespace webapi.Controllers
                 GroupsCreatorsList newGroup = new GroupsCreatorsList()
                 {
                     GroupName = groupname,
-                    CreatorId = mainUser.UserId
+                    CreatorId = mainUser.UserId,
                 };
 
                 await DataContext.GroupsCreatorsLists.AddAsync(newGroup);
@@ -49,9 +118,11 @@ namespace webapi.Controllers
                 GroupMemberList newMember = new GroupMemberList()
                 {
                     MemberId = mainUser.UserId,
-                    GroupId = newGroup.GroupId
+                    GroupId = newGroup.GroupId,
+                    MemberDegree = "Creator"
                 };
 
+                await DataContext.GroupMemberLists.AddAsync(newMember);
                 await DataContext.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -85,7 +156,8 @@ namespace webapi.Controllers
                 GroupMemberList newMember = new GroupMemberList()
                 {
                     GroupId = group.GroupId,
-                    MemberId = mainUser.UserId
+                    MemberId = mainUser.UserId,
+                    MemberDegree = "Member"
                 };
 
                 await DataContext.GroupMemberLists.AddAsync(newMember);
@@ -96,8 +168,8 @@ namespace webapi.Controllers
                 return HandleException(ex);
             }
 
+            response.Success = true;
             response.Message = "Successfully entered the group";
-
             return Ok(response);
         }
 
@@ -171,7 +243,8 @@ namespace webapi.Controllers
                 GroupMemberList newMember = new GroupMemberList()
                 {
                     GroupId = groupInvite.GroupId,
-                    MemberId = mainUser.UserId
+                    MemberId = mainUser.UserId,
+                    MemberDegree = "Member"
                 };
 
                 DataContext.GroupInvites.Remove(groupInvite);
@@ -227,27 +300,29 @@ namespace webapi.Controllers
 
             try
             {
-                UserInfo? mainUser = await DataContext.UserInfo
-                    .Include(user => user.GroupMembers.Where(group => group.RelatedGroup.GroupName == groupname))
-                    .SingleOrDefaultAsync(obj => obj.UserName == getUserName());
-                if (mainUser == null)
-                    return Ok(response);
+                string mainUsername = getUserName();
 
-                var group = mainUser.GroupMembers.FirstOrDefault(group => group.RelatedGroup.GroupName == groupname);
+                GroupsCreatorsList? group = await DataContext.GroupsCreatorsLists
+                    .Include(group => group.Creator)
+                    .Include(group => group.GroupMembers
+                        .Where(member => member.RelatedUser.UserName == mainUsername))
+                        .ThenInclude(member => member.RelatedUser)
+                    .SingleOrDefaultAsync(obj => obj.GroupName == groupname);
                 if (group == null)
                     return Ok(response);
-
-                var CreatorOfGroup = await DataContext.GroupsCreatorsLists.SingleOrDefaultAsync(obj => obj.GroupName == groupname && obj.CreatorId == mainUser.UserId);
-                if(CreatorOfGroup != null)
+                GroupMemberList? groupMember = group.GroupMembers.Where(member => member.RelatedUser.UserName == mainUsername).First();
+                if (groupMember == null)
+                    return Ok(response);
+                if(group.Creator.UserName == mainUsername)
                 {
-                    var firstMember = await DataContext.GroupMemberLists.FirstOrDefaultAsync(obj => obj.GroupId == group.GroupId && obj.MemberId != mainUser.UserId);
+                    var firstMember = await DataContext.GroupMemberLists.FirstOrDefaultAsync(obj => obj.GroupId == group.GroupId && obj.RelatedUser.UserName != mainUsername);
                     if (firstMember == null)
-                        DataContext.GroupsCreatorsLists.Remove(CreatorOfGroup);
+                        DataContext.GroupsCreatorsLists.Remove(group);
                     else
-                        CreatorOfGroup.CreatorId = firstMember.MemberId;
+                        group.CreatorId = firstMember.MemberId;
                 }
-                DataContext.GroupMemberLists.Remove(group);
 
+                DataContext.GroupMemberLists.Remove(group.GroupMembers.Where(member => member.RelatedUser.UserName == mainUsername).First());
                 await DataContext.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -264,6 +339,8 @@ namespace webapi.Controllers
         public bool Success { get; set; } = false;
 
         public string Message { get; set; } = "Request has failed";
+
+        public List<string> Groups { get; set; } = new List<string>();
     }
 
     public class GroupRequest
@@ -272,4 +349,5 @@ namespace webapi.Controllers
 
         public string GroupName { get; set; }
     }
+
 }

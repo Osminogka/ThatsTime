@@ -4,6 +4,7 @@ import { ref, reactive, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { getRecordsWithFriend } from '../core/userRecords';
+import { todayDate } from '@/core/month';
 
 import RecordList from '@/view/RecordsList.vue';
 import LoadingAnimation from '@/view/LoadingAnimation.vue';
@@ -33,14 +34,18 @@ async function fetchData() {
     error.value = null;
     loading.value = true;
     try{
-        let newData = await getRecordsWithFriend(route.params.nickname);
-        // Clear the current object
-        for (let key in infoAboutFriend) {
-            delete infoAboutFriend[key];
+        let result = await getRecordsWithFriend(route.params.nickname, {
+            year: todayDate.getFullYear(),
+            month: todayDate.getMonth() + 1,
+            day: todayDate.getDate()
+        });
+        if(result.success){
+            infoAboutFriend.records = result.records;
+            infoAboutFriend.isFriend = true;
         }
-        // Add new properties
-        for (let key in newData) {
-            infoAboutFriend[key] = newData[key];
+        else{
+            infoAboutFriend.records = [];
+            infoAboutFriend.isFriend = false;
         }
     } catch (e) {
         error.value = e;
@@ -65,7 +70,7 @@ function deleteFriend(){
             <button class="delete-friend-button custom-button" @click="deleteFriend"/>
         </div>
         <h2 style="text-align: center;">Friend Records</h2>
-        <record-list :no-recent="infoAboutFriend.records.length === 0" :friend="route.params.nickname" />
+        <record-list :records="infoAboutFriend.records" :friend="route.params.nickname" />
     </div>
     <div v-if="!infoAboutFriend.isFriend">
         <h1 class="not-your-friend">You don't have such friend</h1>

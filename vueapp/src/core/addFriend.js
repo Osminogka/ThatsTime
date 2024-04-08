@@ -1,5 +1,3 @@
-const friendListOnServer = [];
-
 export const getFriendList = async (page) => {
     let response = await fetch("/api/friends/getusers?page="+page,{
         method: 'GET',
@@ -14,10 +12,22 @@ export const getFriendList = async (page) => {
     }
     else
         return {success: false, message: 'Server error'};
-  }
+}
 
 export const getFriendByNickname = async (nickname) => {
-    return friendListOnServer.find(friend => friend === nickname);
+    let response = await fetch("/api/friends/getcertainuser?username="+nickname,{
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('jwtToken').replace(/"/g, ''),
+            'Content-Type': 'application/json'
+        }
+    });
+    if(response.ok){
+        let responseData = await response.json();
+        return responseData;
+    }
+    else
+        return {success: false, message: 'Server error'};
 }
 
 export const sendFriendRequest = async (username) => {
@@ -34,8 +44,4 @@ export const sendFriendRequest = async (username) => {
     }
     else
         return {success: false, message: 'Server error'};
-}
-
-export const sendGroupInvite = async () => {
-    
 }

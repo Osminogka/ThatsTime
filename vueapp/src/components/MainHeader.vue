@@ -5,8 +5,8 @@ import('../assets/css/nav-buttons.css');
 import('../assets/css/user.css');
 import CustomHideShow from '@/view/CustomHideShow.vue';
 import { reactive, ref, onMounted } from 'vue';
-import { vOnClickOutside } from '@vueuse/components'
-import { friendList, groupList} from '../core/userInfo'
+import { vOnClickOutside } from '@vueuse/components';
+import { friendList, groupList} from '@/core/userInfo';
 
 function hideSideBar() {
   if(showInterface.showSideBar && event.target.id != 'showSideBar')
@@ -89,11 +89,11 @@ const showUserNav = ref(false);
           Friends
         </custom-hide-show>
         <Transition name="navlists">
-          <div v-if="showInterface.showFriendList" class="main-nav-div">
+          <div v-if="showInterface.showFriendList">
             <div v-if="friendList.length == 0">
               <p class="no-info-p">No friends</p>
             </div>
-            <div v-else>
+            <div v-else class="main-nav-div">
               <div v-for="(friend ,index) in friendList" :key="index" class="sidebar-entity-box">
                 <p style="display: inline;">{{ friend }}</p>
                 <router-link :to="{ name: 'Friend', params: { nickname: friend } }" class="button-nav custom-button" @click="hideSideBar"/>
@@ -106,11 +106,11 @@ const showUserNav = ref(false);
           Groups
         </custom-hide-show>
         <Transition name="navlists">
-          <div v-if="showInterface.showGroupList" class="main-nav-div">
+          <div v-if="showInterface.showGroupList">
             <div v-if="groupList.length == 0">
               <p class="no-info-p">No groups</p>
             </div>
-            <div v-else>
+            <div v-else class="main-nav-div">
               <div v-for="(group ,index) in groupList" :key="index" class="sidebar-entity-box">
                 <p style="display: inline;">{{ group }}</p>
                 <router-link :to="{ name: 'Group', params: { groupname: group } }" class="button-nav custom-button" @click="hideSideBar"/>

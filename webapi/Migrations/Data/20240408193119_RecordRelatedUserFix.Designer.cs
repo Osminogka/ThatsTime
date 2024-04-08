@@ -12,8 +12,8 @@ using webapi.Models;
 namespace webapi.Migrations.Data
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240331104124_DataTimeRecord")]
-    partial class DataTimeRecord
+    [Migration("20240408193119_RecordRelatedUserFix")]
+    partial class RecordRelatedUserFix
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -157,6 +157,9 @@ namespace webapi.Migrations.Data
                     b.Property<DateTime>("DateTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("Importance")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsRecordForGroup")
                         .HasColumnType("bit");
 
@@ -166,21 +169,22 @@ namespace webapi.Migrations.Data
                     b.Property<string>("RecordContent")
                         .IsRequired()
                         .HasMaxLength(1)
-                        .HasColumnType("nvarchar(1)");
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("RecordName")
                         .IsRequired()
                         .HasMaxLength(1)
-                        .HasColumnType("nvarchar(1)");
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<long?>("RelatedGroupId")
                         .HasColumnType("bigint");
 
                     b.Property<long?>("RelatedUserId")
-                        .IsRequired()
                         .HasColumnType("bigint");
 
                     b.HasKey("RecordId");
+
+                    b.HasIndex("CreatorId");
 
                     b.HasIndex("RelatedGroupId");
 
@@ -295,6 +299,12 @@ namespace webapi.Migrations.Data
 
             modelBuilder.Entity("webapi.Models.Record", b =>
                 {
+                    b.HasOne("webapi.Models.UserInfo", "CreatorUser")
+                        .WithMany("RecordsCreators")
+                        .HasForeignKey("CreatorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("webapi.Models.GroupsCreatorsList", "RelatedGroup")
                         .WithMany("RecordsForThisGroup")
                         .HasForeignKey("RelatedGroupId")
@@ -303,8 +313,9 @@ namespace webapi.Migrations.Data
                     b.HasOne("webapi.Models.UserInfo", "RelatedUser")
                         .WithMany("RecordsForThisUser")
                         .HasForeignKey("RelatedUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatorUser");
 
                     b.Navigation("RelatedGroup");
 
@@ -329,6 +340,8 @@ namespace webapi.Migrations.Data
                     b.Navigation("GroupInvites");
 
                     b.Navigation("GroupMembers");
+
+                    b.Navigation("RecordsCreators");
 
                     b.Navigation("RecordsForThisUser");
 

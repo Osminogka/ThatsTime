@@ -105,6 +105,7 @@ namespace webapi.Models
                 .HasOne(e => e.RelatedUser)
                 .WithMany(e => e.RecordsForThisUser)
                 .HasForeignKey(e => e.RelatedUserId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

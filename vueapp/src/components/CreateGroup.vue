@@ -2,8 +2,8 @@
 import { createGroup } from '@/core/addGroup';
 import { ref, reactive } from 'vue';
 
-import { friendList } from '@/core/userInfo';
-import {  sendInviteToFriend } from '@/core/addGroup';
+import { friendList, groupList } from '@/core/userInfo';
+import { sendInviteToFriend } from '@/core/addGroup';
 
 const groupname = ref('');
 const creationResult = reactive({
@@ -14,16 +14,18 @@ const creationResult = reactive({
 
 async function createGroupChecks(){
     const result = await createGroup(groupname.value);
-    if(!result) {
-        creationResult.error = true;
-        creationResult.success = false;
-        creationResult.message = 'Group name already exists';
-    }
-    else {
+    if(result.success) {
+        groupList.value.push(groupname.value);
         creationResult.error = false;
         creationResult.success = true;
         creationResult.message = 'Group created successfully';
     }
+    else {
+        creationResult.error = true;
+        creationResult.success = false;
+        creationResult.message = result.message;
+    }
+    groupname.value = '';
 }
 
 const friendsToInvite = ref([...friendList.value]);

@@ -177,7 +177,6 @@ namespace webapi.Migrations.Data
                         .HasColumnType("bigint");
 
                     b.Property<long?>("RelatedUserId")
-                        .IsRequired()
                         .HasColumnType("bigint");
 
                     b.HasKey("RecordId");
@@ -311,8 +310,7 @@ namespace webapi.Migrations.Data
                     b.HasOne("webapi.Models.UserInfo", "RelatedUser")
                         .WithMany("RecordsForThisUser")
                         .HasForeignKey("RelatedUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("CreatorUser");
 

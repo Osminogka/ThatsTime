@@ -11,7 +11,27 @@ const email = ref('');
 const password = ref('');
 const error = ref('');
 
+const passErrorList = ref([]);
+
+function checkPassForMistakes()
+{
+  passErrorList.value = [];
+  if(password.value.length < 8)
+    passErrorList.value.push('Password must be at least 8 characters long');
+  if(!password.value.match(/[a-z]/))  
+    passErrorList.value.push('Password must contain at least one lowercase letter');
+  if(!password.value.match(/[A-Z]/))
+    passErrorList.value.push('Password must contain at least one uppercase letter');
+  if(!password.value.match(/[0-9]/))
+    passErrorList.value.push('Password must contain at least one number');
+  if(!password.value.match(/[^a-zA-Z0-9]/)) 
+    passErrorList.value.push('Password must contain at least one special character');
+}
+
 async function register(){
+  checkPassForMistakes();
+  if(passErrorList.value.length > 0)
+    return;
   error.value = '';
   let result = await signUp(username.value, email.value, password.value);
   if(!result.success)
@@ -28,6 +48,7 @@ async function register(){
         <div class="login-header">That's Time</div>
           <h1>Register</h1>
           <p style="color: red;">{{ error }}</p>
+          <p class="error-message" v-for="(error, index) in passErrorList" :key="index">{{ error }}</p>
           <form>
               <input v-model="username" type="text" placeholder="Username" required>
               <input v-model="email" type="text" placeholder="Email" required>
@@ -111,6 +132,16 @@ async function register(){
     margin-left: auto;
     text-shadow: 3px 4px 0px rgba(0,0,0,0.3);
     font-size: 2em;
+}
+
+.error-message{
+    color: black;
+    background-image: url('@/assets/svg/MainForm/error.svg');
+    background-repeat: no-repeat;
+    background-position: left;
+    background-color: #bff9fb;
+    padding-left: 1.5em;
+    text-align: left;
 }
 
 </style>

@@ -19,6 +19,7 @@ async function createGroupChecks(){
         creationResult.error = false;
         creationResult.success = true;
         creationResult.message = 'Group created successfully';
+        groupList.value.push(groupname.value)
     }
     else {
         creationResult.error = true;

@@ -16,12 +16,18 @@ onBeforeMount(async () => {
   loading.value = true;
   error.value = null;
   let friendInviteResponse = await getMyFriendRequests();
-  await getMyGroupInvites();
+  let groupInviteResponse = await getMyGroupInvites();
   if(friendInviteResponse.success)
     friendRequests.value = friendInviteResponse.friendList;
   else{
     friendRequests.value = [];
     error.value = "Error getting friend invites";
+  }
+  if(groupInviteResponse.success)
+    groupInvites.value = groupInviteResponse.groups;
+  else{
+    friendRequests.value = [];
+    error.value = "Error getting group invites";
   }
   loading.value = false;
 });

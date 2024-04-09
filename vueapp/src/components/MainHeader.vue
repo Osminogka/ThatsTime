@@ -62,8 +62,6 @@ const showInterface = reactive({
 });
 
 const showUserNav = ref(false);
-
-//const username = 'Osminogka';
 </script>
 
 <template>

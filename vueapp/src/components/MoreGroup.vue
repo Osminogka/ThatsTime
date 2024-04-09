@@ -2,6 +2,7 @@
 
 import { ref, reactive, watch, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { vOnClickOutside } from '@vueuse/components';
 
 import { getRecordsWithGroup } from '../core/userRecords';
 import { user } from '@/core/userInfo';
@@ -70,12 +71,13 @@ async function fetchData() {
         error.value = e;
     }finally{
         loading.value = false;
+        friendToInvite.value = friendList.value;
     }
 }
 
 const lastMember = computed(() => infoAboutGroup.members[infoAboutGroup.members.length - 1]);
 
-const friendToInvite = ref([...friendList.value])
+const friendToInvite = ref([])
 
 const lastToInvite = computed(() => friendToInvite.value[friendToInvite.value.length - 1].name);
 
@@ -97,12 +99,19 @@ async function leaveGroup(){
 }
 
 async function removeMember(memberName){
-    await removeMemberFromGroup(memberName);
+    let response = await removeMemberFromGroup(route.params.groupname, memberName);
+    if(response.success)
+        infoAboutGroup.members = infoAboutGroup.members.filter(member => member !== memberName);
+    else
+        error.value = response.message;
 }
 
 async function inviteToGroup(friendName){
-    await inviteFriendToGroup(friendName);
-    friendToInvite.value = friendToInvite.value.filter(friend => friend !== friendName);
+    let response = await inviteFriendToGroup(friendName, route.params.groupname);
+    if(response.success)
+        friendToInvite.value = friendToInvite.value.filter(friend => friend !== friendName);
+    else
+        error.value = "Failed to send invite";
 }
 
 async function promoteMember(memberName){
@@ -111,6 +120,11 @@ async function promoteMember(memberName){
 
 async function demoteMember(memberName){
     await demoteMemberInGroup(memberName);
+}
+
+function hideGroupInfo(){
+    if(event.target.id != 'showGroupInfo')
+    showInterface.showGroupInfo = false;
 }
 </script>
 
@@ -123,10 +137,10 @@ async function demoteMember(memberName){
         <div v-else-if="infoAboutGroup.isMember">
             <div class="header-container">
                 <div class="friend-info-header">{{ route.params.groupname }}</div>
-                <button class="group-show-info-button custom-button" @click="showInterface.showGroupInfo = !showInterface.showGroupInfo" />
+                <button id="showGroupInfo" class="group-show-info-button custom-button" @click="showInterface.showGroupInfo = !showInterface.showGroupInfo" />
                 <button v-if="infoAboutGroup.isCreator" class="delete-group-button custom-button" @click="deleteGroup()"></button>
                 <Transition name="bounce">
-                    <div class="group-actions-container" v-if="showInterface.showGroupInfo">
+                    <div class="group-actions-container" v-if="showInterface.showGroupInfo" v-on-click-outside="hideGroupInfo">
                         <div class="header-container">
                             <button class="show-invite-friend-button" @click="showOptionalActions('invite')">Invite</button>
                             <button class="show-invite-friend-button" @click="showOptionalActions('leave')">Leave</button>
@@ -135,7 +149,7 @@ async function demoteMember(memberName){
                             <div class="info-social-header">Invite</div>
                             <div :class="{'member-enitity': member !== lastToInvite,'member-enitity-last': member === lastToInvite}" v-for="(friend, index) in friendToInvite" :key="index">
                                 <p>{{ friend }}</p>
-                                <button class="invite-friend-button custom-button" @click="inviteToGroup(friend.name)" />
+                                <button class="invite-friend-button custom-button" @click="inviteToGroup(friend)" />
                             </div>
                         </div>
                         <div class="leave-group-option" v-else-if="showInterface.showLeaveOption">
@@ -149,10 +163,10 @@ async function demoteMember(memberName){
             <div class="social-action-container">
                 <div class="members-container">
                     <div class="info-social-header">Members</div>
-                    <div v-for="(member, index) in infoAboutGroup.members" 
+                    <div v-for="(member, index) in infoAboutGroup.members" class="member-list"
                         :class="{'member-enitity': member !== lastMember,'member-enitity-last': member === lastMember}" :key="index">
                         <p>{{ member }}</p>
-                        <div v-if="infoAboutGroup.isCreator" class="member-action-buttons">
+                        <div v-if="infoAboutGroup.isCreator && user.name != member" class="member-action-buttons">
                             <button class="promote-member custom-button" @click="promoteMember(member)"/>
                             <button class="demote-member custom-button" @click="demoteMember(member)" />
                             <button class="remove-friend-button custom-button" @click="removeMember(member)" />
@@ -186,7 +200,7 @@ async function demoteMember(memberName){
     display: flex;
     flex-direction: column;
     position: absolute;
-    left: 9em;
+    left: 11em;
     border: 3px solid black;
     border-radius: 5px;
     background-color: #03f7ff;
@@ -285,11 +299,15 @@ async function demoteMember(memberName){
     padding-right: 10px;
 }
 
+.member-list{
+    min-width: 15em;
+}
+
 .member-action-buttons{
     display: flex;
+    justify-content: flex-end;
     flex-direction: row;
     margin-left: auto;
-    margin-left: 5em;
 }
 
 .info-header{

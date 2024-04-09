@@ -23,13 +23,13 @@ const importanceList = ['Low', 'Medium', 'High'];
         <span>Creator:</span> {{ record.creator }}
     </div>
     <div class="info-item">
-        <span>Created for:</span> {{ record.selectedObject }}
+        <span>For {{ record.showGroupList ? "group" : "user" }}:</span> {{ record.selectedObject }}
     </div>
     <div class="info-item">
         <span>importance:</span> {{ importanceList[record.importance] }}
     </div>
     <div v-if="isTimeCorrent()" class="info-item">
-        <span>Time:</span> {{ record.hour }}:{{ record.minute }}
+        <span>Time:</span> {{ record.hour }}:{{ record.minute == 0 ? '00' : record.minute }}
     </div>
     <div class="record-content">
         <p>{{ record.recordContent }}</p>

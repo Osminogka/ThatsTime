@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
 using System.Security.Claims;
 using webapi.Models;
 
@@ -173,25 +174,51 @@ namespace webapi.Controllers
             return Ok(response);
         }
 
-        [HttpGet("sendinvite")]
-        public async Task<IActionResult> sendInviteToGroupAsync([FromQuery] GroupRequest request)
+        [HttpGet("getinvites")]
+        public async Task<IActionResult> getGroupInvitesAsync()
         {
             GroupResponse response = new GroupResponse();
 
             try
             {
                 UserInfo? mainUser = await DataContext.UserInfo
-                    .Include(user => user.GroupMembers.Where(group => group.RelatedGroup.GroupName == request.GroupName))
+                    .Include(obj => obj.GroupInvites).ThenInclude(obj => obj.GroupEntity)
                     .SingleOrDefaultAsync(obj => obj.UserName == getUserName());
 
                 if (mainUser == null)
                     return Ok(response);
 
-                var groupMember = mainUser.GroupMembers.FirstOrDefault(group => group.RelatedGroup.GroupName == request.GroupName);
+                response.Groups = mainUser.GroupInvites.Select(obj => obj.GroupEntity.GroupName).ToList();
+            }
+            catch(Exception ex)
+            {
+                return HandleException(ex);
+            }
+
+            response.Success = true;
+            response.Message = "Got all invites";
+            return Ok(response);
+        }
+
+        [HttpGet("sendinvite")]
+        public async Task<IActionResult> sendInviteToGroupAsync([FromQuery] string groupName, [FromQuery] string friendName)
+        {
+            GroupResponse response = new GroupResponse();
+
+            try
+            {
+                UserInfo? mainUser = await DataContext.UserInfo
+                    .Include(user => user.GroupMembers.Where(group => group.RelatedGroup.GroupName == groupName)).ThenInclude(obj => obj.RelatedGroup)
+                    .SingleOrDefaultAsync(obj => obj.UserName == getUserName());
+
+                if (mainUser == null)
+                    return Ok(response);
+
+                var groupMember = mainUser.GroupMembers.SingleOrDefault(group => group.RelatedGroup.GroupName == groupName && group.MemberId == mainUser.UserId);
                 if (groupMember == null)
                     return Ok(response);
 
-                UserInfo? friend = await DataContext.UserInfo.SingleOrDefaultAsync(obj => obj.UserName == request.FriendName);
+                UserInfo? friend = await DataContext.UserInfo.SingleOrDefaultAsync(obj => obj.UserName == friendName);
                 if (friend == null)
                     return Ok(response);
 
@@ -217,6 +244,7 @@ namespace webapi.Controllers
                 return HandleException(ex);
             }
 
+            response.Success = true;
             response.Message = "Group invite request is sent";
 
             return Ok(response);
@@ -235,7 +263,7 @@ namespace webapi.Controllers
                 if (mainUser == null)
                     return Ok(response);
 
-                var groupInvite = mainUser.GroupInvites.FirstOrDefault(invite => invite.GroupEntity.GroupName == groupname);
+                var groupInvite = mainUser.GroupInvites.SingleOrDefault(invite => invite.GroupEntity.GroupName == groupname);
 
                 if (groupInvite == null)
                     return Ok(response);
@@ -275,7 +303,7 @@ namespace webapi.Controllers
                 if (mainUser == null)
                     return Ok(response);
 
-                var groupInvite = mainUser.GroupInvites.FirstOrDefault(group => group.GroupEntity.GroupName == groupname);
+                var groupInvite = mainUser.GroupInvites.SingleOrDefault(group => group.GroupEntity.GroupName == groupname);
                 if (groupInvite == null)
                     return Ok(response);
 
@@ -290,6 +318,37 @@ namespace webapi.Controllers
 
             response.Message = "Successfully decline group invite";
 
+            return Ok(response);
+        }
+
+        [HttpGet("remove")]
+        public async Task<IActionResult> removeUserFromGroupAsync([FromQuery] string groupName, [FromQuery] string friendName)
+        {
+            GroupResponse response = new GroupResponse();
+
+            try
+            {
+                GroupsCreatorsList? group = await DataContext.GroupsCreatorsLists.SingleOrDefaultAsync(obj => obj.GroupName == groupName && obj.Creator.UserName == getUserName());
+                if (group == null)
+                {
+                    response.Message = "You are not creator of the group";
+                    return Ok(response);
+                }
+                GroupMemberList? member = await DataContext.GroupMemberLists.SingleOrDefaultAsync(obj => obj.GroupId == group.GroupId && obj.RelatedUser.UserName == friendName);
+                if(member == null)
+                {
+                    response.Message = "This user isn't member of this group";
+                    return Ok(response);
+                }
+                DataContext.GroupMemberLists.Remove(member);
+                await DataContext.SaveChangesAsync();
+            }
+            catch(Exception ex)
+            {
+                return HandleException(ex);
+            }
+
+            response.Message = "Request has succeeded";
             return Ok(response);
         }
 

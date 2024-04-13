@@ -59,7 +59,7 @@ export const enterTheGroup = async (name) => {
             'Content-Type': 'application/json'
         }
     });
-    if(response.success){
+    if(response.ok){
         let responseData = await response.json();
         return responseData;
     }
@@ -81,8 +81,4 @@ export const leaveTheGroup = async (name) => {
     }
     else
         return {success: false, message: 'Server error'};
-}
-
-export const sendInviteToFriend = async (friend, group) => {
-    return { friend, group};
 }

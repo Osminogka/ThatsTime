@@ -93,6 +93,10 @@ const lastWeek = computed(() => records.value.find(record => record.showType == 
 const today = computed(() => records.value.find(record => record.showType == 0));
 const nextWeek = computed(() => records.value.find(record => record.showType == 7));
 const certain = computed(() => records.value.find(record => record.showType == -1));
+
+const isThereRecentRec = computed(() => 
+    lastWeek.value.records.length > 0 || today.value.records.length > 0 || nextWeek.value.records.length > 0
+);
 </script>
 
 <template>
@@ -102,7 +106,7 @@ const certain = computed(() => records.value.find(record => record.showType == -
     <div v-else-if="error">
         <p style="text-align: center;">{{ error }}</p>
     </div>
-    <div v-else-if="!props.noRecent && !error" class="container-records">
+    <div v-else-if="isThereRecentRec && !error" class="container-records">
             <custom-hide-show :list="lastWeek.records" :showInterface="lastWeek.isHidden"  @showList="getRecordsLocal" :showType="'-7'">
                 Last week
             </custom-hide-show>

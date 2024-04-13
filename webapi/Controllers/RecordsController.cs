@@ -31,6 +31,17 @@ namespace webapi.Controllers
 
             try
             {
+                DateTime date = new DateTime(recordFromFrontEnd.selectedYear, recordFromFrontEnd.selectedMonth, recordFromFrontEnd.selectedDay);
+                Record? doesRecordExist = await DataContext.Records.SingleOrDefaultAsync(obj => obj.RecordName == recordFromFrontEnd.recordName && obj.DateTime.Date == date.Date
+                    && recordFromFrontEnd.yourSelf ? obj.RelatedUser.UserName == getUserName() 
+                    : (recordFromFrontEnd.showGroupList ? obj.RelatedGroup.GroupName == recordFromFrontEnd.selectedObject : obj.RelatedUser.UserName == recordFromFrontEnd.selectedObject)
+                    && obj.CreatorUser.UserName == getUserName());
+                if (doesRecordExist != null)
+                {
+                    response.Message = "Such record already exist";
+                    return Ok(response);
+                }
+
                 GroupsCreatorsList? relatedGroup = null;
                 UserInfo? relatedUser = null;
                 long selectedObjectId = 0;
@@ -55,6 +66,7 @@ namespace webapi.Controllers
                     return Ok(response);
 
                 Record record = new Record(recordFromFrontEnd, selectedObjectId, mainUser.UserId);
+
                 await DataContext.Records.AddAsync(record);
                 await DataContext.SaveChangesAsync();
             }
@@ -176,8 +188,18 @@ namespace webapi.Controllers
                 if (group == null)
                     return Ok(groupInfo);
 
+                List<MemberInfo> members = new List<MemberInfo>();
+                foreach(GroupMemberList member in group.GroupMembers)
+                {
+                    members.Add(new MemberInfo()
+                    {
+                        Name = member.RelatedUser.UserName,
+                        Degree = member.MemberDegree
+                    });
+                }
+
                 groupInfo.Creator = group.Creator.UserName;
-                groupInfo.Members = group.GroupMembers.Select(obj => obj.RelatedUser.UserName).ToList();
+                groupInfo.Members = members;
                 groupInfo.Records = RecordFromFrontEnd.transformToFrontendRecords(group.RecordsForThisGroup.ToList());
                 groupInfo.IsMember = true;
                 groupInfo.isCreator = group.Creator.UserName == getUserName() ? true : false;
@@ -362,8 +384,15 @@ namespace webapi.Controllers
 
         public string Creator { get; set; } = string.Empty;
 
-        public List<string> Members { get; set; } = new List<string>();
+        public List<MemberInfo> Members { get; set; } = new List<MemberInfo>();
 
         public List<RecordFromFrontEnd> Records { get; set; } = new List<RecordFromFrontEnd>();
+    }
+
+    public class MemberInfo
+    {
+        public string Name { get; set; } = string.Empty;
+
+        public string Degree { get; set; } = string.Empty;
     }
 }

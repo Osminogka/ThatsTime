@@ -3,6 +3,7 @@ import { defineProps, defineEmits } from 'vue';
 
 import { sendFriendRequest } from '@/core/addFriend';
 import { enterTheGroup } from '@/core/addGroup';
+import { groupList } from '@/core/userInfo';
 
 const props = defineProps({
     name: String,
@@ -20,7 +21,8 @@ async function friendRequest(){
 async function inviteGroup(){
     let response = await enterTheGroup(props.name);
     if(response.success)
-        emits('group-invite',props.name);
+        emits('group-enter',props.name);
+
 }
 
 </script>

@@ -5,6 +5,7 @@ import { getGroupByName, getGroupList } from '../core/addGroup';
 
 import SocialEntity from '@/view/SocialEntity.vue';
 import LoadingAnimation from '@/view/LoadingAnimation.vue';
+import { groupList } from '@/core/userInfo';
 
 const route = useRoute();
 const router = useRouter();
@@ -80,6 +81,7 @@ function searchGroup(){
 }
 
 function enterTheGroup(groupname){
+    groupList.value.push(groupname);
     groups.value = groups.value.filter(group => group !== groupname);
 }
 
@@ -105,7 +107,7 @@ function enterTheGroup(groupname){
         </div>
         <div class="page-nav-button-container">
             <button v-if="currentPage > 0" class="page-nav-button page-nav-button-prev" @click="prevPage" />
-            <button v-if="groups.length > 9" class="page-nav-button page-nav-button-next" @click="nextPage" />
+            <button v-if="groups.length > 4" class="page-nav-button page-nav-button-next" @click="nextPage" />
         </div>
     </div>
 </template>

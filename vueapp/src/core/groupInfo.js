@@ -59,7 +59,37 @@ export const acceptGroupRequest = async (groupname) => {
 }
 
 export const declineGroupRequest = async (groupname) => {
-    let response = await fetch("/api/groups/declinetinvite?groupName=" + groupname,{
+    let response = await fetch("/api/groups/declineinvite?groupName=" + groupname,{
+        method: 'GET',
+        headers: {'Authorization': 'Bearer ' + localStorage.getItem('jwtToken').replace(/"/g, ''),
+        'Content-Type': 'application/json'
+    }
+    });
+    if(response.ok){
+        let responseData = await response.json();
+        return responseData;
+    }
+    else
+        return {success: false, message: 'Server error'};
+}
+
+export const deleteGroup = async (groupname) => {
+    let response = await fetch("/api/groups/deletegroup?groupName=" + groupname,{
+        method: 'GET',
+        headers: {'Authorization': 'Bearer ' + localStorage.getItem('jwtToken').replace(/"/g, ''),
+        'Content-Type': 'application/json'
+    }
+    });
+    if(response.ok){
+        let responseData = await response.json();
+        return responseData;
+    }
+    else
+        return {success: false, message: 'Server error'};
+}
+
+export const leaveGroup = async (groupname) => {
+    let response = await fetch("/api/groups/leave?groupName=" + groupname,{
         method: 'GET',
         headers: {'Authorization': 'Bearer ' + localStorage.getItem('jwtToken').replace(/"/g, ''),
         'Content-Type': 'application/json'

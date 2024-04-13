@@ -22,7 +22,7 @@ namespace webapi.Controllers
         public async Task<IActionResult> getUsersAsync([FromQuery] int page)
         {
             FriendResponse response = new FriendResponse();
-            const int pageSize = 10;
+            const int pageSize = 5;
             try
             {
                 string mainUsername = getUserName();

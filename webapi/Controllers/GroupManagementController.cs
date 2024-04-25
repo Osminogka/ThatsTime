@@ -120,7 +120,7 @@ namespace webapi.Controllers
                 {
                     MemberId = mainUser.UserId,
                     GroupId = newGroup.GroupId,
-                    MemberDegree = "Creator"
+                    RoleId = DataContext.MemberRoles.SingleOrDefault(obj => obj.RoleName == "Creator")?.Id ?? 0
                 };
 
                 await DataContext.GroupMemberLists.AddAsync(newMember);
@@ -158,7 +158,7 @@ namespace webapi.Controllers
                 {
                     GroupId = group.GroupId,
                     MemberId = mainUser.UserId,
-                    MemberDegree = "Member"
+                    RoleId = DataContext.MemberRoles.SingleOrDefault(obj => obj.RoleName == "Member")?.Id ?? 0
                 };
 
                 await DataContext.GroupMemberLists.AddAsync(newMember);
@@ -272,7 +272,7 @@ namespace webapi.Controllers
                 {
                     GroupId = groupInvite.GroupId,
                     MemberId = mainUser.UserId,
-                    MemberDegree = "Member"
+                    RoleId = DataContext.MemberRoles.SingleOrDefault(obj => obj.RoleName == "Member")?.Id ?? 0
                 };
 
                 DataContext.GroupInvites.Remove(groupInvite);
@@ -394,7 +394,7 @@ namespace webapi.Controllers
                     }
                     else
                     {
-                        firstMember.MemberDegree = "Creator";
+                        firstMember.RoleId = DataContext.MemberRoles.SingleOrDefault(obj => obj.RoleName == "Creator")?.Id ?? 0;
                         group.CreatorId = firstMember.MemberId;
                     }
                 }
@@ -462,7 +462,7 @@ namespace webapi.Controllers
                     return Ok(response);
                 }
 
-                member.MemberDegree = "Moderator";
+                member.RoleId = DataContext.MemberRoles.SingleOrDefault(obj => obj.RoleName == "Moderator")?.Id ?? 0;
                 await DataContext.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -491,7 +491,7 @@ namespace webapi.Controllers
                     return Ok(response);
                 }
 
-                member.MemberDegree = "Member";
+                member.RoleId = DataContext.MemberRoles.SingleOrDefault(obj => obj.RoleName == "Member")?.Id ?? 0;
                 await DataContext.SaveChangesAsync();
             }
             catch (Exception ex)

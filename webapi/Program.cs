@@ -84,7 +84,9 @@ app.UseStaticFiles();
 app.MapFallbackToFile("index.html");
 
 var scope = app.Services.CreateScope();
-scope.ServiceProvider.GetRequiredService<DataContext>().Database.Migrate();
+DataContext context = scope.ServiceProvider.GetRequiredService<DataContext>();
+context.createRoles(scope.ServiceProvider.GetRequiredService<DataContext>());
+context.Database.Migrate();
 scope.ServiceProvider.GetRequiredService<IdentityContext>().Database.Migrate();
 
 app.Run();

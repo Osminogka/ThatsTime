@@ -3,14 +3,27 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace webapi.Migrations.Data
+namespace webapi.Migrations
 {
     /// <inheritdoc />
-    public partial class RecordRelatedUserFix : Migration
+    public partial class RoleTable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "MemberRoles",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    RoleName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MemberRoles", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "UserInfo",
                 columns: table => new
@@ -83,7 +96,8 @@ namespace webapi.Migrations.Data
                     GroupId = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     GroupName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatorId = table.Column<long>(type: "bigint", nullable: false)
+                    CreatorId = table.Column<long>(type: "bigint", nullable: false),
+                    IsGroupClosed = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -130,7 +144,7 @@ namespace webapi.Migrations.Data
                         .Annotation("SqlServer:Identity", "1, 1"),
                     GroupId = table.Column<long>(type: "bigint", nullable: false),
                     MemberId = table.Column<long>(type: "bigint", nullable: false),
-                    MemberDegree = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    RoleId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -141,6 +155,12 @@ namespace webapi.Migrations.Data
                         principalTable: "GroupsCreatorsLists",
                         principalColumn: "GroupId",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_GroupMemberLists_MemberRoles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "MemberRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_GroupMemberLists_UserInfo_MemberId",
                         column: x => x.MemberId,
@@ -229,6 +249,11 @@ namespace webapi.Migrations.Data
                 column: "MemberId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_GroupMemberLists_RoleId",
+                table: "GroupMemberLists",
+                column: "RoleId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_GroupsCreatorsLists_CreatorId",
                 table: "GroupsCreatorsLists",
                 column: "CreatorId");
@@ -266,6 +291,9 @@ namespace webapi.Migrations.Data
 
             migrationBuilder.DropTable(
                 name: "Records");
+
+            migrationBuilder.DropTable(
+                name: "MemberRoles");
 
             migrationBuilder.DropTable(
                 name: "GroupsCreatorsLists");

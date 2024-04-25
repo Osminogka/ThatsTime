@@ -182,6 +182,7 @@ namespace webapi.Controllers
                 GroupsCreatorsList? group = await DataContext.GroupsCreatorsLists
                     .Include(group => group.RecordsForThisGroup.Where(obj => obj.DateTime >= sevenDaysAgo && obj.DateTime <= sevenDaysLater)).ThenInclude(obj => obj.CreatorUser)
                     .Include(group => group.GroupMembers).ThenInclude(member => member.RelatedUser)
+                    .Include(group => group.GroupMembers).ThenInclude(role => role.Role)
                     .Include(group => group.Creator)
                     .SingleOrDefaultAsync(obj => obj.GroupName == groupName && obj.GroupMembers.SingleOrDefault(obj => obj.RelatedUser.UserName == getUserName()) != null);
 
@@ -194,7 +195,7 @@ namespace webapi.Controllers
                     members.Add(new MemberInfo()
                     {
                         Name = member.RelatedUser.UserName,
-                        Degree = member.MemberDegree
+                        Degree = member.Role.RoleName
                     });
                 }
 

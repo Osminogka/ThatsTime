@@ -19,7 +19,8 @@ namespace webapi.Models
         //Navigation property to UserInfo
         public UserInfo RelatedUser { get; set; }
 
-        [Required]
-        public string MemberDegree { get; set; } = string.Empty;
+        public long RoleId { get; set; }
+
+        public MemberRole Role { get; set; }
     }
 }

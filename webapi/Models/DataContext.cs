@@ -13,6 +13,7 @@ namespace webapi.Models
         public DbSet<FriendsList> FriendsLists => Set<FriendsList>();
         public DbSet<FriendInvites> FriendInvites => Set<FriendInvites>();
         public DbSet<UserInfo> UserInfo => Set<UserInfo>();
+        public DbSet<MemberRole> MemberRoles => Set<MemberRole>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -56,6 +57,12 @@ namespace webapi.Models
                 .HasMany(e => e.GroupMembers)
                 .WithOne(e => e.RelatedUser)
                 .HasForeignKey(e => e.MemberId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<GroupMemberList>()
+                .HasOne(e => e.Role)
+                .WithMany(e => e.Members)
+                .HasForeignKey(e => e.RoleId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             //UserInfo userId & Friend Invites sender userId
@@ -107,6 +114,36 @@ namespace webapi.Models
                 .HasForeignKey(e => e.RelatedUserId)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
+        }
+
+        public async Task createRoles(DataContext dataContext)
+        {
+            MemberRole? role = dataContext.MemberRoles.SingleOrDefault(obj => obj.Id == 1);
+            if (role != null)
+                return;
+
+            List<MemberRole> roles = new List<MemberRole>()
+            {
+                new MemberRole
+                {
+                    RoleName = "Undefined"
+                },
+                new MemberRole
+                {
+                    RoleName = "Creator"
+                },
+                new MemberRole
+                {
+                    RoleName = "Moderator"
+                },
+                new MemberRole
+                {
+                    RoleName = "Member"
+                }
+            };
+
+            await dataContext.MemberRoles.AddRangeAsync(roles);
+            await dataContext.SaveChangesAsync();
         }
     }
 }

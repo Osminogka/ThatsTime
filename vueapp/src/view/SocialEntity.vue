@@ -3,7 +3,6 @@ import { defineProps, defineEmits } from 'vue';
 
 import { sendFriendRequest } from '@/core/addFriend';
 import { enterTheGroup } from '@/core/addGroup';
-import { groupList } from '@/core/userInfo';
 
 const props = defineProps({
     name: String,

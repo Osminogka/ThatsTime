@@ -9,11 +9,11 @@ using webapi.Models;
 
 #nullable disable
 
-namespace webapi.Migrations.Data
+namespace webapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240408193119_RecordRelatedUserFix")]
-    partial class RecordRelatedUserFix
+    [Migration("20240425182759_RoleTable")]
+    partial class RoleTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -105,11 +105,10 @@ namespace webapi.Migrations.Data
                     b.Property<long>("GroupId")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("MemberDegree")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<long>("MemberId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("RoleId")
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
@@ -117,6 +116,8 @@ namespace webapi.Migrations.Data
                     b.HasIndex("GroupId");
 
                     b.HasIndex("MemberId");
+
+                    b.HasIndex("RoleId");
 
                     b.ToTable("GroupMemberLists");
                 });
@@ -136,11 +137,32 @@ namespace webapi.Migrations.Data
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsGroupClosed")
+                        .HasColumnType("bit");
+
                     b.HasKey("GroupId");
 
                     b.HasIndex("CreatorId");
 
                     b.ToTable("GroupsCreatorsLists");
+                });
+
+            modelBuilder.Entity("webapi.Models.MemberRole", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("RoleName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MemberRoles");
                 });
 
             modelBuilder.Entity("webapi.Models.Record", b =>
@@ -281,9 +303,17 @@ namespace webapi.Migrations.Data
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("webapi.Models.MemberRole", "Role")
+                        .WithMany("Members")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("RelatedGroup");
 
                     b.Navigation("RelatedUser");
+
+                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("webapi.Models.GroupsCreatorsList", b =>
@@ -329,6 +359,11 @@ namespace webapi.Migrations.Data
                     b.Navigation("GroupMembers");
 
                     b.Navigation("RecordsForThisGroup");
+                });
+
+            modelBuilder.Entity("webapi.Models.MemberRole", b =>
+                {
+                    b.Navigation("Members");
                 });
 
             modelBuilder.Entity("webapi.Models.UserInfo", b =>

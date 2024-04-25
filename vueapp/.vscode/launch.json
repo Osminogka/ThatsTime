@@ -5,15 +5,14 @@
       "type": "edge",
       "request": "launch",
       "name": "localhost (Edge)",
-      "url": "https://localhost",
-      "webRoot": "${workspaceFolder}",
-      "stopOnEntry": true
+      "url": "https://192.168.0.57:443",
+      "webRoot": "${workspaceFolder}"
     },
     {
       "type": "chrome",
       "request": "launch",
       "name": "localhost (Chrome)",
-      "url": "https://localhost",
+      "url": "https://192.168.0.57:443",
       "webRoot": "${workspaceFolder}"
     }
   ]

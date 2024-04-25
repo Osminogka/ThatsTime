@@ -13,6 +13,10 @@
       "type": "mssql.onprem",
       "connectionId": "ConnectionStrings:IdentityConnection",
       "dynamicId": null
+    },
+    "identityapp1": {
+      "connectionInfo": "App registration: ThatsTime, Tenant: Default Directory (davidkorobcenkogmail.onmicrosoft.com - Microsoft Entra ID)",
+      "type": "identityapp.default"
     }
   }
 }

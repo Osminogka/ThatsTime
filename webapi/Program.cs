@@ -7,6 +7,8 @@ using System.Text;
 using static Microsoft.AspNetCore.Http.StatusCodes;
 
 using webapi.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.Identity.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,10 +61,13 @@ builder.Services.AddAuthentication()
             ValidateAudience = false,
             ValidateLifetime = true,
         };
-    });
+    })
+    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
 //Jwt configuration ends here
 
 builder.Services.AddAuthorization();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
 
 builder.Services.AddControllers();
 

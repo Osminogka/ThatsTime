@@ -2,14 +2,17 @@
 
 import { ref, reactive, watch, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { vOnClickOutside } from '@vueuse/components';
 
 import { getRecordsWithGroup } from '../core/userRecords';
 import { user } from '@/core/userInfo';
+import { todayDate } from '@/core/month';
 
 import RecordList from '@/view/RecordsList.vue'
 import LoadingAnimation from '@/view/LoadingAnimation.vue';
-import { friendList } from '@/core/userInfo';
-import { inviteFriendToGroup, removeMemberFromGroup, promoteMemberInGroup, demoteMemberInGroup } from '../core/groupInfo'
+import { friendList, groupList } from '@/core/userInfo';
+import { inviteFriendToGroup, removeMemberFromGroup, promoteMemberInGroup, 
+    demoteMemberInGroup, deleteGroup, leaveGroup } from '../core/groupInfo'
 
 const route = useRoute();
 const router = useRouter();
@@ -46,26 +49,36 @@ async function fetchData() {
     error.value = null;
     loading.value = true;
     try{
-        let newData = await getRecordsWithGroup(route.params.groupname);
-
-        // Clear the current object
-        for (let key in infoAboutGroup) {
-            delete infoAboutGroup[key];
+        let result = await getRecordsWithGroup(route.params.groupname,{
+            year: todayDate.getFullYear(),
+            month: todayDate.getMonth() + 1,
+            day: todayDate.getDate()
+        });
+        if(result.isMember){
+            infoAboutGroup.records = result.records;
+            infoAboutGroup.members = result.members;
+            infoAboutGroup.isMember = result.isMember;
+            infoAboutGroup.isCreator = result.isCreator;
+            infoAboutGroup.Creator = result.creator;
         }
-        // Add new properties
-        for (let key in newData) {
-            infoAboutGroup[key] = newData[key];
+        else{
+            infoAboutGroup.records = [];
+            infoAboutGroup.members = [];
+            infoAboutGroup.isMember = false;
+            infoAboutGroup.isCreator = false;
+            infoAboutGroup.Creator = '';
         }
     } catch (e) {
         error.value = e;
     }finally{
         loading.value = false;
+        friendToInvite.value = friendList.value;
     }
 }
 
 const lastMember = computed(() => infoAboutGroup.members[infoAboutGroup.members.length - 1]);
 
-const friendToInvite = ref([...friendList.value])
+const friendToInvite = ref([])
 
 const lastToInvite = computed(() => friendToInvite.value[friendToInvite.value.length - 1].name);
 
@@ -81,18 +94,41 @@ function showOptionalActions(action){
     }
 }
 
-async function leaveGroup(){
-    await removeMemberFromGroup(user.value.nickname);
-    router.push('/');
+async function leaveGroupLocal(){
+    let response = await leaveGroup(route.params.groupname);
+    if(response.success){
+        groupList.value = groupList.value.filter(group => group !== route.params.groupname);
+        router.push('/');
+    }
+    else
+        error.value = response.message;
 }
 
 async function removeMember(memberName){
-    await removeMemberFromGroup(memberName);
+    let response = await removeMemberFromGroup(route.params.groupname, memberName);
+    if(response.success)
+        infoAboutGroup.members = infoAboutGroup.members.filter(member => member.name !== memberName);
+    else
+        error.value = response.message;
 }
 
 async function inviteToGroup(friendName){
-    await inviteFriendToGroup(friendName);
-    friendToInvite.value = friendToInvite.value.filter(friend => friend.name !== friendName);
+    let response = await inviteFriendToGroup(friendName, route.params.groupname);
+    if(response.success)
+        friendToInvite.value = friendToInvite.value.filter(friend => friend !== friendName);
+    else
+        error.value = "Failed to send invite";
+}
+
+async function deleteGroupLocal(){
+    let response = await deleteGroup(route.params.groupname);
+    if(response.success)
+    {
+        groupList.value = groupList.value.filter(group => group !== route.params.groupname);
+        router.push('/');
+    }
+    else
+        error.value = response.message;
 }
 
 async function promoteMember(memberName){
@@ -101,6 +137,11 @@ async function promoteMember(memberName){
 
 async function demoteMember(memberName){
     await demoteMemberInGroup(memberName);
+}
+
+function hideGroupInfo(){
+    if(event.target.id != 'showGroupInfo')
+    showInterface.showGroupInfo = false;
 }
 </script>
 
@@ -113,10 +154,10 @@ async function demoteMember(memberName){
         <div v-else-if="infoAboutGroup.isMember">
             <div class="header-container">
                 <div class="friend-info-header">{{ route.params.groupname }}</div>
-                <button class="group-show-info-button custom-button" @click="showInterface.showGroupInfo = !showInterface.showGroupInfo" />
-                <button v-if="infoAboutGroup.isCreator" class="delete-group-button custom-button" @click="deleteGroup()"></button>
+                <button id="showGroupInfo" class="group-show-info-button custom-button" @click="showInterface.showGroupInfo = !showInterface.showGroupInfo" />
+                <button v-if="infoAboutGroup.isCreator" class="delete-group-button custom-button" @click="deleteGroupLocal()"></button>
                 <Transition name="bounce">
-                    <div class="group-actions-container" v-if="showInterface.showGroupInfo">
+                    <div class="group-actions-container" v-if="showInterface.showGroupInfo" v-on-click-outside="hideGroupInfo">
                         <div class="header-container">
                             <button class="show-invite-friend-button" @click="showOptionalActions('invite')">Invite</button>
                             <button class="show-invite-friend-button" @click="showOptionalActions('leave')">Leave</button>
@@ -124,13 +165,13 @@ async function demoteMember(memberName){
                         <div v-if="showInterface.showFriendInviteBox" class="frieds-container">
                             <div class="info-social-header">Invite</div>
                             <div :class="{'member-enitity': member !== lastToInvite,'member-enitity-last': member === lastToInvite}" v-for="(friend, index) in friendToInvite" :key="index">
-                                <p>{{ friend.name }}</p>
-                                <button class="invite-friend-button custom-button" @click="inviteToGroup(friend.name)" />
+                                <p>{{ friend }}</p>
+                                <button class="invite-friend-button custom-button" @click="inviteToGroup(friend)" />
                             </div>
                         </div>
                         <div class="leave-group-option" v-else-if="showInterface.showLeaveOption">
                             <p style="text-align: center;">Leave this group?</p>
-                            <button class="leave-button" @click="leaveGroup()">Leave</button>
+                            <button class="leave-button" @click="leaveGroupLocal()">Leave</button>
                         </div>
                     </div>
                 </Transition>
@@ -139,19 +180,22 @@ async function demoteMember(memberName){
             <div class="social-action-container">
                 <div class="members-container">
                     <div class="info-social-header">Members</div>
-                    <div v-for="(member, index) in infoAboutGroup.members" 
+                    <div v-for="(member, index) in infoAboutGroup.members" class="member-list"
                         :class="{'member-enitity': member !== lastMember,'member-enitity-last': member === lastMember}" :key="index">
-                        <p>{{ member }}</p>
-                        <div v-if="infoAboutGroup.isCreator" class="member-action-buttons">
-                            <button class="promote-member custom-button" @click="promoteMember(member)"/>
-                            <button class="demote-member custom-button" @click="demoteMember(member)" />
-                            <button class="remove-friend-button custom-button" @click="removeMember(member)" />
+                        <div class="member-name-degree">
+                            <p>{{ member.name }}</p>
+                            <p class="member-degree">{{ member.degree }}</p>
+                        </div>
+                        <div v-if="infoAboutGroup.isCreator && user.name != member.name" class="member-action-buttons">
+                            <button class="promote-member custom-button" @click="promoteMember(member.name)"/>
+                            <button class="demote-member custom-button" @click="demoteMember(member.name)" />
+                            <button class="remove-friend-button custom-button" @click="removeMember(member.name)" />
                         </div>
                     </div>
                 </div>
             </div>
                 <h2 style="text-align: center;">Group Records</h2>
-                <record-list :no-recent="infoAboutGroup.records.length === 0" :group="$route.params.groupname" />
+                <record-list :records="infoAboutGroup.records" :group="$route.params.groupname" />
         </div>
         <div v-if="!infoAboutGroup.isMember">
             <h1 class="not-your-friend">You are not member of such group</h1>
@@ -176,7 +220,7 @@ async function demoteMember(memberName){
     display: flex;
     flex-direction: column;
     position: absolute;
-    left: 9em;
+    left: 6.5em;
     border: 3px solid black;
     border-radius: 5px;
     background-color: #03f7ff;
@@ -275,11 +319,15 @@ async function demoteMember(memberName){
     padding-right: 10px;
 }
 
+.member-list{
+    min-width: 15em;
+}
+
 .member-action-buttons{
     display: flex;
+    justify-content: flex-end;
     flex-direction: row;
     margin-left: auto;
-    margin-left: 5em;
 }
 
 .info-header{
@@ -374,6 +422,18 @@ async function demoteMember(memberName){
   100% {
     transform: scale(1);
   }
+}
+
+.member-name-degree{
+    display: flex;
+    flex-direction: column;
+}
+
+.member-degree{
+    font-size: 0.8em;
+    font-weight: bold;
+    color: gray;
+    margin-top: -5px;
 }
 
 </style>

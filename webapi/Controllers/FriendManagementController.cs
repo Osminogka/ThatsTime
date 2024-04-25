@@ -19,23 +19,22 @@ namespace webapi.Controllers
         }
 
         [HttpGet("getusers")]
-        public async Task<IActionResult> getUsers([FromQuery] int page)
+        public async Task<IActionResult> getUsersAsync([FromQuery] int page)
         {
-            List<string> users = new List<string>();
             FriendResponse response = new FriendResponse();
-            const int pageSize = 10;
+            const int pageSize = 5;
             try
             {
                 string mainUsername = getUserName();
 
-                users = await DataContext.UserInfo
-                    .Where(obj => (obj.UserName != mainUsername) && 
+                response.FriendList.AddRange(await DataContext.UserInfo
+                    .Where(obj => (obj.UserName != mainUsername) &&
                         obj.FirstFromFriendList.Where(friend => friend.FirstUserInfo.UserName != mainUsername || friend.SecondUserInfo.UserName != mainUsername).Count() == 0 &&
                         obj.SecondFromFriendList.Where(friend => friend.FirstUserInfo.UserName != mainUsername || friend.SecondUserInfo.UserName != mainUsername).Count() == 0)
                     .Skip(page * pageSize)
                     .Take(pageSize)
                     .Select(obj => obj.UserName)
-                    .ToListAsync();
+                    .ToListAsync());
             }
             catch(Exception ex)
             {
@@ -43,8 +42,37 @@ namespace webapi.Controllers
             }
 
             response.Success = true;
-            response.FriendList = users;
             response.Message = "Request has succeeded";
+            return Ok(response);
+        }
+
+        [HttpGet("getcertainuser")]
+        public async Task<IActionResult> getCertainUserAsync([FromQuery] string username)
+        {
+            FriendResponse response = new FriendResponse();
+            try
+            {
+                string mainUsername = getUserName();
+                UserInfo? certainUser = await DataContext.UserInfo
+                    .SingleOrDefaultAsync(obj => (obj.UserName != mainUsername) && (obj.UserName == username) &&
+                        obj.FirstFromFriendList.Where(friend => friend.FirstUserInfo.UserName != mainUsername || friend.SecondUserInfo.UserName != mainUsername).Count() == 0 &&
+                        obj.SecondFromFriendList.Where(friend => friend.FirstUserInfo.UserName != mainUsername || friend.SecondUserInfo.UserName != mainUsername).Count() == 0);
+
+                if(certainUser == null)
+                {
+                    response.Message = "Such user doesn't exist";
+                    return Ok(response);
+                }
+
+                response.FriendList.Add(certainUser.UserName);
+            }
+            catch(Exception ex)
+            {
+                return HandleException(ex);
+            }
+
+            response.Success = true;
+            response.Message = "Got certain user";
             return Ok(response);
         }
 
@@ -79,27 +107,29 @@ namespace webapi.Controllers
 
             try
             {
-                FriendsInfo friendsInfo = await areFriends(FriendName);
-                if(friendsInfo.AreFriends)
+                if(await areFriends(FriendName))
                     return Ok(response);
 
-                FriendInvites friendInvite = new FriendInvites()
-                {
-                    SenderUserId = friendsInfo.MainUserId,
-                    TargetUserId = friendsInfo.FriendUserId
-                };
+                FriendInvites? friendInvite = await DataContext.FriendInvites
+                    .SingleOrDefaultAsync(obj => obj.SenderUserInfo.UserName == getUserName() && obj.TargetUserInfo.UserName == FriendName);
 
-                var doesInviteExist = await DataContext.FriendInvites
-                    .SingleOrDefaultAsync(obj => obj.SenderUserId == friendsInfo.MainUserId && obj.TargetUserId == friendsInfo.FriendUserId);
-
-                if (doesInviteExist != null)
+                if (friendInvite != null)
                 {
                     response.Success = true;
                     response.Message = "Such invite already exist";
                     return Ok(response);
                 }
 
-                await DataContext.FriendInvites.AddAsync(friendInvite);
+                UserInfo? mainUser = await DataContext.UserInfo.SingleOrDefaultAsync(obj => obj.UserName == getUserName());
+                UserInfo? friendUser = await DataContext.UserInfo.SingleOrDefaultAsync(obj => obj.UserName == FriendName);
+
+                FriendInvites invite = new FriendInvites()
+                {
+                    SenderUserId = mainUser.UserId,
+                    TargetUserId = friendUser.UserId
+                };
+
+                await DataContext.FriendInvites.AddAsync(invite);
                 await DataContext.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -231,47 +261,22 @@ namespace webapi.Controllers
             return Ok(response);
         }
 
-        private async Task<FriendsInfo> areFriends(string friendName)
+        private async Task<bool> areFriends(string friendName)
         {
-            FriendsInfo friendsInfo = new FriendsInfo();
-
             try
             {
-                UserInfo? mainUser = await DataContext.UserInfo.SingleOrDefaultAsync(obj => obj.UserName == getUserName());
-                if (mainUser == null)
-                    return friendsInfo;
-
-                UserInfo? friendUser = await DataContext.UserInfo.SingleOrDefaultAsync(obj => obj.UserName == friendName);
-                if (friendName == null)
-                    return friendsInfo;
-
-                long firstUserId = Math.Max(mainUser.UserId, friendUser.UserId);
-                long secondUserId = Math.Min(mainUser.UserId, friendUser.UserId);
-
-                FriendsList? areFriends = await DataContext.FriendsLists.SingleOrDefaultAsync(obj => obj.FirstUserId == firstUserId && obj.SecondUserId == secondUserId);
+                FriendsList? areFriends = await DataContext.FriendsLists.SingleOrDefaultAsync(obj => (obj.FirstUserInfo.UserName == getUserName() && obj.SecondUserInfo.UserName == friendName) ||
+                    (obj.FirstUserInfo.UserName == friendName && obj.SecondUserInfo.UserName == getUserName()));
                 if (areFriends == null)
-                    return friendsInfo;
+                    return false;
 
-                friendsInfo.AreFriends = true;
-                friendsInfo.FriendUserId = friendUser.UserId;
-                friendsInfo.MainUserId = mainUser.UserId;
-
-                return friendsInfo;
+                return true;
             }
             catch(Exception ex)
             {
                 Console.WriteLine(ex);
-                return friendsInfo;
+                return false;
             }
-        }
-
-        private class FriendsInfo
-        {
-            public bool AreFriends { get; set; } = false;
-
-            public long MainUserId { get; set; }
-
-            public long FriendUserId { get; set; }
         }
     }
 

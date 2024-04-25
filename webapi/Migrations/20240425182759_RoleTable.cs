@@ -1,50 +1,27 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace webapi.Migrations.Data
+namespace webapi.Migrations
 {
     /// <inheritdoc />
-    public partial class FriendInvites : Migration
+    public partial class RoleTable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "FriendsLists",
+                name: "MemberRoles",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    FirstUserId = table.Column<long>(type: "bigint", nullable: false),
-                    SecondUserId = table.Column<long>(type: "bigint", nullable: false)
+                    RoleName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_FriendsLists", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Records",
-                columns: table => new
-                {
-                    RecordId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    SelectedYear = table.Column<int>(type: "int", nullable: false),
-                    SelectedMonth = table.Column<int>(type: "int", nullable: false),
-                    SelectedDay = table.Column<int>(type: "int", nullable: false),
-                    SelectedObjectId = table.Column<long>(type: "bigint", nullable: false),
-                    CreatorId = table.Column<long>(type: "bigint", nullable: false),
-                    YourSelf = table.Column<bool>(type: "bit", nullable: false),
-                    ShowGroupList = table.Column<bool>(type: "bit", nullable: false),
-                    Hour = table.Column<int>(type: "int", nullable: false),
-                    Minute = table.Column<int>(type: "int", nullable: false),
-                    RecordName = table.Column<string>(type: "nvarchar(1)", maxLength: 1, nullable: false),
-                    RecordContent = table.Column<string>(type: "nvarchar(1)", maxLength: 1, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Records", x => x.RecordId);
+                    table.PrimaryKey("PK_MemberRoles", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -66,8 +43,8 @@ namespace webapi.Migrations.Data
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    SenderUserId = table.Column<long>(type: "bigint", maxLength: 450, nullable: false),
-                    TargetUserId = table.Column<long>(type: "bigint", maxLength: 450, nullable: false)
+                    SenderUserId = table.Column<long>(type: "bigint", nullable: false),
+                    TargetUserId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -87,13 +64,40 @@ namespace webapi.Migrations.Data
                 });
 
             migrationBuilder.CreateTable(
+                name: "FriendsLists",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FirstUserId = table.Column<long>(type: "bigint", nullable: false),
+                    SecondUserId = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FriendsLists", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_FriendsLists_UserInfo_FirstUserId",
+                        column: x => x.FirstUserId,
+                        principalTable: "UserInfo",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_FriendsLists_UserInfo_SecondUserId",
+                        column: x => x.SecondUserId,
+                        principalTable: "UserInfo",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "GroupsCreatorsLists",
                 columns: table => new
                 {
                     GroupId = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     GroupName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatorId = table.Column<long>(type: "bigint", nullable: false)
+                    CreatorId = table.Column<long>(type: "bigint", nullable: false),
+                    IsGroupClosed = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -140,7 +144,7 @@ namespace webapi.Migrations.Data
                         .Annotation("SqlServer:Identity", "1, 1"),
                     GroupId = table.Column<long>(type: "bigint", nullable: false),
                     MemberId = table.Column<long>(type: "bigint", nullable: false),
-                    MemberDegree = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    RoleId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -152,8 +156,53 @@ namespace webapi.Migrations.Data
                         principalColumn: "GroupId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
+                        name: "FK_GroupMemberLists_MemberRoles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "MemberRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
                         name: "FK_GroupMemberLists_UserInfo_MemberId",
                         column: x => x.MemberId,
+                        principalTable: "UserInfo",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Records",
+                columns: table => new
+                {
+                    RecordId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    DateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsRecordForGroup = table.Column<bool>(type: "bit", nullable: false),
+                    RelatedUserId = table.Column<long>(type: "bigint", nullable: true),
+                    RelatedGroupId = table.Column<long>(type: "bigint", nullable: true),
+                    CreatorId = table.Column<long>(type: "bigint", nullable: false),
+                    IsRecordForYourSelf = table.Column<bool>(type: "bit", nullable: false),
+                    Importance = table.Column<int>(type: "int", nullable: false),
+                    RecordName = table.Column<string>(type: "nvarchar(50)", maxLength: 1, nullable: false),
+                    RecordContent = table.Column<string>(type: "nvarchar(500)", maxLength: 1, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Records", x => x.RecordId);
+                    table.ForeignKey(
+                        name: "FK_Records_GroupsCreatorsLists_RelatedGroupId",
+                        column: x => x.RelatedGroupId,
+                        principalTable: "GroupsCreatorsLists",
+                        principalColumn: "GroupId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Records_UserInfo_CreatorId",
+                        column: x => x.CreatorId,
+                        principalTable: "UserInfo",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Records_UserInfo_RelatedUserId",
+                        column: x => x.RelatedUserId,
                         principalTable: "UserInfo",
                         principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
@@ -168,6 +217,16 @@ namespace webapi.Migrations.Data
                 name: "IX_FriendInvites_TargetUserId",
                 table: "FriendInvites",
                 column: "TargetUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FriendsLists_FirstUserId",
+                table: "FriendsLists",
+                column: "FirstUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FriendsLists_SecondUserId",
+                table: "FriendsLists",
+                column: "SecondUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_GroupInvites_GroupId",
@@ -190,9 +249,29 @@ namespace webapi.Migrations.Data
                 column: "MemberId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_GroupMemberLists_RoleId",
+                table: "GroupMemberLists",
+                column: "RoleId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_GroupsCreatorsLists_CreatorId",
                 table: "GroupsCreatorsLists",
                 column: "CreatorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Records_CreatorId",
+                table: "Records",
+                column: "CreatorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Records_RelatedGroupId",
+                table: "Records",
+                column: "RelatedGroupId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Records_RelatedUserId",
+                table: "Records",
+                column: "RelatedUserId");
         }
 
         /// <inheritdoc />
@@ -212,6 +291,9 @@ namespace webapi.Migrations.Data
 
             migrationBuilder.DropTable(
                 name: "Records");
+
+            migrationBuilder.DropTable(
+                name: "MemberRoles");
 
             migrationBuilder.DropTable(
                 name: "GroupsCreatorsLists");

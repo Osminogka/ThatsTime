@@ -1,11 +1,7 @@
-import { reactive } from "vue";
 import { friendList, groupList, user } from "./userInfo";
 import { shortMonthNames, todayDate } from "./month";
 
-var records = reactive([]);
-let recordOnServer = [];
-
-export const getRecordsFromLocal = (date) => {
+export const getRecordsFromLocal = (records, date) => {
     let startDay = Math.min(date, todayDate.getDate());
     let endDay = Math.max(date, todayDate.getDate());
     return records.filter(record => record.selectedMonth === todayDate.getMonth() + 1 && record.selectedYear === todayDate.getFullYear() 
@@ -25,10 +21,9 @@ export const getRecords = async (date) => {
     });
     if(response.ok) {
         let responseData = await response.json();
-        records = responseData.records;
-        return true;
+        return responseData;
     }
-    return false;
+    return {success: false, message: 'Server error'};
 }
 
 export const getCertainRecord = async (CertainRecord) =>  {
@@ -53,35 +48,44 @@ export const getCertainRecord = async (CertainRecord) =>  {
         return {success: false, message: 'Server error'};
 }
 
-export const getRecordsWithFriend = (friendName) => {
-    if(friendList.value.some(obj => obj.name === friendName)) 
-        return {
-            isFriend: true,
-            records: [...recordOnServer.filter(record => (record.selectedObject === friendName  || record.Creator === friendName) && record.yourSelf === false && record.showGroupList === false)]
-        };
+export const getRecordsWithFriend = async (friendName,date) => {
+    let searchParams = new URLSearchParams({
+        friendName,
+        ...date
+    });
+    let response = await fetch(`/api/records/friend?${searchParams}`,{
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('jwtToken').replace(/"/g, ''),
+            'Content-Type': 'application/json'
+        }
+    });
+    if(response.ok) {
+        let responseData = await response.json();
+        return responseData;
+    }
     else
-        return {
-            isFriend: false,
-            records: []
-        };
+        return {success: false, message: 'Server error'};
 }
 
-export const getRecordsWithGroup = (groupName) => {
-    if(groupList.value.some(obj => obj.name === groupName)) 
-        return {
-            isMember: true,
-            isCreator: groupList.value.find(obj => obj.name === groupName).creator === user.value.name,
-            Creator: groupList.value.find(obj => obj.name === groupName).creator,
-            members: ['test1', 'test2', 'test3'],
-            records: recordOnServer.filter(record => record.selectedObject === groupName && record.showGroupList === true)
-        };
+export const getRecordsWithGroup = async (groupName, date) => {
+    let searchParams = new URLSearchParams({
+        groupName,
+        ...date
+    });
+    let response = await fetch(`/api/records/groupinfo?${searchParams}`,{
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('jwtToken').replace(/"/g, ''),
+            'Content-Type': 'application/json'
+        }
+    });
+    if(response.ok) {
+        let responseData = await response.json();
+        return responseData;
+    }
     else
-        return {
-            isMember: false,
-            isCreator: false,
-            members: [],
-            records: []
-        };
+        return {success: false, message: 'Server error'};
 }
 
 export const postRecord = async (record) => {

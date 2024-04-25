@@ -4,16 +4,13 @@ import CustomHideShow from '@/view/CustomHideShow.vue';
 import LoadingAnimation from '@/view/LoadingAnimation.vue';
 
 import DateSelector from '@/view/DateSelector.vue';
-import { getRecords, getCertainRecord, getRecordsFromLocal } from '../core/userRecords'
+import { getCertainRecord, getRecordsFromLocal } from '../core/userRecords'
 import { todayDate } from '@/core/month';
 
 import { ref, onBeforeMount, defineProps, computed } from 'vue';
 
 const props = defineProps({
-    noRecent: {
-        type: Boolean,
-        required: true,
-    },
+    records: Array,
     group: String,
     friend: String,
     all: Boolean
@@ -23,21 +20,9 @@ const error = ref("");
 const loading = ref(false);
 
 onBeforeMount(async () => {
-    loading.value = true;
-    let response = await getRecords({
-        year: todayDate.getFullYear(),
-        month: todayDate.getMonth() + 1,
-        day: todayDate.getDate()
-    });
-
-    if(response){
-        records.value.find(record => record.showType == 0).records = getRecordsFromLocal(todayDate.getDate());
-        records.value.find(record => record.showType == 7).records = getRecordsFromLocal(todayDate.getDate() + 7);
-        records.value.find(record => record.showType == -7).records = getRecordsFromLocal(todayDate.getDate() - 7);
-    }
-    else
-        error.value = "An error occured while getting records!";
-    loading.value = false;
+    records.value.find(record => record.showType == 0).records = getRecordsFromLocal(props.records, todayDate.getDate());
+    records.value.find(record => record.showType == 7).records = getRecordsFromLocal(props.records, todayDate.getDate() + 7);
+    records.value.find(record => record.showType == -7).records = getRecordsFromLocal(props.records, todayDate.getDate() - 7);
 });
 
 const records = ref([
@@ -108,6 +93,10 @@ const lastWeek = computed(() => records.value.find(record => record.showType == 
 const today = computed(() => records.value.find(record => record.showType == 0));
 const nextWeek = computed(() => records.value.find(record => record.showType == 7));
 const certain = computed(() => records.value.find(record => record.showType == -1));
+
+const isThereRecentRec = computed(() => 
+    lastWeek.value.records.length > 0 || today.value.records.length > 0 || nextWeek.value.records.length > 0
+);
 </script>
 
 <template>
@@ -117,7 +106,7 @@ const certain = computed(() => records.value.find(record => record.showType == -
     <div v-else-if="error">
         <p style="text-align: center;">{{ error }}</p>
     </div>
-    <div v-else-if="!props.noRecent && !error" class="container-records">
+    <div v-else-if="isThereRecentRec && !error" class="container-records">
             <custom-hide-show :list="lastWeek.records" :showInterface="lastWeek.isHidden"  @showList="getRecordsLocal" :showType="'-7'">
                 Last week
             </custom-hide-show>

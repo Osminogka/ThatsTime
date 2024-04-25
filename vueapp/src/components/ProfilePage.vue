@@ -6,7 +6,8 @@ import LoadingAnimation from '@/view/LoadingAnimation.vue';
 import { ref, reactive, onBeforeMount} from 'vue';
 import { friendList, friendRequests, groupInvites, groupList, user} from '../core/userInfo';
 import { getMyFriendRequests, getMyGroupInvites, acceptFriendRequest, declineFriendRequest, deleteFriend} from '../core/userInfo';
-import { acceptGroupRequest, declineGroupRequest} from '../core/groupInfo';
+import { acceptGroupRequest, declineGroupRequest } from '../core/groupInfo';
+import { leaveTheGroup } from '../core/addGroup';
 
 const error = ref("");
 let loading = ref(false);
@@ -15,12 +16,18 @@ onBeforeMount(async () => {
   loading.value = true;
   error.value = null;
   let friendInviteResponse = await getMyFriendRequests();
-  await getMyGroupInvites();
+  let groupInviteResponse = await getMyGroupInvites();
   if(friendInviteResponse.success)
     friendRequests.value = friendInviteResponse.friendList;
   else{
     friendRequests.value = [];
     error.value = "Error getting friend invites";
+  }
+  if(groupInviteResponse.success)
+    groupInvites.value = groupInviteResponse.groups;
+  else{
+    friendRequests.value = [];
+    error.value = "Error getting group invites";
   }
   loading.value = false;
 });
@@ -90,11 +97,22 @@ async function declineGroupInvite(groupname){
 
 async function deleteFriendLocal(friendname){
   let response = await deleteFriend(friendname);
-  if(response.success){
+  if(response){
     friendList.value = friendList.value.filter((friend) => friend != friendname);
   }
   else{
     error.value = "Error deleting friend";
+  }
+  loading.value = false;
+}
+
+async function leaveGroupLocal(groupname){
+  let response = await leaveTheGroup(groupname);
+  if(response){
+    groupList.value = groupList.value.filter((group) => group != groupname);
+  }
+  else{
+    error.value = "Error leaving group";
   }
   loading.value = false;
 }
@@ -145,7 +163,7 @@ async function deleteFriendLocal(friendname){
               <div v-for="(group ,index) in groupList" :key="index" class="entity">
                 <p style="display: inline;">{{ group }}</p>
                 <router-link class="button-nav custom-button" :to="{ name: 'Group', params: { groupname: group } }" />
-                <button class="custom-button delete-button"></button>
+                <button class="custom-button delete-button" @click="leaveGroupLocal(group)"></button>
               </div>
             </div>
           </div>

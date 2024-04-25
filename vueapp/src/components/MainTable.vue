@@ -26,7 +26,7 @@ async function submitForm() {
         for(let key of result.records) 
             errorList[key].error = true;
         recordCreationStatus.showMessage = true;
-        recordCreationStatus.message = 'Record creation failed!';
+        recordCreationStatus.message = result.message;
         recordCreationStatus.status = false;
         clearInputs(false);
     }

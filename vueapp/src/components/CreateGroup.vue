@@ -2,8 +2,8 @@
 import { createGroup } from '@/core/addGroup';
 import { ref, reactive } from 'vue';
 
-import { friendList } from '@/core/userInfo';
-import {  sendInviteToFriend } from '@/core/addGroup';
+import { friendList, groupList } from '@/core/userInfo';
+import { inviteFriendToGroup } from '@/core/groupInfo';
 
 const groupname = ref('');
 const creationResult = reactive({
@@ -14,23 +14,33 @@ const creationResult = reactive({
 
 async function createGroupChecks(){
     const result = await createGroup(groupname.value);
-    if(!result) {
-        creationResult.error = true;
-        creationResult.success = false;
-        creationResult.message = 'Group name already exists';
-    }
-    else {
+    if(result.success) {
+        groupList.value.push(groupname.value);
+        friendsToInvite.value = [...friendList.value];
         creationResult.error = false;
         creationResult.success = true;
         creationResult.message = 'Group created successfully';
     }
+    else {
+        creationResult.error = true;
+        creationResult.success = false;
+        creationResult.message = result.message;
+    }
+    groupToInvite = groupname.value;
+    groupname.value = '';
 }
 
-const friendsToInvite = ref([...friendList.value]);
+const friendsToInvite = ref([]);
+const error = ref('');
+var groupToInvite = '';
 
-function inviteFriend(friendName){
-    sendInviteToFriend(friendName, groupname.value);
-    friendsToInvite.value = friendsToInvite.value.filter(friend => friend.name !== friendName);
+async function inviteFriend(friendName){
+    error.value = '';
+    let response = await inviteFriendToGroup(friendName, groupToInvite);
+    if(response.success)
+        friendsToInvite.value = friendsToInvite.value.filter(friend => friend !== friendName);
+    else
+        error.value = response.message;
 }
 </script>
 
@@ -45,10 +55,12 @@ function inviteFriend(friendName){
                 <div v-if="creationResult.error" class="group-creation-status group-creation-failed">{{ creationResult.message }}</div>
                 <div v-else-if="creationResult.success">
                     <div class="group-creation-status group-creation-success">{{ creationResult.message }}</div>
-                    <div class="friends-to-invite-container">
+                    <div v-if="friendsToInvite.length === 0" style="text-align: center; margin-top: 10px">No friends to invite</div>
+                    <div v-else-if="error" class="group-creation-status group-creation-failed">{{ error }}</div>
+                    <div v-else class="friends-to-invite-container">
                         <div class="friend-invite-container" v-for="(friend, index) in friendsToInvite" :key="index">
-                            <p>{{ friend.name }}</p>
-                            <button @click="inviteFriend(friend.name)" class="send-invitation-button"></button>
+                            <p>{{ friend }}</p>
+                            <button @click="inviteFriend(friend)" class="send-invitation-button"></button>
                         </div>
                     </div>
                 </div>

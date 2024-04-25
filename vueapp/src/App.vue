@@ -8,9 +8,11 @@ import { isAuthenticated, getCurrentUser } from '@/core/authentication';
 import { onBeforeMount } from 'vue';
 
 onBeforeMount(async () => {
-  await getMyFriendList();
-  await getMyGroupList();
   getCurrentUser();
+  if(isAuthenticated){
+    await getMyFriendList();
+    await getMyGroupList();
+  }
 });
 
 </script>

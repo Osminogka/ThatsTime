@@ -1,24 +1,27 @@
 <script setup>
 import { defineProps, defineEmits } from 'vue';
 
-import { sendFriendRequest, sendGroupInvite } from '@/core/addFriend';
+import { sendFriendRequest } from '@/core/addFriend';
+import { enterTheGroup } from '@/core/addGroup';
 
 const props = defineProps({
     name: String,
     type: String
 });
 
-const emits = defineEmits(['friend-request', 'group-invite']);
+const emits = defineEmits(['friend-request', 'group-enter']);
 
 async function friendRequest(){
     let response = await sendFriendRequest(props.name);
-    if(response.success){
+    if(response.success)
         emits('friend-request',props.name);
-    }
 }
 
-function inviteGroup(){
-    sendGroupInvite(props.name);
+async function inviteGroup(){
+    let response = await enterTheGroup(props.name);
+    if(response.success)
+        emits('group-enter',props.name);
+
 }
 
 </script>

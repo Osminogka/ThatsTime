@@ -3,20 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using webapi.Models;
 
 #nullable disable
 
-namespace webapi.Migrations.Data
+namespace webapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240331104124_DataTimeRecord")]
-    partial class DataTimeRecord
+    partial class DataContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -105,11 +102,10 @@ namespace webapi.Migrations.Data
                     b.Property<long>("GroupId")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("MemberDegree")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<long>("MemberId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("RoleId")
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
@@ -117,6 +113,8 @@ namespace webapi.Migrations.Data
                     b.HasIndex("GroupId");
 
                     b.HasIndex("MemberId");
+
+                    b.HasIndex("RoleId");
 
                     b.ToTable("GroupMemberLists");
                 });
@@ -136,11 +134,32 @@ namespace webapi.Migrations.Data
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsGroupClosed")
+                        .HasColumnType("bit");
+
                     b.HasKey("GroupId");
 
                     b.HasIndex("CreatorId");
 
                     b.ToTable("GroupsCreatorsLists");
+                });
+
+            modelBuilder.Entity("webapi.Models.MemberRole", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("RoleName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MemberRoles");
                 });
 
             modelBuilder.Entity("webapi.Models.Record", b =>
@@ -157,6 +176,9 @@ namespace webapi.Migrations.Data
                     b.Property<DateTime>("DateTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("Importance")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsRecordForGroup")
                         .HasColumnType("bit");
 
@@ -166,21 +188,22 @@ namespace webapi.Migrations.Data
                     b.Property<string>("RecordContent")
                         .IsRequired()
                         .HasMaxLength(1)
-                        .HasColumnType("nvarchar(1)");
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("RecordName")
                         .IsRequired()
                         .HasMaxLength(1)
-                        .HasColumnType("nvarchar(1)");
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<long?>("RelatedGroupId")
                         .HasColumnType("bigint");
 
                     b.Property<long?>("RelatedUserId")
-                        .IsRequired()
                         .HasColumnType("bigint");
 
                     b.HasKey("RecordId");
+
+                    b.HasIndex("CreatorId");
 
                     b.HasIndex("RelatedGroupId");
 
@@ -277,9 +300,17 @@ namespace webapi.Migrations.Data
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("webapi.Models.MemberRole", "Role")
+                        .WithMany("Members")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("RelatedGroup");
 
                     b.Navigation("RelatedUser");
+
+                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("webapi.Models.GroupsCreatorsList", b =>
@@ -295,6 +326,12 @@ namespace webapi.Migrations.Data
 
             modelBuilder.Entity("webapi.Models.Record", b =>
                 {
+                    b.HasOne("webapi.Models.UserInfo", "CreatorUser")
+                        .WithMany("RecordsCreators")
+                        .HasForeignKey("CreatorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("webapi.Models.GroupsCreatorsList", "RelatedGroup")
                         .WithMany("RecordsForThisGroup")
                         .HasForeignKey("RelatedGroupId")
@@ -303,8 +340,9 @@ namespace webapi.Migrations.Data
                     b.HasOne("webapi.Models.UserInfo", "RelatedUser")
                         .WithMany("RecordsForThisUser")
                         .HasForeignKey("RelatedUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatorUser");
 
                     b.Navigation("RelatedGroup");
 
@@ -320,6 +358,11 @@ namespace webapi.Migrations.Data
                     b.Navigation("RecordsForThisGroup");
                 });
 
+            modelBuilder.Entity("webapi.Models.MemberRole", b =>
+                {
+                    b.Navigation("Members");
+                });
+
             modelBuilder.Entity("webapi.Models.UserInfo", b =>
                 {
                     b.Navigation("CreatorOfGroups");
@@ -329,6 +372,8 @@ namespace webapi.Migrations.Data
                     b.Navigation("GroupInvites");
 
                     b.Navigation("GroupMembers");
+
+                    b.Navigation("RecordsCreators");
 
                     b.Navigation("RecordsForThisUser");
 

@@ -44,8 +44,8 @@ async function getCertainUser(){
     loading.value = true;
     try{
         let tempUser = await getFriendByNickname(username.value)
-        if(tempUser)
-            users.value.push();
+        if(tempUser.success)
+            users.value.push(tempUser.friendList[0]);
         loading.value = false;
     }
     catch(err){
@@ -108,7 +108,7 @@ function inviteIsSent(name){
         </div>
         <div class="page-nav-button-container">
             <button v-if="currentPage > 0" class="page-nav-button page-nav-button-prev" @click="prevPage" />
-            <button v-if="users.length > 9" class="page-nav-button page-nav-button-next" @click="nextPage" />
+            <button v-if="users.length > 4" class="page-nav-button page-nav-button-next" @click="nextPage" />
         </div>
     </div>
 </template>

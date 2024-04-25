@@ -39,7 +39,7 @@ export const getMyFriendList = async () => {
 }
 
 export const getMyGroupList = async () => {
-    let response = await fetch("/api/friends/getgroups",{
+    let response = await fetch("/api/groups/getmygroups",{
         method: 'GET',
         headers: {
             'Authorization': 'Bearer ' + localStorage.getItem('jwtToken').replace(/"/g, ''),
@@ -49,10 +49,12 @@ export const getMyGroupList = async () => {
     if(response.ok){
         let responseData = await response.json();
         if(responseData.success)
-            groupList.value = responseData.groupList;
+            groupList.value = responseData.groups;
+        else
+            groupList.value = [];
     }
     else
-        return {success: false, message: 'Server error'};
+        groupList.value = [];
 }
 
 export const getMyFriendRequests = async () => {

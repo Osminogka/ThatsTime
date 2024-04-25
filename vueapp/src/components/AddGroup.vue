@@ -5,6 +5,7 @@ import { getGroupByName, getGroupList } from '../core/addGroup';
 
 import SocialEntity from '@/view/SocialEntity.vue';
 import LoadingAnimation from '@/view/LoadingAnimation.vue';
+import { groupList } from '@/core/userInfo';
 
 const route = useRoute();
 const router = useRouter();
@@ -20,7 +21,17 @@ const groupname = ref('');
 async function loadGroups(){
     loading.value = true;
     try{
-        groups.value = await getGroupList(currentPage.value);
+        let response = await getGroupList(parseInt(currentPage.value));
+        if(response.success)
+        {
+            groups.value = response.groups;
+            error.value = "";
+        }
+        else
+        {
+            groups.value = [];
+            error.value = "Server error!";
+        }
         loading.value = false;
     }
     catch(err) {
@@ -34,8 +45,8 @@ async function getCertainGroup(){
     loading.value = true;
     try{
         let tempGroup = await getGroupByName(groupname.value);
-        if(tempGroup)
-            groups.value.push();
+        if(tempGroup.success)
+            groups.value.push(tempGroup.groups[0]);
         loading.value = false;
     }
     catch(err){
@@ -69,13 +80,18 @@ function searchGroup(){
     getCertainGroup();
 }
 
+function enterTheGroup(groupname){
+    groupList.value.push(groupname);
+    groups.value = groups.value.filter(group => group !== groupname);
+}
+
 </script>
 
 <template>
     <div class="addfriend-container">
         <div class="search-container">
             <form>
-                <input v-model="username" type="text" placeholder="Search.." name="search">
+                <input v-model="groupname" type="text" placeholder="Search.." name="search">
                 <button class="search-friend-button custom-button" type="submit" @click.prevent="searchGroup"><i class="fa fa-search"></i></button>
             </form>
         </div>
@@ -83,15 +99,15 @@ function searchGroup(){
             <loading-animation v-if="loading" />
             <div v-else-if="error" class="error">{{ error.message }}</div>
             <div v-if="groups.length > 0">
-                <social-entity v-for="(group, index) in groups" :name="group" type='group' :key="index"/>
+                <social-entity v-for="(group, index) in groups" :name="group" type='group' :key="index" @group-enter="enterTheGroup(group)"/>
             </div>
             <div v-else>
                 <p>Such group don't exist</p>
             </div>
         </div>
         <div class="page-nav-button-container">
-            <button class="page-nav-button page-nav-button-prev" @click="prevPage" />
-            <button class="page-nav-button page-nav-button-next" @click="nextPage" />
+            <button v-if="currentPage > 0" class="page-nav-button page-nav-button-prev" @click="prevPage" />
+            <button v-if="groups.length > 4" class="page-nav-button page-nav-button-next" @click="nextPage" />
         </div>
     </div>
 </template>

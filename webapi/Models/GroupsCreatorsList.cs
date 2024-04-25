@@ -16,6 +16,8 @@ namespace webapi.Models
         //Navigation property to UserInfo
         public UserInfo Creator { get; set; }
 
+        public bool IsGroupClosed { get; set; }
+
         //Navigation property to GroupInvites
         public ICollection<GroupInvites> GroupInvites { get; set; }
 

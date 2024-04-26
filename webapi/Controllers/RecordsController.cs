@@ -31,20 +31,6 @@ namespace webapi.Controllers
 
             try
             {
-                DateTime date = new DateTime(recordFromFrontEnd.selectedYear, recordFromFrontEnd.selectedMonth, recordFromFrontEnd.selectedDay);
-                Record? doesRecordExist = await DataContext.Records.FirstOrDefaultAsync(obj => obj.CreatorUser.UserName == getUserName() 
-                    && obj.RecordName == recordFromFrontEnd.recordName 
-                    && obj.DateTime.Date == date.Date
-                    && recordFromFrontEnd.yourSelf ? obj.RelatedUser.UserName == getUserName() 
-                    : (recordFromFrontEnd.showGroupList ? obj.RelatedGroup.GroupName == recordFromFrontEnd.selectedObject && obj.RelatedUserId == null 
-                    : obj.RelatedUser.UserName == recordFromFrontEnd.selectedObject && obj.RelatedGroupId == null)
-                );
-                if (doesRecordExist != null)
-                {
-                    response.Message = "Such record already exist";
-                    return Ok(response);
-                }
-
                 GroupsCreatorsList? relatedGroup = null;
                 UserInfo? relatedUser = null;
                 long selectedObjectId = 0;

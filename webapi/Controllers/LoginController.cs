@@ -16,7 +16,7 @@ namespace webapi.Controllers
 
     [ApiController]
     [Route("api/auth")]
-    public class ApiAuthController : ControllerBase
+    public class ApiAuthController : MyBaseController
     {
         private SignInManager<IdentityUser> SignInManager;
         private UserManager<IdentityUser> UserManager;
@@ -34,14 +34,21 @@ namespace webapi.Controllers
         [HttpPost("signin")]
         public async Task<IActionResult> ApiSignIn([FromBody] SigningCredentials creds)
         {
-            var response = new LoginResponse();
+            LoginResponse response = new LoginResponse();
             response.Message = "Invalid username or password";
+            Microsoft.AspNetCore.Identity.SignInResult result = new Microsoft.AspNetCore.Identity.SignInResult();
+            IdentityUser user = new IdentityUser();
 
-            IdentityUser user = await UserManager.FindByNameAsync(creds.Username);
-            if (user == null)
-                return Ok(response);
-            Microsoft.AspNetCore.Identity.SignInResult result = await SignInManager.CheckPasswordSignInAsync(user, creds.Password, false);
-
+            try{
+                user = await UserManager.FindByNameAsync(creds.Username);
+                if (user == null)
+                    return Ok(response);
+                result = await SignInManager.CheckPasswordSignInAsync(user, creds.Password, false);
+            }
+            catch(Exception ex)
+            {
+                return HandleException(ex);
+            }
             if (result.Succeeded)
             {
                 SecurityTokenDescriptor descriptor = new SecurityTokenDescriptor
@@ -70,9 +77,18 @@ namespace webapi.Controllers
         [HttpPost("signup")]
         public async Task<IActionResult> ApiSignUp([FromBody] SingupCredentials creds)
         {
-            IdentityUser user = new IdentityUser { UserName = creds.Username, Email = creds.Email };
-            IdentityResult result = await UserManager.CreateAsync(user, creds.Password);
+            IdentityUser user = new IdentityUser();
+            IdentityResult result = new IdentityResult();
 
+            try
+            {
+                user = new IdentityUser { UserName = creds.Username, Email = creds.Email };
+                result = await UserManager.CreateAsync(user, creds.Password);
+            }
+            catch(Exception ex)
+            {
+                return HandleException(ex);
+            }
             var response = new LoginResponse();
 
             if (result.Succeeded)
@@ -82,8 +98,15 @@ namespace webapi.Controllers
                     UserName = user.UserName
                 };
 
-                await DataContext.UserInfo.AddAsync(newUser);
-                await DataContext.SaveChangesAsync();
+                try
+                {
+                    await DataContext.UserInfo.AddAsync(newUser);
+                    await DataContext.SaveChangesAsync();
+                }
+                catch(Exception ex)
+                {
+                    return HandleException(ex);
+                }
 
                 SecurityTokenDescriptor descriptor = new SecurityTokenDescriptor
                 {
@@ -105,7 +128,7 @@ namespace webapi.Controllers
                 response.Token = handler.WriteToken(secToken);
             }
             else
-                response.Message = result.Errors.ToString();
+                response.Message = "Invalid username";
             return Ok(response);
         }
     }

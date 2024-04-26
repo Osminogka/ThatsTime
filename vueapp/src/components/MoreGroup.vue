@@ -332,13 +332,11 @@ function hideGroupInfo(){
 
 .info-header{
     font-size: 1.2em;
-    font-family: 'Brush Script MT', cursive;
     font-weight: bold;
 }
 
 .info-social-header{
     font-size: 1.2em;
-    font-family: 'Brush Script MT', cursive;
     font-weight: bold;
     text-align: center;
 }

@@ -4,6 +4,7 @@ import { ref, reactive, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { getRecordsWithFriend } from '../core/userRecords';
+import { deleteFriend } from '@/core/userInfo';
 import { todayDate } from '@/core/month';
 
 import RecordList from '@/view/RecordsList.vue';
@@ -54,8 +55,15 @@ async function fetchData() {
     }
 }
 
-function deleteFriend(){
-
+async function deleteFriendLocal(friendname){
+  let response = await deleteFriend(friendname);
+  if(response){
+    friendList.value = friendList.value.filter((friend) => friend != friendname);
+  }
+  else{
+    error.value = "Error deleting friend";
+  }
+  loading.value = false;
 }
 </script>
 
@@ -67,7 +75,7 @@ function deleteFriend(){
     <div v-else-if="infoAboutFriend.isFriend">
         <div class="friend-manage-container">
             <div class="friend-info-header">{{ route.params.nickname }}</div>
-            <button class="delete-friend-button custom-button" @click="deleteFriend"/>
+            <button class="delete-friend-button custom-button" @click="deleteFriendLocal"/>
         </div>
         <h2 style="text-align: center;">Friend Records</h2>
         <record-list :records="infoAboutFriend.records" :friend="route.params.nickname" />

@@ -214,7 +214,8 @@ namespace webapi.Controllers
                 if (mainUser == null)
                     return Ok(response);
 
-                var groupMember = mainUser.GroupMembers.SingleOrDefault(group => group.RelatedGroup.GroupName == groupName && group.MemberId == mainUser.UserId);
+                var groupMember = mainUser.GroupMembers.SingleOrDefault(group => group.RelatedGroup.GroupName == groupName && group.MemberId == mainUser.UserId &&
+                    group.Role.RoleName == "Moderator");
                 if (groupMember == null)
                     return Ok(response);
 
@@ -229,12 +230,19 @@ namespace webapi.Controllers
                 if (areFriends == null)
                     return Ok(response);
 
+                var isUserInGroup = await DataContext.GroupMemberLists.SingleOrDefaultAsync(obj => obj.RelatedGroup.GroupName == groupName && obj.RelatedUser.UserName == friendName);
+                if(isUserInGroup != null)
+                {
+                    response.Message = "User already in group";
+                    return Ok(response);
+                }
 
                 GroupInvites groupInvite = new GroupInvites()
                 {
                     GroupId = groupMember.GroupId,
                     TargetUserId = friend.UserId
                 };
+
 
                 await DataContext.GroupInvites.AddAsync(groupInvite);
                 await DataContext.SaveChangesAsync();
@@ -257,16 +265,17 @@ namespace webapi.Controllers
 
             try
             {
-                UserInfo? mainUser = await DataContext.UserInfo
-                    .Include(user => user.GroupInvites.Where(group => group.GroupEntity.GroupName == groupname)).ThenInclude(obj => obj.GroupEntity)
-                    .SingleOrDefaultAsync(obj => obj.UserName == getUserName());
+                UserInfo? mainUser = await DataContext.UserInfo.SingleOrDefaultAsync(obj => obj.UserName == getUserName());
                 if (mainUser == null)
                     return Ok(response);
 
-                var groupInvite = mainUser.GroupInvites.SingleOrDefault(invite => invite.GroupEntity.GroupName == groupname);
+                var groupInvite = mainUser.GroupInvites.SingleOrDefault(invite => invite.GroupEntity.GroupName == groupname && invite.TargetUserId == mainUser.UserId);
 
                 if (groupInvite == null)
+                {
+                    response.Message = "Invite doesn't exist";
                     return Ok(response);
+                }
 
                 GroupMemberList newMember = new GroupMemberList()
                 {
@@ -296,16 +305,17 @@ namespace webapi.Controllers
 
             try
             {
-                UserInfo? mainUser = await DataContext.UserInfo
-                    .Include(user => user.GroupInvites.Where(group => group.GroupEntity.GroupName == groupname)).ThenInclude(obj => obj.GroupEntity)
-                    .SingleOrDefaultAsync(obj => obj.UserName == getUserName());
-
+                UserInfo? mainUser = await DataContext.UserInfo.SingleOrDefaultAsync(obj => obj.UserName == getUserName());
                 if (mainUser == null)
                     return Ok(response);
 
-                var groupInvite = mainUser.GroupInvites.SingleOrDefault(group => group.GroupEntity.GroupName == groupname);
+                var groupInvite = mainUser.GroupInvites.SingleOrDefault(invite => invite.GroupEntity.GroupName == groupname && invite.TargetUserId == mainUser.UserId);
+
                 if (groupInvite == null)
+                {
+                    response.Message = "Invite doesn't exist";
                     return Ok(response);
+                }
 
                 DataContext.GroupInvites.Remove(groupInvite);
                 await DataContext.SaveChangesAsync();

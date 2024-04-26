@@ -85,12 +85,11 @@ namespace webapi.Controllers
                 if (certainRecord.ForYourSelf)
                 {
                     recordsRaw.AddRange(await DataContext.Records
+                        .Include(obj => obj.RelatedGroup)
                         .Include(obj => obj.RelatedUser)
                         .Include(obj => obj.CreatorUser)
-                        .Where(obj => (obj.RelatedUserId == mainUser.UserId || obj.CreatorId == mainUser.UserId) && obj.DateTime.Date == date.Date).ToListAsync());
-                    List<GroupMemberList> userGroups = await DataContext.GroupMemberLists.Include(groupmember => groupmember.RelatedGroup.RecordsForThisGroup).Where(obj => obj.MemberId == mainUser.UserId).ToListAsync();
-                    foreach(GroupMemberList groupMember in userGroups)
-                        recordsRaw.AddRange(groupMember.RelatedGroup.RecordsForThisGroup.Where(obj => obj.DateTime. Date == date.Date));
+                        .Where(obj => (obj.RelatedUserId == mainUser.UserId || obj.CreatorId == mainUser.UserId || 
+                        obj.RelatedGroup.GroupMembers.Where(group => group.MemberId != mainUser.UserId).Count() == 0) && obj.DateTime.Date == date.Date).ToListAsync());
                 }
                 else
                 {
@@ -108,6 +107,7 @@ namespace webapi.Controllers
 
                     recordsRaw = await DataContext.Records
                         .Include(obj => obj.RelatedUser)
+                        .Include(obj => obj.RelatedGroup)
                         .Include(obj => obj.CreatorUser)
                         .Where(obj => (certainRecord.IsGroup ? obj.RelatedGroupId == relatedObjectId :
                             ((obj.RelatedUserId == relatedObjectId && obj.CreatorId == mainUser.UserId) || (obj.RelatedUserId == mainUser.UserId && obj.RelatedUserId == relatedObjectId))) && obj.DateTime.Date == date.Date)

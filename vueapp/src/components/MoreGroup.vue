@@ -72,7 +72,7 @@ async function fetchData() {
         error.value = e;
     }finally{
         loading.value = false;
-        friendToInvite.value = friendList.value;
+        friendToInvite.value = friendList.value.filter(friend => !infoAboutGroup.members.some(member => member.name === friend));
     }
 }
 

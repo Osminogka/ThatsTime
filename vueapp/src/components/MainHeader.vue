@@ -6,7 +6,7 @@ import('../assets/css/user.css');
 import CustomHideShow from '@/view/CustomHideShow.vue';
 import { reactive, ref, onMounted } from 'vue';
 import { vOnClickOutside } from '@vueuse/components';
-import { friendList, groupList} from '@/core/userInfo';
+import { friendList, groupList, friendRequests, groupInvites} from '@/core/userInfo';
 
 function hideSideBar() {
   if(showInterface.showSideBar && event.target.id != 'showSideBar')
@@ -70,7 +70,9 @@ const showUserNav = ref(false);
         <button id="showSideBar" class="show-nav-button" @click="rotateTag()">
         </button>
         <h1 class="header-text">That's Time!</h1>
-        <button id="user-icon-button" @click="showUserNav = !showUserNav" class="user-icon" v-on-click-outside="hideUserNav"></button>
+        <button id="user-icon-button" @click="showUserNav = !showUserNav" class="user-icon" v-on-click-outside="hideUserNav">
+          <span v-if="groupInvites.length + friendRequests.length > 0" class="invite-count">{{ groupInvites.length + friendRequests.length }}</span>
+        </button>
       </div>
     </div>
     <Transition name="usernav">
@@ -128,6 +130,22 @@ const showUserNav = ref(false);
   font-size: 1.5em;
   color: black;
   text-align: center;
+}
+
+.invite-count {
+  position: absolute;
+    bottom: -5px;
+    right: -5px; /* Adjust this value to center the circle horizontally */
+    width: 20px; /* Diameter of the circle */
+    height: 20px; /* Diameter of the circle */
+    border-radius: 50%; /* Make it a circle */
+    background-color: red; /* Red circle */
+    color: white; /* Text color */
+    font-size: 12px; /* Font size of the number */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
 }
 
 </style>

@@ -209,13 +209,14 @@ namespace webapi.Controllers
             {
                 UserInfo? mainUser = await DataContext.UserInfo
                     .Include(user => user.GroupMembers.Where(group => group.RelatedGroup.GroupName == groupName)).ThenInclude(obj => obj.RelatedGroup)
+                    .Include(member => member.GroupMembers).ThenInclude(member => member.Role)
                     .SingleOrDefaultAsync(obj => obj.UserName == getUserName());
 
                 if (mainUser == null)
                     return Ok(response);
 
                 var groupMember = mainUser.GroupMembers.SingleOrDefault(group => group.RelatedGroup.GroupName == groupName && group.MemberId == mainUser.UserId &&
-                    group.Role.RoleName == "Moderator");
+                    (group.Role.RoleName == "Moderator" || group.Role.RoleName == "Creator"));
                 if (groupMember == null)
                     return Ok(response);
 
@@ -265,7 +266,9 @@ namespace webapi.Controllers
 
             try
             {
-                UserInfo? mainUser = await DataContext.UserInfo.SingleOrDefaultAsync(obj => obj.UserName == getUserName());
+                UserInfo? mainUser = await DataContext.UserInfo
+                    .Include(obj => obj.GroupInvites).ThenInclude(obj => obj.GroupEntity)
+                    .SingleOrDefaultAsync(obj => obj.UserName == getUserName());
                 if (mainUser == null)
                     return Ok(response);
 
@@ -305,7 +308,9 @@ namespace webapi.Controllers
 
             try
             {
-                UserInfo? mainUser = await DataContext.UserInfo.SingleOrDefaultAsync(obj => obj.UserName == getUserName());
+                UserInfo? mainUser = await DataContext.UserInfo
+                    .Include(obj => obj.GroupInvites).ThenInclude(obj => obj.GroupEntity)
+                    .SingleOrDefaultAsync(obj => obj.UserName == getUserName());
                 if (mainUser == null)
                     return Ok(response);
 

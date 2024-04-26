@@ -89,7 +89,7 @@ namespace webapi.Controllers
                         .Include(obj => obj.RelatedUser)
                         .Include(obj => obj.CreatorUser)
                         .Where(obj => (obj.RelatedUserId == mainUser.UserId || obj.CreatorId == mainUser.UserId || 
-                        obj.RelatedGroup.GroupMembers.Where(group => group.MemberId != mainUser.UserId).Count() == 0) && obj.DateTime.Date == date.Date).ToListAsync());
+                        obj.RelatedGroup.GroupMembers.Where(group => group.MemberId != mainUser.UserId).Count() != 0) && obj.DateTime.Date == date.Date).ToListAsync());
                 }
                 else
                 {
@@ -110,7 +110,7 @@ namespace webapi.Controllers
                         .Include(obj => obj.RelatedGroup)
                         .Include(obj => obj.CreatorUser)
                         .Where(obj => (certainRecord.IsGroup ? obj.RelatedGroupId == relatedObjectId :
-                            ((obj.RelatedUserId == relatedObjectId && obj.CreatorId == mainUser.UserId) || (obj.RelatedUserId == mainUser.UserId && obj.RelatedUserId == relatedObjectId))) && obj.DateTime.Date == date.Date)
+                            ((obj.RelatedUserId == relatedObjectId && obj.CreatorId == mainUser.UserId) || (obj.RelatedUserId == mainUser.UserId && obj.CreatorId == relatedObjectId))) && obj.DateTime.Date == date.Date)
                         .ToListAsync();
                 }
             }

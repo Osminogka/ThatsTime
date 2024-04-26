@@ -3,34 +3,14 @@ import('../assets/css/profile.css');
 import CustomHideShow from '@/view/CustomHideShow.vue';
 import LoadingAnimation from '@/view/LoadingAnimation.vue';
 
-import { ref, reactive, onBeforeMount} from 'vue';
+import { ref, reactive} from 'vue';
 import { friendList, friendRequests, groupInvites, groupList, user} from '../core/userInfo';
-import { getMyFriendRequests, getMyGroupInvites, acceptFriendRequest, declineFriendRequest, deleteFriend} from '../core/userInfo';
+import { acceptFriendRequest, declineFriendRequest, deleteFriend} from '../core/userInfo';
 import { acceptGroupRequest, declineGroupRequest } from '../core/groupInfo';
 import { leaveTheGroup } from '../core/addGroup';
 
 const error = ref("");
 let loading = ref(false);
-
-onBeforeMount(async () => {
-  loading.value = true;
-  error.value = null;
-  let friendInviteResponse = await getMyFriendRequests();
-  let groupInviteResponse = await getMyGroupInvites();
-  if(friendInviteResponse.success)
-    friendRequests.value = friendInviteResponse.friendList;
-  else{
-    friendRequests.value = [];
-    error.value = "Error getting friend invites";
-  }
-  if(groupInviteResponse.success)
-    groupInvites.value = groupInviteResponse.groups;
-  else{
-    friendRequests.value = [];
-    error.value = "Error getting group invites";
-  }
-  loading.value = false;
-});
 
 function showList(list){
   showInterface[list] = !showInterface[list];

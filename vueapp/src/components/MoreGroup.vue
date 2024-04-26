@@ -72,7 +72,7 @@ async function fetchData() {
         error.value = e;
     }finally{
         loading.value = false;
-        friendToInvite.value = friendList.value;
+        friendToInvite.value = friendList.value.filter(friend => !infoAboutGroup.members.some(member => member.name === friend));
     }
 }
 
@@ -169,7 +169,7 @@ function hideGroupInfo(){
                 <Transition name="bounce">
                     <div class="group-actions-container" v-if="showInterface.showGroupInfo" v-on-click-outside="hideGroupInfo">
                         <div class="header-container">
-                            <button class="show-invite-friend-button" @click="showOptionalActions('invite')">Invite</button>
+                            <button v-if="infoAboutGroup.members.find(member => member.name == user.name).degree != 'Member'" class="show-invite-friend-button" @click="showOptionalActions('invite')">Invite</button>
                             <button class="show-invite-friend-button" @click="showOptionalActions('leave')">Leave</button>
                         </div>
                         <div v-if="showInterface.showFriendInviteBox" class="frieds-container">
@@ -230,7 +230,7 @@ function hideGroupInfo(){
     display: flex;
     flex-direction: column;
     position: absolute;
-    left: 6.5em;
+    left: 11.5em;
     border: 3px solid black;
     border-radius: 5px;
     background-color: #03f7ff;

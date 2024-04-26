@@ -156,7 +156,7 @@ const isThereRecentRec = computed(() =>
             <div v-if="certainLoading">
                 <loading-animation/>
             </div>
-            <div v-else>
+            <div v-else class="container-week">
                 <div v-if="certainError.value">{{ certainError.value }}</div>
                 <div v-if="certain.records.length == 0">No records</div>
                 <record-card v-for="(record, index) in certain.records" :record="record" :key="index"/>

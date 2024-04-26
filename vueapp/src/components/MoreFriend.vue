@@ -1,7 +1,7 @@
 <script setup>
 
 import { ref, reactive, watch, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 import { getRecordsWithFriend } from '../core/userRecords';
 import { deleteFriend } from '@/core/userInfo';
@@ -11,6 +11,7 @@ import RecordList from '@/view/RecordsList.vue';
 import LoadingAnimation from '@/view/LoadingAnimation.vue';
 
 const route = useRoute();
+const router = useRouter();
 
 const infoAboutFriend = reactive({
     isFriend: true,
@@ -55,10 +56,11 @@ async function fetchData() {
     }
 }
 
-async function deleteFriendLocal(friendname){
-  let response = await deleteFriend(friendname);
-  if(response){
+async function deleteFriendLocal(){
+  let response = await deleteFriend(route.params.nickname);
+  if(response.success){
     friendList.value = friendList.value.filter((friend) => friend != friendname);
+    router.push('/');
   }
   else{
     error.value = "Error deleting friend";

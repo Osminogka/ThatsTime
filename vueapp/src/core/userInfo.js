@@ -128,8 +128,7 @@ export const deleteFriend = async (friendname) => {
     });
     if(response.ok){
         let responseData = await response.json();
-        if(responseData.success)
-            return true;
+        return responseData;
     }
-    return false;
+    return {success: false, message: 'Server error'};
 }

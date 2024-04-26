@@ -132,11 +132,21 @@ async function deleteGroupLocal(){
 }
 
 async function promoteMember(memberName){
-    await promoteMemberInGroup(memberName);
+    let response = await promoteMemberInGroup(route.params.groupname, memberName);
+    if(response.success){
+        router.go();
+    }
+    else
+        error.value = response.message;
 }
 
 async function demoteMember(memberName){
-    await demoteMemberInGroup(memberName);
+    let response = await demoteMemberInGroup(route.params.groupname, memberName);
+    if(response.success){
+        router.go();
+    }
+    else
+        error.value = response.message;
 }
 
 function hideGroupInfo(){

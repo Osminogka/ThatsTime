@@ -37,7 +37,7 @@ namespace webapi.Controllers
                     && obj.DateTime.Date == date.Date
                     && recordFromFrontEnd.yourSelf ? obj.RelatedUser.UserName == getUserName() 
                     : (recordFromFrontEnd.showGroupList ? obj.RelatedGroup.GroupName == recordFromFrontEnd.selectedObject && obj.RelatedUserId == null 
-                    : obj.RelatedUser.UserName == recordFromFrontEnd.selectedObject && obj.RelatedUserId == null)
+                    : obj.RelatedUser.UserName == recordFromFrontEnd.selectedObject && obj.RelatedGroupId == null)
                 );
                 if (doesRecordExist != null)
                 {

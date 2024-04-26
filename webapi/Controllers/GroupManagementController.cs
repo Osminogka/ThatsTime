@@ -29,7 +29,7 @@ namespace webapi.Controllers
             {
                 string mainUserName = getUserName();
                 response.Groups.AddRange(await DataContext.GroupsCreatorsLists
-                    .Where(obj => obj.GroupMembers.Where(member => member.RelatedUser.UserName == mainUserName).Count() == 0)
+                    .Where(obj => obj.IsGroupClosed == false && obj.GroupMembers.Where(member => member.RelatedUser.UserName == mainUserName).Count() == 0)
                     .Skip(page * pageSize)
                     .Take(pageSize)
                     .Select(obj => obj.GroupName)
@@ -53,7 +53,7 @@ namespace webapi.Controllers
             {
                 string mainUserName = getUserName();
                 GroupsCreatorsList? group = await DataContext.GroupsCreatorsLists
-                    .SingleOrDefaultAsync(obj => obj.GroupName == groupname && obj.GroupMembers.Where(member => member.RelatedUser.UserName == mainUserName).Count() == 0);
+                    .SingleOrDefaultAsync(obj => obj.GroupName == groupname && obj.IsGroupClosed == false && obj.GroupMembers.Where(member => member.RelatedUser.UserName == mainUserName).Count() == 0);
                 if(group == null)
                 {
                     response.Message = "Such groupo doesn't exist";
@@ -149,7 +149,7 @@ namespace webapi.Controllers
 
                 GroupsCreatorsList? group = await DataContext.GroupsCreatorsLists
                     .Include(member => member.GroupMembers.Where(user => user.MemberId == mainUser.UserId))
-                    .SingleOrDefaultAsync(group => group.GroupName == groupname);
+                    .SingleOrDefaultAsync(group => group.GroupName == groupname && group.IsGroupClosed == false);
 
                 if (group == null || group?.GroupMembers.Count > 0)
                     return Ok(response);

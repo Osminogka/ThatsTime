@@ -45,7 +45,7 @@ async function getCertainGroup(){
     loading.value = true;
     try{
         let tempGroup = await getGroupByName(groupname.value);
-        if(tempGroup.success)
+        if(tempGroup.success && tempGroup.groups.length > 0)
             groups.value.push(tempGroup.groups[0]);
         loading.value = false;
     }

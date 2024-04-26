@@ -44,7 +44,7 @@ async function getCertainUser(){
     loading.value = true;
     try{
         let tempUser = await getFriendByNickname(username.value)
-        if(tempUser.success)
+        if(tempUser.success && tempUser.friendList.length > 0)
             users.value.push(tempUser.friendList[0]);
         loading.value = false;
     }

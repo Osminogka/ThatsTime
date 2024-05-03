@@ -222,18 +222,10 @@ namespace webapi.Controllers
                     await DataContext.Records
                     .Include(obj => obj.RelatedUser)
                     .Include(obj => obj.CreatorUser)
+                    .Include(obj => obj.RelatedGroup.GroupMembers.Where(member => member.RelatedUser.UserName == mainUser.UserName))
                     .Where(obj => (obj.RelatedUserId == mainUser.UserId || obj.CreatorId == mainUser.UserId) && obj.RelatedGroupId == null && obj.DateTime >= sevenDaysAgo && obj.DateTime <= sevenDaysLater)
                     .ToListAsync()
                 );
-
-                foreach(GroupMemberList group in mainUser.GroupMembers ?? new List<GroupMemberList>())
-                {
-                    recordsRaw.AddRange(await DataContext.Records
-                        .Include(obj => obj.RelatedGroup)
-                        .Include(obj => obj.CreatorUser)
-                        .Where(obj => obj.RelatedGroupId == group.GroupId && obj.DateTime >= sevenDaysAgo && obj.DateTime <= sevenDaysLater).ToListAsync() 
-                    ?? new List<Record>());
-                }
             }
             catch (Exception ex)
             {

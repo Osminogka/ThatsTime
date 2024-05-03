@@ -58,8 +58,6 @@ async function login(){
   border-radius: 8px;
   padding: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  max-width: 400px;
-  width: 100%;
   text-align: center;
 }
 

@@ -29,8 +29,8 @@ namespace webapi.Controllers
 
                 response.FriendList.AddRange(await DataContext.UserInfo
                     .Where(obj => (obj.UserName != mainUsername) &&
-                        obj.FirstFromFriendList.Where(friend => friend.FirstUserInfo.UserName != mainUsername || friend.SecondUserInfo.UserName != mainUsername).Count() == 0 &&
-                        obj.SecondFromFriendList.Where(friend => friend.FirstUserInfo.UserName != mainUsername || friend.SecondUserInfo.UserName != mainUsername).Count() == 0)
+                        obj.FirstFromFriendList.Where(friend => friend.FirstUserInfo.UserName == mainUsername || friend.SecondUserInfo.UserName == mainUsername).Count() == 0 &&
+                        obj.SecondFromFriendList.Where(friend => friend.FirstUserInfo.UserName == mainUsername || friend.SecondUserInfo.UserName == mainUsername).Count() == 0)
                     .Skip(page * pageSize)
                     .Take(pageSize)
                     .Select(obj => obj.UserName)
@@ -55,8 +55,8 @@ namespace webapi.Controllers
                 string mainUsername = getUserName();
                 UserInfo? certainUser = await DataContext.UserInfo
                     .SingleOrDefaultAsync(obj => (obj.UserName != mainUsername) && (obj.UserName == username) &&
-                        obj.FirstFromFriendList.Where(friend => friend.FirstUserInfo.UserName != mainUsername || friend.SecondUserInfo.UserName != mainUsername).Count() == 0 &&
-                        obj.SecondFromFriendList.Where(friend => friend.FirstUserInfo.UserName != mainUsername || friend.SecondUserInfo.UserName != mainUsername).Count() == 0);
+                        obj.FirstFromFriendList.Where(friend => friend.FirstUserInfo.UserName == mainUsername || friend.SecondUserInfo.UserName == mainUsername).Count() == 0 &&
+                        obj.SecondFromFriendList.Where(friend => friend.FirstUserInfo.UserName == mainUsername || friend.SecondUserInfo.UserName == mainUsername).Count() == 0);
 
                 if(certainUser == null)
                 {

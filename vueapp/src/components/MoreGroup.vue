@@ -116,6 +116,8 @@ async function inviteToGroup(friendName){
     let response = await inviteFriendToGroup(friendName, route.params.groupname);
     if(response.success)
         friendToInvite.value = friendToInvite.value.filter(friend => friend !== friendName);
+    else if (!response.success)
+        error.value = response.message;
     else
         error.value = "Failed to send invite";
 }
@@ -160,7 +162,7 @@ function hideGroupInfo(){
         <div v-if="error">
             <p>{{ error }}</p>
         </div>
-        <loading-animation v-else-if="loading" />
+        <loading-animation v-if="loading" />
         <div v-else-if="infoAboutGroup.isMember">
             <div class="header-container">
                 <div class="friend-info-header">{{ route.params.groupname }}</div>

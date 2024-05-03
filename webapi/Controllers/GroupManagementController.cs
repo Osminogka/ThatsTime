@@ -207,29 +207,48 @@ namespace webapi.Controllers
 
             try
             {
+                var isInviteExist = await DataContext.GroupInvites.SingleOrDefaultAsync(obj => obj.GroupEntity.GroupName == groupName && obj.UserEntity.UserName == friendName);
+                if(isInviteExist != null)
+                {
+                    response.Message = "Invite already exist";
+                    return Ok(response);
+                }
+
                 UserInfo? mainUser = await DataContext.UserInfo
                     .Include(user => user.GroupMembers.Where(group => group.RelatedGroup.GroupName == groupName)).ThenInclude(obj => obj.RelatedGroup)
                     .Include(member => member.GroupMembers).ThenInclude(member => member.Role)
                     .SingleOrDefaultAsync(obj => obj.UserName == getUserName());
 
                 if (mainUser == null)
+                {
+                    response.Message = "User doesn't exist";
                     return Ok(response);
+                }
 
                 var groupMember = mainUser.GroupMembers.SingleOrDefault(group => group.RelatedGroup.GroupName == groupName && group.MemberId == mainUser.UserId &&
                     (group.Role.RoleName == "Moderator" || group.Role.RoleName == "Creator"));
                 if (groupMember == null)
+                {
+                    response.Message = "You are not permitted to send invites";
                     return Ok(response);
+                }
 
                 UserInfo? friend = await DataContext.UserInfo.SingleOrDefaultAsync(obj => obj.UserName == friendName);
                 if (friend == null)
+                {
+                    response.Message = "User doesn't exist";
                     return Ok(response);
+                }
 
                 long firstUserId = Math.Max(mainUser.UserId, friend.UserId);
                 long secondUserId = Math.Min(mainUser.UserId, friend.UserId);
 
                 FriendsList? areFriends = await DataContext.FriendsLists.SingleOrDefaultAsync(obj => obj.FirstUserId == firstUserId && obj.SecondUserId == secondUserId);
                 if (areFriends == null)
+                {
+                    response.Message = "This user isn't your friend";
                     return Ok(response);
+                }
 
                 var isUserInGroup = await DataContext.GroupMemberLists.SingleOrDefaultAsync(obj => obj.RelatedGroup.GroupName == groupName && obj.RelatedUser.UserName == friendName);
                 if(isUserInGroup != null)
@@ -445,10 +464,10 @@ namespace webapi.Controllers
                     return Ok(response);
                 }
 
-                DataContext.GroupsCreatorsLists.Remove(group);
                 DataContext.GroupMemberLists.RemoveRange(group.GroupMembers);
                 DataContext.Records.RemoveRange(group.RecordsForThisGroup);
                 DataContext.GroupInvites.RemoveRange(group.GroupInvites);
+                DataContext.GroupsCreatorsLists.Remove(group);
                 await DataContext.SaveChangesAsync();
             }
             catch(Exception ex)

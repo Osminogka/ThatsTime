@@ -6,6 +6,7 @@ import { friendList, groupList } from '@/core/userInfo';
 import { inviteFriendToGroup } from '@/core/groupInfo';
 
 const groupname = ref('');
+const success_groupname = ref('');
 const creationResult = reactive({
     error: false,
     success: false,
@@ -13,13 +14,14 @@ const creationResult = reactive({
 });
 
 async function createGroupChecks(){
+    success_groupname.value = '';
     const result = await createGroup(groupname.value);
     if(result.success) {
         groupList.value.push(groupname.value);
+        success_groupname.value = groupname.value;
         friendsToInvite.value = [...friendList.value];
         creationResult.error = false;
         creationResult.success = true;
-        creationResult.message = 'Group created successfully';
     }
     else {
         creationResult.error = true;
@@ -54,7 +56,7 @@ async function inviteFriend(friendName){
             <Transition name="bounce">
                 <div v-if="creationResult.error" class="group-creation-status group-creation-failed">{{ creationResult.message }}</div>
                 <div v-else-if="creationResult.success">
-                    <div class="group-creation-status group-creation-success">{{ creationResult.message }}</div>
+                    <div class="group-creation-status group-creation-success">Group {{ success_groupname }} created successfully</div>
                     <div v-if="friendsToInvite.length === 0" style="text-align: center; margin-top: 10px">No friends to invite</div>
                     <div v-else-if="error" class="group-creation-status group-creation-failed">{{ error }}</div>
                     <div v-else class="friends-to-invite-container">

@@ -22,7 +22,7 @@ async function submitForm() {
     let result = await postRecord({...toRaw(recordCreationForm)});
     for(let key in errorList) 
         errorList[key].error = false;
-    if(!result.success && result.message != 'Invalid record'){
+    if(!result.success && result.message == 'Invalid record'){
         for(let key of result.records) 
             errorList[key].error = true;
         recordCreationStatus.showMessage = true;

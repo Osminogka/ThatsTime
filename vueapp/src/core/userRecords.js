@@ -90,7 +90,7 @@ export const getRecordsWithGroup = async (groupName, date) => {
 
 export const postRecord = async (record) => {
     let errorList = isRecordValid(record);
-    if(!errorList.length === 0) {
+    if(!errorList.length == 0) {
         return {success: false, message: 'Invalid record', records: errorList};
     }
 
@@ -142,7 +142,7 @@ function isRecordValid (record) {
     // Check if selectedObject is a valid object
     if (record.yourSelf? !(record.selectedObject == user.value.name) 
         : record.showGroupList ? !groupList.value.some(obj => obj.name === record.selectedObject) : !friendList.value.some(obj => obj.name === record.selectedObject)) {
-        errorList.push('selectedObject');
+        //errorList.push('selectedObject');
     }
     // Check if hour is a valid hour
     if (!(0 <= parseInt(record.hour) && parseInt(record.hour) <= 23)) {

@@ -175,10 +175,10 @@ namespace webapi.Controllers
 
             try
             {
-                var invites = DataContext.FriendInvites.Where(obj => obj.TargetUserInfo.UserName == getUserName()).Select(obj => obj.SenderUserInfo.UserName);
+                var invites = await DataContext.FriendInvites.Where(obj => obj.TargetUserInfo.UserName == getUserName()).Select(obj => obj.SenderUserInfo.UserName).ToListAsync();
 
                 if (invites != null)
-                    response.FriendList = invites.ToList();
+                    response.FriendList = invites;
                 else
                     response.FriendList = new List<string>();
             }

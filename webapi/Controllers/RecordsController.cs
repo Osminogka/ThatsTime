@@ -121,7 +121,7 @@ namespace webapi.Controllers
 
             response.Success = true;
             response.Message = "Got all records";
-            response.Records.AddRange(RecordFromFrontEnd.transformToFrontendRecords(recordsRaw));
+            response.Records.AddRange(transformToFrontendRecords(recordsRaw));
             return Ok(response);
         }
 
@@ -143,7 +143,7 @@ namespace webapi.Controllers
                     return Ok(response);
                 }
 
-                response.Records.AddRange(RecordFromFrontEnd.transformToFrontendRecords(await DataContext.Records
+                response.Records.AddRange(transformToFrontendRecords(await DataContext.Records
                     .Include(obj => obj.RelatedUser)
                     .Include(obj => obj.CreatorUser)
                     .Where(obj => ((obj.CreatorUser.UserName == mainUsername && obj.RelatedUser.UserName == friendName) ||
@@ -190,7 +190,7 @@ namespace webapi.Controllers
 
                 groupInfo.Creator = group.Creator.UserName;
                 groupInfo.Members = members;
-                groupInfo.Records = RecordFromFrontEnd.transformToFrontendRecords(group.RecordsForThisGroup.ToList());
+                groupInfo.Records = transformToFrontendRecords(group.RecordsForThisGroup.ToList());
                 groupInfo.IsMember = true;
                 groupInfo.isCreator = group.Creator.UserName == getUserName() ? true : false;
 
@@ -234,7 +234,7 @@ namespace webapi.Controllers
 
             response.Success = true;
             response.Message = "Got all records";
-            response.Records.AddRange(RecordFromFrontEnd.transformToFrontendRecords(recordsRaw));
+            response.Records.AddRange(transformToFrontendRecords(recordsRaw));
             return Ok(response);
         }
 
@@ -259,9 +259,31 @@ namespace webapi.Controllers
             return true;
         }
 
-        private string getUserName()
+        public List<RecordFromFrontEnd> transformToFrontendRecords(List<Record> recordsRaw)
         {
-            return HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name).Value;
+            List<RecordFromFrontEnd> recordFromFrontEnds = new List<RecordFromFrontEnd>();
+
+            foreach (Record record in recordsRaw)
+            {
+                RecordFromFrontEnd tempRec = new RecordFromFrontEnd()
+                {
+                    selectedYear = record.DateTime.Year,
+                    selectedMonth = record.DateTime.Month,
+                    selectedDay = record.DateTime.Day,
+                    showGroupList = record.IsRecordForGroup,
+                    yourSelf = record.IsRecordForYourSelf,
+                    selectedObject = record.IsRecordForGroup ? record.RelatedGroup.GroupName : record.RelatedUser.UserName,
+                    Creator = record.CreatorUser.UserName,
+                    importance = record.Importance,
+                    hour = record.DateTime.Hour,
+                    minute = record.DateTime.Minute,
+                    recordName = record.RecordName,
+                    recordContent = record.RecordContent
+                };
+                recordFromFrontEnds.Add(tempRec);
+            }
+
+            return recordFromFrontEnds;
         }
     }
 
@@ -288,33 +310,6 @@ namespace webapi.Controllers
         public int minute { get; set; }
         public string recordName { get; set; }
         public string recordContent { get; set; }
-        
-        public static List<RecordFromFrontEnd> transformToFrontendRecords(List<Record> recordsRaw)
-        {
-            List<RecordFromFrontEnd> recordFromFrontEnds = new List<RecordFromFrontEnd>();
-
-            foreach(Record record in recordsRaw)
-            {
-                RecordFromFrontEnd tempRec = new RecordFromFrontEnd()
-                {
-                    selectedYear = record.DateTime.Year,
-                    selectedMonth = record.DateTime.Month,
-                    selectedDay = record.DateTime.Day,
-                    showGroupList = record.IsRecordForGroup,
-                    yourSelf = record.IsRecordForYourSelf,
-                    selectedObject = record.IsRecordForGroup ? record.RelatedGroup.GroupName : record.RelatedUser.UserName,
-                    Creator = record.CreatorUser.UserName,
-                    importance = record.Importance,
-                    hour = record.DateTime.Hour,
-                    minute = record.DateTime.Minute,
-                    recordName = record.RecordName,
-                    recordContent = record.RecordContent
-                };
-                recordFromFrontEnds.Add(tempRec);
-            }
-
-            return recordFromFrontEnds;
-        }
 
         public bool isValid()
         {

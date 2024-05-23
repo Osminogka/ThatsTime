@@ -1,10 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
-using webapi.Controllers;
 
 namespace webapi.Models
 {
-    public class Record
+    public class Record : BaseEntity
     {
         public Record()
         {
@@ -33,9 +32,6 @@ namespace webapi.Models
             RecordName = recordFromFrontEnd.recordName;
             RecordContent = recordFromFrontEnd.recordContent;
         }
-
-        [Key]
-        public int RecordId { get; set; }
 
         public DateTime DateTime { get; set; }
 

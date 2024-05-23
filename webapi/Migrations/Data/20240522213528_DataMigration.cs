@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace webapi.Migrations
+namespace webapi.Migrations.Data
 {
     /// <inheritdoc />
-    public partial class RoleTable : Migration
+    public partial class DataMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -28,13 +28,13 @@ namespace webapi.Migrations
                 name: "UserInfo",
                 columns: table => new
                 {
-                    UserId = table.Column<long>(type: "bigint", nullable: false)
+                    Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserName = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserInfo", x => x.UserId);
+                    table.PrimaryKey("PK_UserInfo", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -53,13 +53,13 @@ namespace webapi.Migrations
                         name: "FK_FriendInvites_UserInfo_SenderUserId",
                         column: x => x.SenderUserId,
                         principalTable: "UserInfo",
-                        principalColumn: "UserId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_FriendInvites_UserInfo_TargetUserId",
                         column: x => x.TargetUserId,
                         principalTable: "UserInfo",
-                        principalColumn: "UserId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -79,13 +79,13 @@ namespace webapi.Migrations
                         name: "FK_FriendsLists_UserInfo_FirstUserId",
                         column: x => x.FirstUserId,
                         principalTable: "UserInfo",
-                        principalColumn: "UserId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_FriendsLists_UserInfo_SecondUserId",
                         column: x => x.SecondUserId,
                         principalTable: "UserInfo",
-                        principalColumn: "UserId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -93,7 +93,7 @@ namespace webapi.Migrations
                 name: "GroupsCreatorsLists",
                 columns: table => new
                 {
-                    GroupId = table.Column<long>(type: "bigint", nullable: false)
+                    Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     GroupName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatorId = table.Column<long>(type: "bigint", nullable: false),
@@ -101,12 +101,12 @@ namespace webapi.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_GroupsCreatorsLists", x => x.GroupId);
+                    table.PrimaryKey("PK_GroupsCreatorsLists", x => x.Id);
                     table.ForeignKey(
                         name: "FK_GroupsCreatorsLists_UserInfo_CreatorId",
                         column: x => x.CreatorId,
                         principalTable: "UserInfo",
-                        principalColumn: "UserId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -114,25 +114,23 @@ namespace webapi.Migrations
                 name: "GroupInvites",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    GroupId = table.Column<long>(type: "bigint", nullable: false),
+                    Id = table.Column<long>(type: "bigint", nullable: false),
                     TargetUserId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_GroupInvites", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_GroupInvites_GroupsCreatorsLists_GroupId",
-                        column: x => x.GroupId,
+                        name: "FK_GroupInvites_GroupsCreatorsLists_Id",
+                        column: x => x.Id,
                         principalTable: "GroupsCreatorsLists",
-                        principalColumn: "GroupId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_GroupInvites_UserInfo_TargetUserId",
                         column: x => x.TargetUserId,
                         principalTable: "UserInfo",
-                        principalColumn: "UserId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -140,9 +138,7 @@ namespace webapi.Migrations
                 name: "GroupMemberLists",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    GroupId = table.Column<long>(type: "bigint", nullable: false),
+                    Id = table.Column<long>(type: "bigint", nullable: false),
                     MemberId = table.Column<long>(type: "bigint", nullable: false),
                     RoleId = table.Column<long>(type: "bigint", nullable: false)
                 },
@@ -150,10 +146,10 @@ namespace webapi.Migrations
                 {
                     table.PrimaryKey("PK_GroupMemberLists", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_GroupMemberLists_GroupsCreatorsLists_GroupId",
-                        column: x => x.GroupId,
+                        name: "FK_GroupMemberLists_GroupsCreatorsLists_Id",
+                        column: x => x.Id,
                         principalTable: "GroupsCreatorsLists",
-                        principalColumn: "GroupId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_GroupMemberLists_MemberRoles_RoleId",
@@ -165,7 +161,7 @@ namespace webapi.Migrations
                         name: "FK_GroupMemberLists_UserInfo_MemberId",
                         column: x => x.MemberId,
                         principalTable: "UserInfo",
-                        principalColumn: "UserId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -173,7 +169,7 @@ namespace webapi.Migrations
                 name: "Records",
                 columns: table => new
                 {
-                    RecordId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     DateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsRecordForGroup = table.Column<bool>(type: "bit", nullable: false),
@@ -187,24 +183,24 @@ namespace webapi.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Records", x => x.RecordId);
+                    table.PrimaryKey("PK_Records", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Records_GroupsCreatorsLists_RelatedGroupId",
                         column: x => x.RelatedGroupId,
                         principalTable: "GroupsCreatorsLists",
-                        principalColumn: "GroupId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Records_UserInfo_CreatorId",
                         column: x => x.CreatorId,
                         principalTable: "UserInfo",
-                        principalColumn: "UserId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Records_UserInfo_RelatedUserId",
                         column: x => x.RelatedUserId,
                         principalTable: "UserInfo",
-                        principalColumn: "UserId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -229,19 +225,9 @@ namespace webapi.Migrations
                 column: "SecondUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_GroupInvites_GroupId",
-                table: "GroupInvites",
-                column: "GroupId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_GroupInvites_TargetUserId",
                 table: "GroupInvites",
                 column: "TargetUserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_GroupMemberLists_GroupId",
-                table: "GroupMemberLists",
-                column: "GroupId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_GroupMemberLists_MemberId",

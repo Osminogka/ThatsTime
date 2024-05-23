@@ -5,6 +5,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Security.Claims;
 using webapi.Models;
+using webapi.Models.User;
+using webapi.DL.Repositories;
 
 namespace webapi.Controllers
 {
@@ -18,21 +20,19 @@ namespace webapi.Controllers
     [Route("api/auth")]
     public class ApiAuthController : MyBaseController
     {
-        private SignInManager<IdentityUser> SignInManager;
-        private UserManager<IdentityUser> UserManager;
-        private IConfiguration Configuration;
-        private DataContext DataContext;
+        private readonly IUsersRepository _usersRepository;
+        private readonly IBaseRepository<UserInfo> _service;
+        private readonly IConfiguration Configuration;
 
-        public ApiAuthController(SignInManager<IdentityUser> signMgr, UserManager<IdentityUser> usrMgr,IConfiguration config, DataContext ctx)
+        public ApiAuthController(IUsersRepository usersRepository,IConfiguration config, IBaseRepository<UserInfo> service)
         {
-            SignInManager = signMgr;
-            UserManager = usrMgr;
+            _usersRepository = usersRepository;
             Configuration = config;
-            DataContext = ctx;
+            _service = service;
         }
 
         [HttpPost("signin")]
-        public async Task<IActionResult> ApiSignIn([FromBody] SigningCredentials creds)
+        public async Task<IActionResult> ApiSignIn([FromBody] webapi.Models.User.SigningCredentials creds)
         {
             LoginResponse response = new LoginResponse();
             response.Message = "Invalid username or password";
@@ -40,10 +40,10 @@ namespace webapi.Controllers
             IdentityUser user = new IdentityUser();
 
             try{
-                user = await UserManager.FindByNameAsync(creds.Username);
+                user = await _usersRepository.GetByUsername(creds.Username);
                 if (user == null)
                     return Ok(response);
-                result = await SignInManager.CheckPasswordSignInAsync(user, creds.Password, false);
+                result = await _usersRepository.CheckPasswordSignInAsync(user, creds.Password);
             }
             catch(Exception ex)
             {
@@ -83,7 +83,7 @@ namespace webapi.Controllers
             try
             {
                 user = new IdentityUser { UserName = creds.Username, Email = creds.Email };
-                result = await UserManager.CreateAsync(user, creds.Password);
+                result = await _usersRepository.Create(user, creds.Password);
             }
             catch(Exception ex)
             {
@@ -100,8 +100,8 @@ namespace webapi.Controllers
 
                 try
                 {
-                    await DataContext.UserInfo.AddAsync(newUser);
-                    await DataContext.SaveChangesAsync();
+                    await _service.AddAsync(newUser);
+                    await _service.SaveChanges();
                 }
                 catch(Exception ex)
                 {
@@ -131,25 +131,5 @@ namespace webapi.Controllers
                 response.Message = "Invalid username";
             return Ok(response);
         }
-    }
-
-    public class SigningCredentials
-    {
-        public string Username { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-    }
-
-    public class SingupCredentials
-    {
-        public string Username { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-    }
-
-    public class LoginResponse
-    {
-        public bool Success { get; set; } = false;
-        public string Message { get; set; } = "";
-        public string Token { get; set; } = "";
     }
 }

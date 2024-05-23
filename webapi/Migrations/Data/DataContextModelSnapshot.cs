@@ -3,24 +3,21 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using webapi.Models;
 
 #nullable disable
 
-namespace webapi.Migrations
+namespace webapi.Migrations.Data
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240425182759_RoleTable")]
-    partial class RoleTable
+    partial class DataContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.3")
+                .HasAnnotation("ProductVersion", "8.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -74,20 +71,12 @@ namespace webapi.Migrations
             modelBuilder.Entity("webapi.Models.GroupInvites", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("GroupId")
                         .HasColumnType("bigint");
 
                     b.Property<long>("TargetUserId")
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("GroupId");
 
                     b.HasIndex("TargetUserId");
 
@@ -97,12 +86,6 @@ namespace webapi.Migrations
             modelBuilder.Entity("webapi.Models.GroupMemberList", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("GroupId")
                         .HasColumnType("bigint");
 
                     b.Property<long>("MemberId")
@@ -113,8 +96,6 @@ namespace webapi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GroupId");
-
                     b.HasIndex("MemberId");
 
                     b.HasIndex("RoleId");
@@ -124,11 +105,11 @@ namespace webapi.Migrations
 
             modelBuilder.Entity("webapi.Models.GroupsCreatorsList", b =>
                 {
-                    b.Property<long>("GroupId")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("GroupId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<long>("CreatorId")
                         .HasColumnType("bigint");
@@ -140,7 +121,7 @@ namespace webapi.Migrations
                     b.Property<bool>("IsGroupClosed")
                         .HasColumnType("bit");
 
-                    b.HasKey("GroupId");
+                    b.HasKey("Id");
 
                     b.HasIndex("CreatorId");
 
@@ -167,11 +148,11 @@ namespace webapi.Migrations
 
             modelBuilder.Entity("webapi.Models.Record", b =>
                 {
-                    b.Property<int>("RecordId")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RecordId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<long>("CreatorId")
                         .HasColumnType("bigint");
@@ -204,7 +185,7 @@ namespace webapi.Migrations
                     b.Property<long?>("RelatedUserId")
                         .HasColumnType("bigint");
 
-                    b.HasKey("RecordId");
+                    b.HasKey("Id");
 
                     b.HasIndex("CreatorId");
 
@@ -217,17 +198,17 @@ namespace webapi.Migrations
 
             modelBuilder.Entity("webapi.Models.UserInfo", b =>
                 {
-                    b.Property<long>("UserId")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("UserId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<string>("UserName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("UserId");
+                    b.HasKey("Id");
 
                     b.ToTable("UserInfo");
                 });
@@ -274,7 +255,7 @@ namespace webapi.Migrations
                 {
                     b.HasOne("webapi.Models.GroupsCreatorsList", "GroupEntity")
                         .WithMany("GroupInvites")
-                        .HasForeignKey("GroupId")
+                        .HasForeignKey("Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -293,7 +274,7 @@ namespace webapi.Migrations
                 {
                     b.HasOne("webapi.Models.GroupsCreatorsList", "RelatedGroup")
                         .WithMany("GroupMembers")
-                        .HasForeignKey("GroupId")
+                        .HasForeignKey("Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

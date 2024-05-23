@@ -2,10 +2,8 @@
 
 namespace webapi.Models
 {
-    public class FriendsList
+    public class FriendsList : BaseEntity
     {
-        [Key]
-        public long Id { get; set; }
 
         //Foreign key to UserInfo userId
         public long FirstUserId { get; set; }

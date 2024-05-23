@@ -2,11 +2,8 @@
 
 namespace webapi.Models
 {
-    public class UserInfo
+    public class UserInfo : BaseEntity
     {
-        [Key]
-        public long UserId { get; set; }
-
         [Required]
         public string UserName { get; set; } = string.Empty;
 

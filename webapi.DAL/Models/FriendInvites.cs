@@ -1,13 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace webapi.Models
 {
-    public class FriendInvites
+    public class FriendInvites : BaseEntity
     {
-        [Key]
-        public long Id { get; set; }
-
         //Foreign key to UserInfo userId
         public long SenderUserId { get; set; }
 

@@ -2,15 +2,12 @@
 
 namespace webapi.Models
 {
-    public class GroupsCreatorsList
+    public class GroupsCreatorsList : BaseEntity
     {
-        [Key]
-        public long GroupId { get; set; }
-
         [Required]
         public string GroupName { get; set; } = string.Empty;
 
-        //Foreighn key to UserInfo.UserId
+        //Foreighn key to UserInfo.Id
         public long CreatorId { get; set; }
 
         //Navigation property to UserInfo

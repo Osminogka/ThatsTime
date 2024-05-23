@@ -43,7 +43,7 @@ namespace webapi.Controllers
 
                     if (recordFromFrontEnd.showGroupList ? relatedGroup == null : relatedUser == null)
                         return Ok(response);
-                    selectedObjectId = recordFromFrontEnd.showGroupList ? relatedGroup.GroupId : relatedUser.UserId;
+                    selectedObjectId = recordFromFrontEnd.showGroupList ? relatedGroup.Id : relatedUser.Id;
                 }
 
                 UserInfo? mainUser = await DataContext.UserInfo.SingleOrDefaultAsync(obj => obj.UserName == getUserName());
@@ -51,10 +51,10 @@ namespace webapi.Controllers
                 if (mainUser == null)
                     return Ok(response);
 
-                if (!recordFromFrontEnd.yourSelf && !(await canUserMakeAction(selectedObjectId, mainUser.UserId, recordFromFrontEnd.showGroupList)))
+                if (!recordFromFrontEnd.yourSelf && !(await canUserMakeAction(selectedObjectId, mainUser.Id, recordFromFrontEnd.showGroupList)))
                     return Ok(response);
 
-                Record record = new Record(recordFromFrontEnd, selectedObjectId, mainUser.UserId);
+                Record record = new Record(recordFromFrontEnd, selectedObjectId, mainUser.Id);
 
                 await DataContext.Records.AddAsync(record);
                 await DataContext.SaveChangesAsync();
@@ -88,29 +88,29 @@ namespace webapi.Controllers
                         .Include(obj => obj.RelatedGroup)
                         .Include(obj => obj.RelatedUser)
                         .Include(obj => obj.CreatorUser)
-                        .Where(obj => (obj.RelatedUserId == mainUser.UserId || obj.CreatorId == mainUser.UserId || 
-                        obj.RelatedGroup.GroupMembers.Where(group => group.MemberId != mainUser.UserId).Count() != 0) && obj.DateTime.Date == date.Date).ToListAsync());
+                        .Where(obj => (obj.RelatedUserId == mainUser.Id || obj.CreatorId == mainUser.Id || 
+                        obj.RelatedGroup.GroupMembers.Where(group => group.MemberId != mainUser.Id).Count() != 0) && obj.DateTime.Date == date.Date).ToListAsync());
                 }
                 else
                 {
                     GroupMemberList? relatedGroup = null;
                     UserInfo? relatedUser = null;
                     if (certainRecord.IsGroup)
-                        relatedGroup = await DataContext.GroupMemberLists.SingleOrDefaultAsync(obj => obj.MemberId == mainUser.UserId && obj.RelatedGroup.GroupName == certainRecord.RelatedObject);
+                        relatedGroup = await DataContext.GroupMemberLists.SingleOrDefaultAsync(obj => obj.MemberId == mainUser.Id && obj.RelatedGroup.GroupName == certainRecord.RelatedObject);
                     else
                         relatedUser = await DataContext.UserInfo.SingleOrDefaultAsync(obj => obj.UserName == certainRecord.RelatedObject);
 
                     if (certainRecord.IsGroup ? relatedGroup == null : relatedUser == null)
                         return Ok(response);
 
-                    long relatedObjectId = certainRecord.IsGroup ? relatedGroup.GroupId : relatedUser.UserId;
+                    long relatedObjectId = certainRecord.IsGroup ? relatedGroup.Id : relatedUser.Id;
 
                     recordsRaw = await DataContext.Records
                         .Include(obj => obj.RelatedUser)
                         .Include(obj => obj.RelatedGroup)
                         .Include(obj => obj.CreatorUser)
                         .Where(obj => (certainRecord.IsGroup ? obj.RelatedGroupId == relatedObjectId :
-                            ((obj.RelatedUserId == relatedObjectId && obj.CreatorId == mainUser.UserId) || (obj.RelatedUserId == mainUser.UserId && obj.CreatorId == relatedObjectId))) && obj.DateTime.Date == date.Date)
+                            ((obj.RelatedUserId == relatedObjectId && obj.CreatorId == mainUser.Id) || (obj.RelatedUserId == mainUser.Id && obj.CreatorId == relatedObjectId))) && obj.DateTime.Date == date.Date)
                         .ToListAsync();
                 }
             }
@@ -223,7 +223,7 @@ namespace webapi.Controllers
                     .Include(obj => obj.RelatedUser)
                     .Include(obj => obj.CreatorUser)
                     .Include(obj => obj.RelatedGroup.GroupMembers.Where(member => member.RelatedUser.UserName == mainUser.UserName))
-                    .Where(obj => (obj.RelatedUserId == mainUser.UserId || obj.CreatorId == mainUser.UserId) && obj.RelatedGroupId == null && obj.DateTime >= sevenDaysAgo && obj.DateTime <= sevenDaysLater)
+                    .Where(obj => (obj.RelatedUserId == mainUser.Id || obj.CreatorId == mainUser.Id) && obj.RelatedGroupId == null && obj.DateTime >= sevenDaysAgo && obj.DateTime <= sevenDaysLater)
                     .ToListAsync()
                 );
             }
@@ -242,7 +242,7 @@ namespace webapi.Controllers
         {
             if (isGroup)
             {
-                GroupMemberList? isMember = await DataContext.GroupMemberLists.SingleOrDefaultAsync(obj => obj.MemberId == mainUserId && obj.GroupId == relatedObjectId);
+                GroupMemberList? isMember = await DataContext.GroupMemberLists.SingleOrDefaultAsync(obj => obj.MemberId == mainUserId && obj.Id == relatedObjectId);
                 if (isMember == null)
                     return false;
             }
@@ -294,48 +294,6 @@ namespace webapi.Controllers
         public string Message { get; set; } = "Request has failed";
 
         public List<RecordFromFrontEnd> Records { get; set; } = new List<RecordFromFrontEnd>();
-    }
-
-    public class RecordFromFrontEnd
-    {
-        public int selectedYear { get; set; }
-        public int selectedMonth { get; set; }
-        public int selectedDay { get; set; }
-        public bool showGroupList { get; set; }
-        public bool yourSelf { get; set; }
-        public string Creator { get; set; }
-        public string selectedObject { get; set; }
-        public int importance { get; set; }
-        public int hour { get; set; }
-        public int minute { get; set; }
-        public string recordName { get; set; }
-        public string recordContent { get; set; }
-
-        public bool isValid()
-        {
-            if(!isDateValid() ||
-                selectedObject.IsNullOrEmpty() ||
-                !(0 <= hour && hour <= 23) ||
-                !(0 <= minute && minute <= 59) ||
-                !(recordName.Length >= 1 && recordName.Length <= 50) ||
-                !(recordContent.Length >= 1 && recordContent.Length <= 500) ||
-                !(importance >= 0 && importance <= 2)
-                )
-                return false;
-           return true;
-        }
-
-        private bool isDateValid()
-        {
-            string format = "yyyy-MM-dd HH:mm";
-            string inputDate = $"{selectedYear:D4}-{selectedMonth:D2}-{selectedDay:D2} {hour:D2}:{minute:D2}";
-
-            // Try parsing the input string into a DateTime object
-            if (DateTime.TryParseExact(inputDate, format, null, System.Globalization.DateTimeStyles.None, out _))
-                return true;
-            else
-                return false;
-        }
     }
 
     public class CertainRecord

@@ -2,18 +2,12 @@
 
 namespace webapi.Models
 {
-    public class GroupMemberList
+    public class GroupMemberList : BaseEntity
     {
-        [Key]
-        public long Id { get; set; }
-
-        //Foreign key to GroupsCreatorList.GroupId
-        public long GroupId { get; set; }
-
         //Navigation property to GroupsCreatorsList
         public GroupsCreatorsList RelatedGroup { get; set; }
 
-        //Foreign key to UserInfo.UserId
+        //Foreign key to UserInfo.Id
         public long MemberId { get; set; }
 
         //Navigation property to UserInfo

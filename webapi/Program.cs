@@ -4,10 +4,16 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using static Microsoft.AspNetCore.Http.StatusCodes;
+using webapi.DL.Repositories;
 
 using webapi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddTransient<IBaseRepository<UserInfo>, BaseRepository<UserInfo>>();
+builder.Services.AddTransient<IBaseRepository<FriendsList>, BaseRepository<FriendsList>>();
+builder.Services.AddTransient<IBaseRepository<FriendInvites>, BaseRepository<FriendInvites>>();
+builder.Services.AddTransient<IUsersRepository, UsersRepository>();
 
 //Database setup
 string ThatsTimeData = string.Empty;
@@ -26,10 +32,10 @@ else
 }
 
 builder.Services.AddDbContext<IdentityContext>(opts =>
-    opts.UseSqlServer(Accounts));
+    opts.UseSqlServer(Accounts, b => b.MigrationsAssembly("webapi")));
 
 builder.Services.AddDbContext<DataContext>(opts =>
-    opts.UseSqlServer(ThatsTimeData));
+    opts.UseSqlServer(ThatsTimeData, b => b.MigrationsAssembly("webapi")));
 
 //User account configs
 builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<IdentityContext>();
@@ -88,9 +94,7 @@ app.UseDefaultFiles();
 app.MapFallbackToFile("/index.html");
 
 var scope = app.Services.CreateScope();
-DataContext context = scope.ServiceProvider.GetRequiredService<DataContext>();
-context.Database.Migrate();
+scope.ServiceProvider.GetRequiredService<DataContext>().Database.Migrate();
 scope.ServiceProvider.GetRequiredService<IdentityContext>().Database.Migrate();
-context.createRoles(scope.ServiceProvider.GetRequiredService<DataContext>());
 
 app.Run();

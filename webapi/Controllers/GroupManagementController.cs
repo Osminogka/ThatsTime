@@ -110,7 +110,7 @@ namespace webapi.Controllers
                 GroupsCreatorsList newGroup = new GroupsCreatorsList()
                 {
                     GroupName = groupname,
-                    CreatorId = mainUser.UserId,
+                    CreatorId = mainUser.Id,
                 };
 
                 await DataContext.GroupsCreatorsLists.AddAsync(newGroup);
@@ -118,8 +118,8 @@ namespace webapi.Controllers
 
                 GroupMemberList newMember = new GroupMemberList()
                 {
-                    MemberId = mainUser.UserId,
-                    GroupId = newGroup.GroupId,
+                    MemberId = mainUser.Id,
+                    Id = newGroup.Id,
                     RoleId = DataContext.MemberRoles.SingleOrDefault(obj => obj.RoleName == "Creator")?.Id ?? 0
                 };
 
@@ -148,7 +148,7 @@ namespace webapi.Controllers
                     return Ok(response);
 
                 GroupsCreatorsList? group = await DataContext.GroupsCreatorsLists
-                    .Include(member => member.GroupMembers.Where(user => user.MemberId == mainUser.UserId))
+                    .Include(member => member.GroupMembers.Where(user => user.MemberId == mainUser.Id))
                     .SingleOrDefaultAsync(group => group.GroupName == groupname && group.IsGroupClosed == false);
 
                 if (group == null || group?.GroupMembers.Count > 0)
@@ -156,8 +156,8 @@ namespace webapi.Controllers
 
                 GroupMemberList newMember = new GroupMemberList()
                 {
-                    GroupId = group.GroupId,
-                    MemberId = mainUser.UserId,
+                    Id = group.Id,
+                    MemberId = mainUser.Id,
                     RoleId = DataContext.MemberRoles.SingleOrDefault(obj => obj.RoleName == "Member")?.Id ?? 0
                 };
 
@@ -225,7 +225,7 @@ namespace webapi.Controllers
                     return Ok(response);
                 }
 
-                var groupMember = mainUser.GroupMembers.SingleOrDefault(group => group.RelatedGroup.GroupName == groupName && group.MemberId == mainUser.UserId &&
+                var groupMember = mainUser.GroupMembers.SingleOrDefault(group => group.RelatedGroup.GroupName == groupName && group.MemberId == mainUser.Id &&
                     (group.Role.RoleName == "Moderator" || group.Role.RoleName == "Creator"));
                 if (groupMember == null)
                 {
@@ -240,8 +240,8 @@ namespace webapi.Controllers
                     return Ok(response);
                 }
 
-                long firstUserId = Math.Max(mainUser.UserId, friend.UserId);
-                long secondUserId = Math.Min(mainUser.UserId, friend.UserId);
+                long firstUserId = Math.Max(mainUser.Id, friend.Id);
+                long secondUserId = Math.Min(mainUser.Id, friend.Id);
 
                 FriendsList? areFriends = await DataContext.FriendsLists.SingleOrDefaultAsync(obj => obj.FirstUserId == firstUserId && obj.SecondUserId == secondUserId);
                 if (areFriends == null)
@@ -259,8 +259,8 @@ namespace webapi.Controllers
 
                 GroupInvites groupInvite = new GroupInvites()
                 {
-                    GroupId = groupMember.GroupId,
-                    TargetUserId = friend.UserId
+                    Id = groupMember.Id,
+                    TargetUserId = friend.Id
                 };
 
 
@@ -291,7 +291,7 @@ namespace webapi.Controllers
                 if (mainUser == null)
                     return Ok(response);
 
-                var groupInvite = mainUser.GroupInvites.SingleOrDefault(invite => invite.GroupEntity.GroupName == groupname && invite.TargetUserId == mainUser.UserId);
+                var groupInvite = mainUser.GroupInvites.SingleOrDefault(invite => invite.GroupEntity.GroupName == groupname && invite.TargetUserId == mainUser.Id);
 
                 if (groupInvite == null)
                 {
@@ -301,8 +301,8 @@ namespace webapi.Controllers
 
                 GroupMemberList newMember = new GroupMemberList()
                 {
-                    GroupId = groupInvite.GroupId,
-                    MemberId = mainUser.UserId,
+                    Id = groupInvite.Id,
+                    MemberId = mainUser.Id,
                     RoleId = DataContext.MemberRoles.SingleOrDefault(obj => obj.RoleName == "Member")?.Id ?? 0
                 };
 
@@ -333,7 +333,7 @@ namespace webapi.Controllers
                 if (mainUser == null)
                     return Ok(response);
 
-                var groupInvite = mainUser.GroupInvites.SingleOrDefault(invite => invite.GroupEntity.GroupName == groupname && invite.TargetUserId == mainUser.UserId);
+                var groupInvite = mainUser.GroupInvites.SingleOrDefault(invite => invite.GroupEntity.GroupName == groupname && invite.TargetUserId == mainUser.Id);
 
                 if (groupInvite == null)
                 {
@@ -368,7 +368,7 @@ namespace webapi.Controllers
                     response.Message = "You are not creator of the group";
                     return Ok(response);
                 }
-                GroupMemberList? member = await DataContext.GroupMemberLists.SingleOrDefaultAsync(obj => obj.GroupId == group.GroupId && obj.RelatedUser.UserName == friendName);
+                GroupMemberList? member = await DataContext.GroupMemberLists.SingleOrDefaultAsync(obj => obj.Id == group.Id && obj.RelatedUser.UserName == friendName);
                 if(member == null)
                 {
                     response.Message = "This user isn't member of this group";
@@ -417,7 +417,7 @@ namespace webapi.Controllers
                 }
                 if(group.Creator.UserName == mainUsername)
                 {
-                    var firstMember = await DataContext.GroupMemberLists.FirstOrDefaultAsync(obj => obj.GroupId == group.GroupId && obj.RelatedUser.UserName != mainUsername);
+                    var firstMember = await DataContext.GroupMemberLists.FirstOrDefaultAsync(obj => obj.Id == group.Id && obj.RelatedUser.UserName != mainUsername);
                     if (firstMember == null)
                     {
                         DataContext.GroupsCreatorsLists.Remove(group);

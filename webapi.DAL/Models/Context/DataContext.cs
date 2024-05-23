@@ -17,6 +17,29 @@ namespace webapi.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<MemberRole>().HasData(
+                new MemberRole
+                {
+                    Id = 1,
+                    RoleName = "Undefined"
+                },
+                new MemberRole
+                {
+                    Id = 2,
+                    RoleName = "Creator"
+                },
+                new MemberRole
+                {
+                    Id = 3,
+                    RoleName = "Moderator"
+                },
+                new MemberRole
+                {
+                    Id = 4,
+                    RoleName = "Member"
+                }
+            );
+
             //Set value types
             modelBuilder.Entity<Record>()
                 .Property(e => e.RecordContent).HasColumnType("nvarchar(500)");
@@ -28,14 +51,14 @@ namespace webapi.Models
             modelBuilder.Entity<GroupsCreatorsList>()
                 .HasMany(e => e.GroupInvites)
                 .WithOne(e => e.GroupEntity)
-                .HasForeignKey(e => e.GroupId)
+                .HasForeignKey(e => e.Id)
                 .IsRequired();
 
             //Main Group table groupId & Group member groupId set up
             modelBuilder.Entity<GroupsCreatorsList>()
                 .HasMany(e => e.GroupMembers)
                 .WithOne(e => e.RelatedGroup)
-                .HasForeignKey(e => e.GroupId)
+                .HasForeignKey(e => e.Id)
                 .IsRequired();
 
             //UserInfo userId & Group invites userId set up
@@ -100,7 +123,7 @@ namespace webapi.Models
                 .HasForeignKey(e => e.CreatorId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            //GroupCreatorList GroupId & Record related group
+            //GroupCreatorList Id & Record related group
             modelBuilder.Entity<Record>()
                 .HasOne(e => e.RelatedGroup)
                 .WithMany(e => e.RecordsForThisGroup)
@@ -114,36 +137,6 @@ namespace webapi.Models
                 .HasForeignKey(e => e.RelatedUserId)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
-        }
-
-        public async Task createRoles(DataContext dataContext)
-        {
-            MemberRole? role = dataContext.MemberRoles.SingleOrDefault(obj => obj.Id == 1);
-            if (role != null)
-                return;
-
-            List<MemberRole> roles = new List<MemberRole>()
-            {
-                new MemberRole
-                {
-                    RoleName = "Undefined"
-                },
-                new MemberRole
-                {
-                    RoleName = "Creator"
-                },
-                new MemberRole
-                {
-                    RoleName = "Moderator"
-                },
-                new MemberRole
-                {
-                    RoleName = "Member"
-                }
-            };
-
-            await dataContext.MemberRoles.AddRangeAsync(roles);
-            await dataContext.SaveChangesAsync();
         }
     }
 }

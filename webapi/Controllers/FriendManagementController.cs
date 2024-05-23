@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using webapi.DL.Repositories;
 using webapi.Models;
 
 namespace webapi.Controllers
@@ -11,11 +12,15 @@ namespace webapi.Controllers
     [Route("api/friends")]
     public class FriendManagementController : MyBaseController
     {
-        DataContext DataContext;
+        private readonly IBaseRepository<UserInfo> _userInfoRepository;
+        private readonly IBaseRepository<FriendsList> _friendListRepository;
+        private readonly IBaseRepository<FriendInvites> _friendInvitesRepository;
 
-        public FriendManagementController(DataContext ctx)
+        public FriendManagementController(IBaseRepository<UserInfo> userInfo, IBaseRepository<FriendsList> friendList, IBaseRepository<FriendInvites> friendInvites)
         {
-            DataContext = ctx;
+            _userInfoRepository = userInfo;
+            _friendListRepository = friendList;
+            _friendInvitesRepository = friendInvites;
         }
 
         [HttpGet("getusers")]
@@ -27,7 +32,7 @@ namespace webapi.Controllers
             {
                 string mainUsername = getUserName();
 
-                response.FriendList.AddRange(await DataContext.UserInfo
+                response.FriendList.AddRange(await _userInfoRepository
                     .Where(obj => (obj.UserName != mainUsername) &&
                         obj.FirstFromFriendList.Where(friend => friend.FirstUserInfo.UserName == mainUsername || friend.SecondUserInfo.UserName == mainUsername).Count() == 0 &&
                         obj.SecondFromFriendList.Where(friend => friend.FirstUserInfo.UserName == mainUsername || friend.SecondUserInfo.UserName == mainUsername).Count() == 0)
@@ -53,7 +58,7 @@ namespace webapi.Controllers
             try
             {
                 string mainUsername = getUserName();
-                UserInfo? certainUser = await DataContext.UserInfo
+                UserInfo? certainUser = await _userInfoRepository
                     .SingleOrDefaultAsync(obj => (obj.UserName != mainUsername) && (obj.UserName == username) &&
                         obj.FirstFromFriendList.Where(friend => friend.FirstUserInfo.UserName == mainUsername || friend.SecondUserInfo.UserName == mainUsername).Count() == 0 &&
                         obj.SecondFromFriendList.Where(friend => friend.FirstUserInfo.UserName == mainUsername || friend.SecondUserInfo.UserName == mainUsername).Count() == 0);
@@ -83,7 +88,7 @@ namespace webapi.Controllers
 
             try
             {
-                List<string> friendList = await DataContext.FriendsLists
+                List<string> friendList = await _friendListRepository
                     .Where(obj => obj.FirstUserInfo.UserName == getUserName() || obj.SecondUserInfo.UserName == getUserName())
                     .Select(obj => obj.FirstUserInfo.UserName == getUserName() ? obj.SecondUserInfo.UserName : obj.FirstUserInfo.UserName).ToListAsync();
 
@@ -110,7 +115,7 @@ namespace webapi.Controllers
                 if(await areFriends(FriendName))
                     return Ok(response);
 
-                FriendInvites? friendInvite = await DataContext.FriendInvites
+                FriendInvites? friendInvite = await _friendInvitesRepository
                     .SingleOrDefaultAsync(obj => obj.SenderUserInfo.UserName == getUserName() && obj.TargetUserInfo.UserName == FriendName);
 
                 if (friendInvite != null)
@@ -120,17 +125,17 @@ namespace webapi.Controllers
                     return Ok(response);
                 }
 
-                UserInfo? mainUser = await DataContext.UserInfo.SingleOrDefaultAsync(obj => obj.UserName == getUserName());
-                UserInfo? friendUser = await DataContext.UserInfo.SingleOrDefaultAsync(obj => obj.UserName == FriendName);
+                UserInfo? mainUser = await _userInfoRepository.SingleOrDefaultAsync(obj => obj.UserName == getUserName());
+                UserInfo? friendUser = await _userInfoRepository.SingleOrDefaultAsync(obj => obj.UserName == FriendName);
 
                 FriendInvites invite = new FriendInvites()
                 {
-                    SenderUserId = mainUser.UserId,
-                    TargetUserId = friendUser.UserId
+                    SenderUserId = mainUser.Id,
+                    TargetUserId = friendUser.Id
                 };
 
-                await DataContext.FriendInvites.AddAsync(invite);
-                await DataContext.SaveChangesAsync();
+                await _friendInvitesRepository.AddAsync(invite);
+                await _friendInvitesRepository.SaveChanges();
             }
             catch (Exception ex)
             {
@@ -149,13 +154,12 @@ namespace webapi.Controllers
             FriendResponse response = new FriendResponse();
             try
             {
-                FriendsList? friendsList = await DataContext.FriendsLists.SingleOrDefaultAsync(obj => (obj.FirstUserInfo.UserName == getUserName() && obj.SecondUserInfo.UserName == FriendName) ||
+                FriendsList? friendsList = await _friendListRepository.SingleOrDefaultAsync(obj => (obj.FirstUserInfo.UserName == getUserName() && obj.SecondUserInfo.UserName == FriendName) ||
                     obj.FirstUserInfo.UserName == FriendName && obj.SecondUserInfo.UserName == getUserName());
                 if (friendsList == null)
                     return Ok(response);
 
-                DataContext.FriendsLists.Remove(friendsList);
-                await DataContext.SaveChangesAsync();
+                _friendListRepository.Delete(friendsList);
             }
             catch (Exception ex)
             {
@@ -175,7 +179,7 @@ namespace webapi.Controllers
 
             try
             {
-                var invites = await DataContext.FriendInvites.Where(obj => obj.TargetUserInfo.UserName == getUserName()).Select(obj => obj.SenderUserInfo.UserName).ToListAsync();
+                var invites = await _friendInvitesRepository.Where(obj => obj.TargetUserInfo.UserName == getUserName()).Select(obj => obj.SenderUserInfo.UserName).ToListAsync();
 
                 if (invites != null)
                     response.FriendList = invites;
@@ -199,13 +203,13 @@ namespace webapi.Controllers
             List<FriendInvites> invites = new List<FriendInvites>();
             try
             {
-                var toMainUserInvite = await DataContext.FriendInvites
+                var toMainUserInvite = await _friendInvitesRepository
                     .SingleOrDefaultAsync(obj => obj.TargetUserInfo.UserName == getUserName() && obj.SenderUserInfo.UserName == FriendName);
 
                 if (toMainUserInvite == null)
                     return Ok(response);
 
-                var fromMainUserInvite = await DataContext.FriendInvites
+                var fromMainUserInvite = await _friendInvitesRepository
                     .SingleOrDefaultAsync(obj => obj.SenderUserInfo.UserName == getUserName() && obj.TargetUserInfo.UserName == FriendName);
 
                 if (fromMainUserInvite != null)
@@ -222,9 +226,9 @@ namespace webapi.Controllers
                     SecondUserId = secondUserId
                 };
 
-                DataContext.FriendInvites.RemoveRange(invites);
-                await DataContext.FriendsLists.AddAsync(friendsList);
-                await DataContext.SaveChangesAsync();
+                _friendInvitesRepository.DeleteRange(invites);
+                await _friendListRepository.AddAsync(friendsList);
+                await _friendListRepository.SaveChanges();
             }
             catch (Exception ex)
             {
@@ -243,12 +247,12 @@ namespace webapi.Controllers
             FriendResponse response = new FriendResponse();
             try
             {
-                FriendInvites? friendInvite = await DataContext.FriendInvites.SingleOrDefaultAsync(obj => obj.TargetUserInfo.UserName == getUserName() && obj.SenderUserInfo.UserName == FriendName);
+                FriendInvites? friendInvite = await _friendInvitesRepository.SingleOrDefaultAsync(obj => obj.TargetUserInfo.UserName == getUserName() && obj.SenderUserInfo.UserName == FriendName);
                 if (friendInvite == null)
                     return Ok(response);
 
-                DataContext.FriendInvites.Remove(friendInvite);
-                await DataContext.SaveChangesAsync();
+                _friendInvitesRepository.Delete(friendInvite);
+                await _friendInvitesRepository.SaveChanges();
             }
             catch (Exception ex)
             {
@@ -265,7 +269,7 @@ namespace webapi.Controllers
         {
             try
             {
-                FriendsList? areFriends = await DataContext.FriendsLists.SingleOrDefaultAsync(obj => (obj.FirstUserInfo.UserName == getUserName() && obj.SecondUserInfo.UserName == friendName) ||
+                FriendsList? areFriends = await _friendListRepository.SingleOrDefaultAsync(obj => (obj.FirstUserInfo.UserName == getUserName() && obj.SecondUserInfo.UserName == friendName) ||
                     (obj.FirstUserInfo.UserName == friendName && obj.SecondUserInfo.UserName == getUserName()));
                 if (areFriends == null)
                     return false;

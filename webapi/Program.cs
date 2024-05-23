@@ -7,12 +7,14 @@ using static Microsoft.AspNetCore.Http.StatusCodes;
 using webapi.DL.Repositories;
 
 using webapi.Models;
+using webapi.DL.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddTransient<IBaseRepository<UserInfo>, BaseRepository<UserInfo>>();
 builder.Services.AddTransient<IBaseRepository<FriendsList>, BaseRepository<FriendsList>>();
 builder.Services.AddTransient<IBaseRepository<FriendInvites>, BaseRepository<FriendInvites>>();
+builder.Services.AddTransient<IGetUsername, GetUsername>();
 builder.Services.AddTransient<IUsersRepository, UsersRepository>();
 
 //Database setup
